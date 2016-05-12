@@ -129,3 +129,64 @@ For the token endpoints, no authentication is required.
       Content-Type: application/json
 
       {"payload":{"sub":"1234567890","name":"John Doe","admin":true}}
+
+
+Password resets
+^^^^^^^^^^^^^^^
+
+For the password reset endpoints, no authentication is required.
+
+To reset a user's password, the following steps should be followed:
+
+1. Make a request to the reset endpoint.
+   This will make an HTTP request to the preconfigured endpoint with the user's
+   details, and a token.
+2. Make a request to the confirm endpoint, with the provided token and the new
+   password.
+
+.. http:post:: /passwords/reset
+
+   Start the process for resetting a user's password.
+
+   :<json str username: The username of the user to reset the password for.
+   :code 202: The password reset process was started.
+   :code 400: The username does not exist.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      POST /passwords/reset HTTP/1.1
+      Content-Type: application/json
+
+      {"username":"jonsnow"}
+
+   **Example response**:
+
+   .. sourcecode:: http
+      
+      HTTP/1.1 202 Accepted
+
+.. http:post:: /passwords/confirm
+
+   Reset the users password using the provided token.
+
+   :<json str token: The provided token.
+   :<json str password: The new password.
+   :code 200: The password was successfully reset.
+   :code 400: The token was incorrect.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      POST /password/confirm HTTP/1.1
+      Content-Type: application/json
+
+      {"password":"gh0st","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBTbm93In0.H7huFJ_ioqf1-_qzZQ6VLHOJpnqhdDiZFV2VdkIt7LY"}
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
