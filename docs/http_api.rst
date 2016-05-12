@@ -66,3 +66,66 @@ user:read
     Can read the user data they have the permission for.
 
 
+.. _tokens:
+
+Tokens
+^^^^^^
+
+For the token endpoints, no authentication is required.
+
+.. http:post:: /tokens/create
+
+   Create a new token for the provided user.
+
+   :<json str username: The username of the user to create the token for.
+   :<json str password: The password of the user to create the token for.
+   :>json str token: The generated token.
+   :status 201: When the token is successfully generated.
+   :status 400: When the user credentials are incorrect.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      POST /tokens/create HTTP/1.1
+      Content-Type: application/json
+
+      {"username":"testuser","password":"testpassword"}
+
+   
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 201 Created
+      Content-Type: application/json
+
+      {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"}
+
+
+.. http:post:: /tokens/verify
+
+   Verify that an existing token is valid, and return the token's payload.
+
+   :<json str token: The token to verify.
+   :>json obj payload: The payload of the token.
+   :status 200: The token is valid.
+   :status 400: The token is invalid.
+
+   **Example request**:
+
+   .. sourcecode:: http
+   
+      POST /tokens/verify HTTP/1.1
+      Content-Type: application/json
+
+      {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"}
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+
+      {"payload":{"sub":"1234567890","name":"John Doe","admin":true}}
