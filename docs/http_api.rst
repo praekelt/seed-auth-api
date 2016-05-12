@@ -35,35 +35,25 @@ and write permissions are.
 A user automatically has read/write permissions for themselves, without being
 in a team that grants those permissions.
 
-admin
-    Full create/read/write permissions.
-org:create
-    Can create new organizations.
+All users have read permissions for all other users, and organizations.
+
+All members of an organization have read access to that organization's teams.
+
+
 org:admin
-    Can create/read/write users and teams, and can add users to the
-    organization that they are an admin for. Can read/write the organization
-    that they are admin for.
+    Can create/read/write/delete users, and teams that are part of the
+    organization, and can add users to the organization that they are an admin
+    for. Can read/write the organization that they are admin for.
 org:write
     Can modify an organization's details, including adding existing users and
     teams to the organization.
-org:read
-    Can view an organization's details.
-team:create
-    Can create new teams.
-team:admin
-    Can read/write the specific team. Can create and add users to the team that
-    they are admin for.
 team:write
     Can modify the team they have permission for, including adding or removing
     permissions, and adding existing users to the team.
 team:read
-    Can view the group they have permission for.
+    Can view the team they have permission for.
 user:create
     Can create new users.
-user:write
-    Can modify the user they have the permission for.
-user:read
-    Can read the user data they have the permission for.
 
 
 .. _tokens:
@@ -73,7 +63,7 @@ Tokens
 
 For the token endpoints, no authentication is required.
 
-.. http:post:: /tokens/create
+.. http:post:: /tokens/
 
    Create a new token for the provided user.
 
@@ -87,7 +77,7 @@ For the token endpoints, no authentication is required.
 
    .. sourcecode:: http
 
-      POST /tokens/create HTTP/1.1
+      POST /tokens/ HTTP/1.1
       Content-Type: application/json
 
       {"username":"testuser","password":"testpassword"}
@@ -103,11 +93,11 @@ For the token endpoints, no authentication is required.
       {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"}
 
 
-.. http:post:: /tokens/verify
+.. http:get:: /token
 
    Verify that an existing token is valid, and return the token's payload.
 
-   :<json str token: The token to verify.
+   :>header Authorization: "JWT " followed by the token to verify
    :>json obj payload: The payload of the token.
    :status 200: The token is valid.
    :status 400: The token is invalid.
@@ -116,10 +106,9 @@ For the token endpoints, no authentication is required.
 
    .. sourcecode:: http
    
-      POST /tokens/verify HTTP/1.1
-      Content-Type: application/json
+      GET /token HTTP/1.1
+      Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 
-      {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"}
 
    **Example response**:
 
@@ -144,11 +133,13 @@ To reset a user's password, the following steps should be followed:
 2. Make a request to the confirm endpoint, with the provided token and the new
    password.
 
-.. http:post:: /passwords/reset
+.. http:post:: /passwords/resets/
 
    Start the process for resetting a user's password.
 
    :<json str username: The username of the user to reset the password for.
+   :<json str app:
+        The application that the token should go to, configured in settings.
    :code 202: The password reset process was started.
    :code 400: The username does not exist.
 
@@ -156,10 +147,10 @@ To reset a user's password, the following steps should be followed:
 
    .. sourcecode:: http
 
-      POST /passwords/reset HTTP/1.1
+      POST /passwords/resets/ HTTP/1.1
       Content-Type: application/json
 
-      {"username":"jonsnow"}
+      {"username":"jonsnow","app":"numi"}
 
    **Example response**:
 
@@ -167,7 +158,7 @@ To reset a user's password, the following steps should be followed:
       
       HTTP/1.1 202 Accepted
 
-.. http:post:: /passwords/confirm
+.. http:post:: /passwords/confirmations/
 
    Reset the users password using the provided token.
 
@@ -180,7 +171,7 @@ To reset a user's password, the following steps should be followed:
 
    .. sourcecode:: http
 
-      POST /password/confirm HTTP/1.1
+      POST /password/confirmations/ HTTP/1.1
       Content-Type: application/json
 
       {"password":"gh0st","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBTbm93In0.H7huFJ_ioqf1-_qzZQ6VLHOJpnqhdDiZFV2VdkIt7LY"}
