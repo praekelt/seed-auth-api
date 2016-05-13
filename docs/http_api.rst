@@ -213,3 +213,165 @@ To reset a user's password, the following steps should be followed:
    .. sourcecode:: http
 
       HTTP/1.1 200 OK
+
+
+Organizations
+^^^^^^^^^^^^^
+
+.. http:post:: /organizations/
+
+    Creates a new organization.
+
+    :<json str name: The name of the organization.
+    :>json str name: The name of the created organization.
+    :>json int id: The id of the created organization.
+    :>json list teams: The list of teams that the organization has.
+    :>json list users: The list of users that are part of the organization.
+    :status 201: When the organization is successfully generated.
+    :status 400: When there is invalid information to create the organization.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+       POST /organizations/ HTTP/1.1
+       Content-Type: application/json
+
+       {"name":"Nights Watch"}
+ 
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 Created
+        Content-Type: application/json
+
+        {"name":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+
+.. http:get:: /organizations/
+
+    Get a list of existing organizations
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+       GET /organizations/ HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+       HTTP/1.1 200 OK
+       Content-Type: application/json
+
+       [{"name":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}]
+
+.. http:get:: /organizations/(int:organization_id)
+
+    Get the details of an organization.
+
+    :>json str name: The name of the created organization.
+    :>json int id: The id of the created organization.
+    :>json list teams: The list of teams that the organization has.
+
+    **Example request**:
+
+    .. sourcecode:: http
+       
+       GET /organizations/4 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+       HTTP/1.1 200 OK
+       Content-Type: application/json
+
+       {"name":"Night's Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+
+.. http:put:: /organizations/(int:organization_id)
+
+    Update an existing organization.
+
+    :<json str name: The name of the organization.
+    :>json str name: The name of the created organization.
+    :>json int id: The id of the created organization.
+    :>json list teams: The list of teams that the organization has.
+    :>json list users: The list of users that are part of the organization.
+    :status 201: When the organization is successfully generated.
+    :status 400: When there is invalid information to update the organization.
+
+    **Example request**:
+
+    .. sourcecode:: http
+ 
+       PUT /organizations/4 HTTP/1.1
+       Content-Type: application/json
+ 
+       {"name": "Brotherhood Without Banners"}
+ 
+    **Example response**:
+ 
+    .. sourcecode:: http
+
+       HTTP/1.1 201 Created
+       Content-Type: application/json
+
+       {"name":"Brotherhood Without Banners","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+
+.. http:delete:: /organizations/(int:organization_id)
+
+    Remove an existing organization.
+
+    :status 200: Resource successfully deleted
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      DELETE /organizations/4 HTTP/1.1
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+
+.. http:put:: /organizations/(int:organization_id)/users/
+
+    Add a user to an existing organization.
+
+    :<json int user_id: The ID of the user to add.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /organizations/4/users/ HTTP/1.1
+        Content-Type: application/json
+
+        {"user_id": 2}
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+
+.. http:delete:: /organizations/(int:organization_id)/users/(int:user_id)
+
+    Remove a user from an organization.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /organizations/4/users/2 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
