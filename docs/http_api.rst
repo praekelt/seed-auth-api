@@ -63,6 +63,31 @@ user:create
     Can create new users.
 
 
+.. _pagination:
+
+Pagination
+^^^^^^^^^^
+
+When the results set is larger than a configured amount, the data is broken up
+into pages.
+
+You can navigate to specific pages using the 'page' parameter. Links to the
+next and previous page (if available) will be provided in the 'Link' header.
+
+Example:
+
+.. sourcecode:: http
+
+   GET /endpoint/ HTTP/1.1
+   Authorization: JWT .....
+
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+   Link: <https://example.com/endpoint/?page=2>; rel="next"
+
+   [....]
+
 .. _tokens:
 
 Tokens
