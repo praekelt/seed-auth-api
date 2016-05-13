@@ -26,18 +26,25 @@ be placed in the header for requests to the other endpoints.
 
 .. _permissions:
 
+Permissions
+^^^^^^^^^^^
+
 While you can store any string as a permission, there are a few permissions
 that have specific meaning within the Seed Auth API.
 
 Create permissions are not linked to a specific instances, where as admin, read,
 and write permissions are.
 
-A user automatically has read/write permissions for themselves, without being
-in a team that grants those permissions.
+A user automatically has read/write permissions for themselves.
 
-All users have read permissions for all other users, and organizations.
+All users have read permissions for all users and organizations.
 
 All members of an organization have read access to that organization's teams.
+
+Permissions can be assigned either to a user or a team. All users can add and
+remove permissions for all teams and users, except for the following
+permissions, which can only be set be set by a person with org:admin
+permission.
 
 
 org:admin
@@ -47,9 +54,9 @@ org:admin
 org:write
     Can modify an organization's details, including adding existing users and
     teams to the organization.
-team:write
-    Can modify the team they have permission for, including adding or removing
-    permissions, and adding existing users to the team.
+team:admin
+    Can modify the team they have permission for, and add and remove existing
+    users to that team.
 team:read
     Can view the team they have permission for.
 user:create
