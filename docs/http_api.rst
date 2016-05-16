@@ -408,6 +408,7 @@ Teams
                 "id": 4,
                 "name": "admins",
                 "permissions": [],
+                "users": [],
                 "url": "https://example.org/teams/4",
                 "organization": 7
             }
@@ -441,6 +442,7 @@ Teams
             {
                 "id": 4,
                 "name": "organization admins",
+                "users": [],
                 "permissions":
                     [
                         {
@@ -455,6 +457,7 @@ Teams
             {
                 "id": 7,
                 "name": "organization editors",
+                "users": [],
                 "permissions":
                     [
                         {
@@ -478,6 +481,7 @@ Teams
     :>json int id: The ID of the created team.
     :>json str url: The URL of the created team.
     :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
@@ -507,6 +511,7 @@ Teams
         {
             "id": 2,
             "name": "Lord Commanders",
+            "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2",
             "organization": 7
@@ -519,6 +524,7 @@ Teams
     :>json int id: the ID of the team.
     :>json str url: the URL of the team.
     :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
@@ -542,6 +548,7 @@ Teams
             "id": 2,
             "name": "Lord Commanders",
             "permissions": [],
+            "users": [],
             "url": "https://example.org/teams/2",
             "organization": 7
         }
@@ -555,6 +562,7 @@ Teams
     :>json int id: the id of the updated team.
     :>json str url: The URL of the updated team.
     :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
@@ -583,6 +591,7 @@ Teams
             "id": 2,
             "name": "Brotherhood without banners",
             "permissions": [],
+            "users": [],
             "url": "https://example.org/teams/2",
             "organization": 7
         }
@@ -620,6 +629,7 @@ Teams
     :>json int id: the id of the team.
     :>json str url: the URL of the team.
     :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
@@ -649,6 +659,7 @@ Teams
         {
             "id": 2,
             "name": "Lord Commanders",
+            "users": [],
             "permissions": [
                 {
                     "id": 17,
@@ -668,6 +679,7 @@ Teams
     :>json int id: the id of the team.
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
@@ -691,10 +703,95 @@ Teams
             "id": 2,
             "name": "Lord Commanders",
             "permissions": [],
+            "users": [],
             "url": "https://example.org/teams/2",
             "organization": 7
         }
 
+.. http:post:: /teams/(int:team_id)/users/
+
+    Add an existing user to an existing team.
+
+    :<json int user_id: The ID of the user to add to the team.
+
+    :>json int id: the id of the team.
+    :>json str url: The URL of the team.
+    :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: successfully added the user to the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /teams/2/users/ HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "user_id": 1
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [],
+            "users": 
+                [
+                    {
+                        "id": 1,
+                        "url": "https://example.org/users/1"
+                    }
+                ],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:delete:: /teams/(int:team_id)/users/1
+
+    Remove a user from a team.
+
+    :>json int id: the id of the team.
+    :>json str url: The URL of the team.
+    :>json str name: the name of the team.
+    :>json list users: The list of users that belong to this team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: successfully removed the user from the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /teams/2/users/1 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [],
+            "users": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
 Users
 ^^^^^
 
@@ -912,95 +1009,3 @@ Users
     .. sourcecode:: http
 
         HTTP/1.1 204 No Content
-
-.. http:post:: /users/(int:user_id)/teams/
-
-    Place a user in a team
-
-    :<json int team_id: The ID of the team to place the user in
-
-    :>json int id: The ID for the user.
-    :>json str url: The URL for the user.
-    :>json str first_name: The (optional) first name of the user.
-    :>json str last_name: The (optional) last name of the user.
-    :>json str email: The email address of the user.
-    :>json bool admin: True if the user is an admin user.
-    :>json list teams: A list of all the teams a user is a member of.
-    :>json list organizations:
-        A list of all the organizations the user is a member of.
-
-    :status 200: Successfully added the user to the team.
-
-    **Example request**:
-
-    .. sourcecode:: http
-
-        POST /users/1/teams/ HTTP/1.1
-        Content-Type: application/json
-
-        {
-            "team_id": 2
-        }
-
-    **Example response**:
-
-    .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-        {
-            "id": 1,
-            "url": "https://example.org/users/1",
-            "first_name": "Jon",
-            "last_name": "Snow",
-            "email": "jonsnow@castleblack.net",
-            "admin": false,
-            "teams": [
-                {
-                    "id": 2,
-                    "url": "https://example.org/teams/2"
-                }
-            ],
-            "organizations": []
-        }
-
-.. http:delete:: /users/(int:user_id)/teams/(int:team_id)
-
-    Remove the user from the specified team.
-
-    :>json int id: The ID for the user.
-    :>json str url: The URL for the user.
-    :>json str first_name: The (optional) first name of the user.
-    :>json str last_name: The (optional) last name of the user.
-    :>json str email: The email address of the user.
-    :>json bool admin: True if the user is an admin user.
-    :>json list teams: A list of all the teams a user is a member of.
-    :>json list organizations:
-        A list of all the organizations the user is a member of.
-
-    :status 200: Successfully removed the user from the team.
-
-    **Example request**:
-
-    .. sourcecode:: http
-
-        DELETE /users/1/teams/2 HTTP/1.1
-
-    **Example response**:
-
-    .. sourcecode:: http
-
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-        {
-            "id": 1,
-            "url": "https://example.org/users/1",
-            "first_name": "Jon",
-            "last_name": "Snow",
-            "email": "jonsnow@castleblack.net",
-            "admin": false,
-            "teams": [],
-            "organizations": []
-        }
