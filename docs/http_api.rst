@@ -604,7 +604,7 @@ Teams
 
         HTTP/1.1 204 No Content
 
-.. http:put:: /teams/(int:team_id)/permission
+.. http:post:: /teams/(int:team_id)/permissions/
 
     Add a permission to a team.
 
@@ -626,7 +626,7 @@ Teams
 
     .. sourcecode:: http
 
-        PUT /teams/2/permission HTTP/1.1
+        POST /teams/2/permissions/ HTTP/1.1
         Content-Type: application/json
 
         {
