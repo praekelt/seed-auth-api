@@ -413,9 +413,9 @@ Teams
 
     Allows filtering of teams to retreive a subset.
 
-    :<param permission_contains:
+    :query string permission_contains:
         All the permission fields on the resulting teams must contain this string.
-    :<param object_id:
+    :query string object_id:
         All the object_id fields on the resulting teams must equal this string.
 
     **Example request**:
@@ -429,6 +429,7 @@ Teams
     .. sourcecode:: http
 
         HTTP/1.1 200 OK
+        Content-Type: application/json
 
         [
             {
