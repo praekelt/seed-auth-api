@@ -409,6 +409,58 @@ Teams
             }
         ]
 
+.. http:get:: /teams/
+
+    Allows filtering of teams to retreive a subset.
+
+    :<param permission_contains:
+        All the permission fields on the resulting teams must contain this string.
+    :<param object_id:
+        All the object_id fields on the resulting teams must equal this string.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /teams/?permission_contains=org&object_id=3 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+
+        [
+            {
+                "id": 4,
+                "name": "organization admins",
+                "permissions":
+                    [
+                        {
+                            "id": 2,
+                            "permission": "org:admins",
+                            "object_id": "3"
+                        }
+                    ],
+                "url": "https://example.org/teams/4",
+                "organization": 3
+            },
+            {
+                "id": 7,
+                "name": "organization editors",
+                "permissions":
+                    [
+                        {
+                            "id": 3,
+                            "permission": "org:write",
+                            "object_id": "3"
+                        }
+                    ],
+                "url": "https://exmple.org/teams/6",
+                "organization": 3
+        ]
+
+
 .. http:post:: /teams/
 
     Create a new team.
