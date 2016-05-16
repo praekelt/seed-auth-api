@@ -419,10 +419,12 @@ Teams
 
     Allows filtering of teams to retreive a subset.
 
-    :query string permission_contains:
-        All the permission fields on the resulting teams must contain this string.
+    :query string type_contains:
+        The type field on one of the resulting team's permissions must contain
+        this string.
     :query string object_id:
-        All the object_id fields on the resulting teams must equal this string.
+        All the object_id fields on one of the resulting team's permissions
+        must equal this string.
 
     **Example request**:
 
