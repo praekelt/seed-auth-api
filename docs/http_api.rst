@@ -609,10 +609,13 @@ Teams
 
     Add a permission to a team.
 
-    :<json str permission: The string representing the permission.
+    :<json str type: The string representing the permission.
     :<json str object_id:
         The id of the object that the permission acts on. "null" if it doesn't
         act on any object.
+    :<json obj properties:
+        A single layer object that can contain any amount of keys. Used to add
+        additional information that might be useful to external applications.
 
     :>json int id: the id of the team.
     :>json str url: the URL of the team.
@@ -631,8 +634,9 @@ Teams
         Content-Type: application/json
 
         {
-            "permission": "org:admin",
-            "object_id": "2"
+            "type": "org:admin",
+            "object_id": "2",
+            "properties": {}
         }
 
     **Example response**:
@@ -648,8 +652,9 @@ Teams
             "permissions": [
                 {
                     "id": 17,
-                    "permission": "org:admin",
-                    "object_id": "2"
+                    "type": "org:admin",
+                    "object_id": "2",
+                    "properties": {}
                 }
             ],
             "url": "https://example.org/teams/2",
