@@ -18,7 +18,7 @@ be placed in the header for requests to the other endpoints.
 **Example request**:
 
 .. sourcecode:: http
-   
+
    POST /endpoint/ HTTP/1.1
    Content-Type: application/json
    Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
@@ -32,7 +32,7 @@ Permissions
 While you can store any string as a permission, there are a few permissions
 that have specific meaning within the Seed Auth API.
 
-Create permissions are not linked to a specific instances, where as admin, read,
+Create permissions are not linked to specific instances, whereas admin, read,
 and write permissions are.
 
 A user automatically has read/write permissions for themselves.
@@ -114,7 +114,7 @@ For the token endpoints, no authentication is required.
 
       {"username":"testuser","password":"testpassword"}
 
-   
+
    **Example response**:
 
    .. sourcecode:: http
@@ -137,7 +137,7 @@ For the token endpoints, no authentication is required.
    **Example request**:
 
    .. sourcecode:: http
-   
+
       GET /token HTTP/1.1
       Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 
@@ -189,7 +189,7 @@ To reset a user's password, the following steps should be followed:
    **Example response**:
 
    .. sourcecode:: http
-      
+
       HTTP/1.1 202 Accepted
 
 .. http:post:: /passwords/confirmations/
@@ -228,7 +228,6 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Creates a new organization.
 
-    :<json str name: The name of the organization.
     :>json str name: The name of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
@@ -244,7 +243,7 @@ to belong to exactly one organization, but an organization can have many teams.
        Content-Type: application/json
 
        {"name":"Nights Watch"}
- 
+
 
     **Example response**:
 
@@ -285,7 +284,7 @@ to belong to exactly one organization, but an organization can have many teams.
     **Example request**:
 
     .. sourcecode:: http
-       
+
        GET /organizations/4 HTTP/1.1
 
     **Example response**:
@@ -302,7 +301,6 @@ to belong to exactly one organization, but an organization can have many teams.
     Update an existing organization.
 
     :<json str name: The name of the organization.
-    :>json str name: The name of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
@@ -312,14 +310,14 @@ to belong to exactly one organization, but an organization can have many teams.
     **Example request**:
 
     .. sourcecode:: http
- 
+
        PUT /organizations/4 HTTP/1.1
        Content-Type: application/json
- 
+
        {"name": "Brotherhood Without Banners"}
- 
+
     **Example response**:
- 
+
     .. sourcecode:: http
 
        HTTP/1.1 200 OK
