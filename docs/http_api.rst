@@ -329,7 +329,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Remove an existing organization.
 
-    :status 200: Resource successfully deleted
+    :status 204: Resource successfully deleted
 
    **Example request**:
 
@@ -341,13 +341,15 @@ to belong to exactly one organization, but an organization can have many teams.
 
    .. sourcecode:: http
 
-      HTTP/1.1 200 OK
+      HTTP/1.1 204 No Content
 
 .. http:put:: /organizations/(int:organization_id)/user
 
     Add a user to an existing organization.
 
     :<json int user_id: The ID of the user to add.
+
+    :status 204: User was successfully added.
 
     **Example request**:
 
@@ -362,11 +364,13 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-        HTTP/1.1 200 OK
+        HTTP/1.1 204 No Content
 
 .. http:delete:: /organizations/(int:organization_id)/users/(int:user_id)
 
     Remove a user from an organization.
+
+    :status 204: User was successfully removed from an organization
 
     **Example request**:
 
@@ -378,7 +382,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-        HTTP/1.1 200 OK
+        HTTP/1.1 204 No Content
 
 Teams
 ^^^^^
