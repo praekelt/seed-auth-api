@@ -173,8 +173,9 @@ To reset a user's password, the following steps should be followed:
    :<json str app:
         The application that the token should go to, configured in settings.
         This value is optional, defaults to the default configured application.
-   :code 202: The password reset process was started.
-   :code 400: The username does not exist.
+   :code 202:
+        The password reset process was started, or the username doesn't exist.
+        The same code is returned for both as to not leak user information
 
    **Example request**:
 
