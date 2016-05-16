@@ -218,6 +218,10 @@ To reset a user's password, the following steps should be followed:
 Organizations
 ^^^^^^^^^^^^^
 
+Organizations provide a grouping of users, although users do not have to belong
+to an organization, and they can also belong to many organizations. Teams have
+to belong to exactly one organization, but an organization can have many teams.
+
 .. http:post:: /organizations/
 
     Creates a new organization.
@@ -300,7 +304,7 @@ Organizations
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
-    :status 201: When the organization is successfully generated.
+    :status 200: When the organization is successfully generated.
     :status 400: When there is invalid information to update the organization.
 
     **Example request**:
@@ -316,7 +320,7 @@ Organizations
  
     .. sourcecode:: http
 
-       HTTP/1.1 201 Created
+       HTTP/1.1 200 OK
        Content-Type: application/json
 
        {"name":"Brotherhood Without Banners","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
@@ -339,7 +343,7 @@ Organizations
 
       HTTP/1.1 200 OK
 
-.. http:put:: /organizations/(int:organization_id)/users/
+.. http:put:: /organizations/(int:organization_id)/user
 
     Add a user to an existing organization.
 
@@ -375,3 +379,254 @@ Organizations
     .. sourcecode:: http
 
         HTTP/1.1 200 OK
+
+Teams
+^^^^^
+
+.. http:get:: /teams/
+
+    Get a list of all the teams you have read access to.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /teams/ HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+
+        [
+            {
+                "id": 4,
+                "name": "admins",
+                "permissions": [],
+                "url": "https://example.org/teams/4",
+                "organization": 7
+            }
+        ]
+
+.. http:post:: /teams/
+
+    Create a new team.
+
+    :<json str name: The name of the team.
+    :<json int organization: The id of the organization that the team belongs to.
+
+    :>json int id: The ID of the created team.
+    :>json str url: The URL of the created team.
+    :>json str name: the name of the team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 201: Successfully created team.
+    :status 400: Missing required information to create team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /teams/ HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "name": "Lord Commanders",
+            "organization": 7
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 Created
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:get:: /teams/(int:team_id)
+
+    Get the details of a team.
+
+    :>json int id: the ID of the team.
+    :>json str url: the URL of the team.
+    :>json str name: the name of the team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: Successfully retrieved team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /teams/2 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:put:: /teams/(int:team_id)
+
+    Update the details of a team.
+
+    :<json str name: The name of the team.
+
+    :>json int id: the id of the updated team.
+    :>json str url: The URL of the updated team.
+    :>json str name: the name of the team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: successfully updated team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /teams/2 HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "name": "Brotherhood without banners"
+        }
+
+    **Example reponse**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Brotherhood without banners",
+            "permissions": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:delete:: /teams/(int:team_id)
+
+    Remove a team.
+
+    :status 204: Team successfully deleted.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /teams/2 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 204 No Content
+
+.. http:put:: /teams/(int:team_id)/permission
+
+    Add a permission to a team.
+
+    :<json str permission: The string representing the permission.
+    :<json str object_id:
+        The id of the object that the permission acts on. "null" if it doesn't
+        act on any object.
+
+    :>json int id: the id of the team.
+    :>json str url: the URL of the team.
+    :>json str name: the name of the team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: successfully added permission to the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /teams/2/permission HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "permission": "org:admin",
+            "object_id": "2"
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [
+                {
+                    "id": 17,
+                    "permission": "org:admin",
+                    "object_id": "2"
+                }
+            ],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)
+
+    Remove a permission from a team.
+
+    :>json int id: the id of the team.
+    :>json str url: The URL of the team.
+    :>json str name: the name of the team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions:
+        The permission list of the team. Each permission is an object
+        containing the fields "id", "permission", and "object_id".
+    :status 200: successfully removed permission from the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /teams/2/permissions/17 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "name": "Lord Commanders",
+            "permissions": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
