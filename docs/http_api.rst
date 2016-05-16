@@ -468,6 +468,7 @@ Teams
                     ],
                 "url": "https://exmple.org/teams/6",
                 "organization": 3
+            }
         ]
 
 
@@ -792,6 +793,7 @@ Teams
             "url": "https://example.org/teams/2",
             "organization": 7
         }
+
 Users
 ^^^^^
 
