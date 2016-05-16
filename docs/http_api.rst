@@ -169,7 +169,7 @@ To reset a user's password, the following steps should be followed:
 
    Start the process for resetting a user's password.
 
-   :<json str username: The username of the user to reset the password for.
+   :<json str email: The email of the user to reset the password for.
    :<json str app:
         The application that the token should go to, configured in settings.
    :code 202: The password reset process was started.
@@ -182,7 +182,7 @@ To reset a user's password, the following steps should be followed:
       POST /passwords/resets/ HTTP/1.1
       Content-Type: application/json
 
-      {"username":"jonsnow","app":"numi"}
+      {"email":"jonsnow@castleblack.org","app":"numi"}
 
    **Example response**:
 
