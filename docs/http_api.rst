@@ -343,7 +343,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
       HTTP/1.1 204 No Content
 
-.. http:put:: /organizations/(int:organization_id)/user
+.. http:post:: /organizations/(int:organization_id)/users/
 
     Add a user to an existing organization.
 
@@ -355,7 +355,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-        PUT /organizations/4/users/ HTTP/1.1
+        POST /organizations/4/users/ HTTP/1.1
         Content-Type: application/json
 
         {"user_id": 2}
@@ -913,7 +913,7 @@ Users
 
         HTTP/1.1 204 No Content
 
-.. http:put:: /users/(int:user_id)/team
+.. http:post:: /users/(int:user_id)/teams/
 
     Place a user in a team
 
@@ -935,7 +935,7 @@ Users
 
     .. sourcecode:: http
 
-        PUT /users/1/team HTTP/1.1
+        POST /users/1/teams/ HTTP/1.1
         Content-Type: application/json
 
         {
