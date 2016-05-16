@@ -196,7 +196,7 @@ To reset a user's password, the following steps should be followed:
 
    :<json str token: The provided token.
    :<json str password: The new password.
-   :code 200: The password was successfully reset.
+   :code 204: The password was successfully reset.
    :code 400: The token was incorrect.
 
    **Example request**:
@@ -212,7 +212,7 @@ To reset a user's password, the following steps should be followed:
 
    .. sourcecode:: http
 
-      HTTP/1.1 200 OK
+      HTTP/1.1 204 No Content
 
 
 Organizations
