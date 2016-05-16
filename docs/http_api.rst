@@ -630,3 +630,406 @@ Teams
             "url": "https://example.org/teams/2",
             "organization": 7
         }
+
+Users
+^^^^^
+
+.. http:get:: /users/
+
+    Get a list of all users.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /users/ HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        [
+            {
+                "id": 1,
+                "url": "https://example.org/users/1",
+                "first_name": "Jon",
+                "last_name": "Snow",
+                "email": "jonsnow@castleblack.net",
+                "admin": false,
+                "teams": [
+                    {
+                        "id": 2,
+                        "url": "https://example.org/teams/2"
+                    }
+                ],
+                "organizations": [
+                    {
+                        "id": 4,
+                        "url": "https://example.org/organizations/4"
+                    }
+                ]
+            }
+        ]
+
+.. http:post:: /users/
+
+    Create a new user.
+
+    :<json str first_name: The (optional) first name of the user.
+    :<json str last_name: The (optional) last name of the user.
+    :<json str email: The email address of the user.
+    :<json str password: The password for the user.
+    :<json bool admin: True if the user is an admin user.
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 201: Successfully created user.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /users/ HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "password": "gh0st",
+            "admin": false
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 Created
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [],
+            "organizations": []
+        }
+
+.. http:get:: /users/(int:user_id)
+
+    Get details on a specific user.
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /users/1 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [
+                {
+                    "id": 2,
+                    "url": "https://example.org/teams/2"
+                }
+            ],
+            "organizations": [
+                {
+                    "id": 4,
+                    "url": "https://example.org/organizations/4"
+                }
+            ]
+        }
+
+.. http:put:: /users/(int:user_id)
+
+    Update the information of an existing user. Cannot update the password this
+    way, see the "Password resets" section on how to update the user password.
+
+    :<json str first_name: The (optional) first name of the user.
+    :<json str last_name: The (optional) last name of the user.
+    :<json str email: The email address of the user.
+    :<json bool admin: True if the user is an admin user.
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 200: Successfully updated user.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /users/1 HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.org",
+            "admin": true
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 Created
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.org",
+            "admin": true,
+            "teams": [],
+            "organizations": []
+        }
+
+.. http:delete:: /users/(int:user_id)
+
+    Remove an existing user.
+
+    :status 204: Successfully deleted the user.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /users/1 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 204 No Content
+
+.. http:put:: /users/(int:user_id)/team
+
+    Place a user in a team
+
+    :<json int team_id: The ID of the team to place the user in
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 200: Successfully added the user to the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /users/1/team HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "team_id": 2
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [
+                {
+                    "id": 2,
+                    "url": "https://example.org/teams/2"
+                }
+            ],
+            "organizations": []
+        }
+
+.. http:delete:: /users/(int:user_id)/teams/(int:team_id)
+
+    Remove the user from the specified team.
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 200: Successfully removed the user from the team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /users/1/teams/2 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [],
+            "organizations": []
+        }
+
+.. http:put:: /users/(int:user_id)/organization
+
+    Add the user to an organization
+
+    :<json int organization_id: The ID of the organization to add the user to.
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 200: Successfully added the user to the organization.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        PUT /users/1/organizations HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "organization_id": 4
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [],
+            "organizations": [
+                {
+                    "id": 4,
+                    "url": "https://example.org/organizations/4"
+                }
+            ]
+        }
+
+.. http:delete:: /users/(int:user_id)/organizations/(int:organization_id)
+
+    Remove the user from an organization.
+
+
+    :>json int id: The ID for the user.
+    :>json str url: The URL for the user.
+    :>json str first_name: The (optional) first name of the user.
+    :>json str last_name: The (optional) last name of the user.
+    :>json str email: The email address of the user.
+    :>json bool admin: True if the user is an admin user.
+    :>json list teams: A list of all the teams a user is a member of.
+    :>json list organizations:
+        A list of all the organizations the user is a member of.
+
+    :status 200: Successfully removed the user from the organization.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        DELETE /users/1/organizations/4 HTTP/1.1
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+            "id": 1,
+            "url": "https://example.org/users/1",
+            "first_name": "Jon",
+            "last_name": "Snow",
+            "email": "jonsnow@castleblack.net",
+            "admin": false,
+            "teams": [],
+            "organizations": []
+        }
