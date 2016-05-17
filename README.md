@@ -8,7 +8,7 @@ Seed Auth API. User and permissions store, authentication and authorization.
 ## Running
 
  * `pip install -e .`
- * `psql -U postgres -c "CREATE DATABASE seed_auth;"
+ * `psql -U postgres -c "CREATE DATABASE seed_auth;`
  * `./manage.py migrate`
  * `./manage.py createsuperuser`
  * `./manage.py runserver --settings=seed_auth_api.testsettings`
