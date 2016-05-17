@@ -68,7 +68,7 @@ user:create
 
    :>header Authorization: "Token " followed by the token to verify
    :status 200: The token is valid.
-   :status 400: The token is invalid.
+   :status 401: The token is invalid.
 
    **Example request**:
 
@@ -145,7 +145,7 @@ For the token endpoints, no authentication is required.
    :<json str password: The password of the user to create the token for.
    :>json str token: The generated token.
    :status 201: When the token is successfully generated.
-   :status 400: When the user credentials are incorrect.
+   :status 422: When the user credentials are incorrect.
 
    **Example request**:
 
@@ -220,7 +220,7 @@ To reset a user's password, the following steps should be followed:
    :<json str token: The provided token.
    :<json str password: The new password.
    :code 204: The password was successfully reset.
-   :code 400: The token was incorrect.
+   :code 401: The token was incorrect.
 
    **Example request**:
 
@@ -254,7 +254,7 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
     :status 201: When the organization is successfully generated.
-    :status 400: When there is invalid information to create the organization.
+    :status 422: When there is invalid information to create the organization.
 
     **Example request**:
 
@@ -326,7 +326,7 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
     :status 200: When the organization is successfully generated.
-    :status 400: When there is invalid information to update the organization.
+    :status 422: When there is invalid information to update the organization.
 
     **Example request**:
 
@@ -515,7 +515,7 @@ Teams
         the object that the permission acts on, and properties is a flat object
         to add any additional properties.
     :status 201: Successfully created team.
-    :status 400: Missing required information to create team.
+    :status 422: Missing required information to create team.
 
     **Example request**:
 
