@@ -509,7 +509,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 201: Successfully created team.
     :status 400: Missing required information to create team.
 
@@ -552,7 +556,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: Successfully retrieved team.
 
     **Example request**:
@@ -590,7 +598,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: successfully updated team.
 
     **Example request**:
@@ -657,7 +669,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: successfully added permission to the team.
 
     **Example request**:
@@ -707,7 +723,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: successfully removed permission from the team.
 
     **Example request**:
@@ -745,7 +765,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: successfully added the user to the team.
 
     **Example request**:
@@ -792,7 +816,11 @@ Teams
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions:
         The permission list of the team. Each permission is an object
-        containing the fields "id", "permission", and "object_id".
+        containing the fields "id", "type", "object_id", and "properties",
+        where "id" is the id of the permission, "type" is a string representing
+        the type of permission, "object_id" is a string or null, representing
+        the object that the permission acts on, and properties is a flat object
+        to add any additional properties.
     :status 200: successfully removed the user from the team.
 
     **Example request**:
