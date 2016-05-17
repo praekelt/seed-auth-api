@@ -134,7 +134,7 @@ Example:
 .. sourcecode:: http
 
    GET /endpoint/ HTTP/1.1
-   Authorization: JWT .....
+   Authorization: token .....
 
 
    HTTP/1.1 200 OK
