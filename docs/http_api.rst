@@ -62,7 +62,7 @@ team:read
 user:create
     Can create new users.
 
-.. http:get:: /permissions
+.. http:get:: /permissions/
 
    Verify that an existing token is valid, and return the token's permissions.
 
