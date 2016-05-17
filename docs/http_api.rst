@@ -90,16 +90,18 @@ user:create
             "id": 2,
             "type": "org:admins",
             "object_id": "3",
-            "properties": {}
+            "metadata": {},
+            "namespace": "seed_auth"
         },
         {
             "id": 5,
             "type": "foo:bar:baz",
             "object_id": "7",
-            "properties": {
+            "metadata": {
                 "example": "property",
                 "number": 7
-            }
+            },
+            "namespace": "foo_app"
         }
       ]
 
@@ -114,9 +116,12 @@ type
 object_id
     A string that uniquely identifies the object that this permission acts
     upon. "null" if this permission does not act on a specific object.
-properties
+metadata
     A flat object that can be used to add any additional information that
     might be needed for the permission.
+namespace
+    A string used to namespace a set of permissions for a specific app, to
+    avoid "type" collisions.
 
 .. _pagination:
 
@@ -484,7 +489,8 @@ Teams
                             "id": 2,
                             "type": "org:admins",
                             "object_id": "3",
-                            "properties": {}
+                            "metadata": {},
+                            "namespace": "seed_auth"
                         }
                     ],
                 "url": "https://example.org/teams/4",
@@ -500,7 +506,8 @@ Teams
                             "id": 3,
                             "type": "org:write",
                             "object_id": "3",
-                            "properties": {}
+                            "metadata": {},
+                            "namespace": "seed_auth"
                         }
                     ],
                 "url": "https://exmple.org/teams/6",
@@ -654,9 +661,12 @@ Teams
     :<json str object_id:
         The id of the object that the permission acts on. "null" if it doesn't
         act on any object.
-    :<json obj properties:
+    :<json obj metadata:
         A single layer object that can contain any amount of keys. Used to add
         additional information that might be useful to external applications.
+    :<json str namespace:
+        The namespace for the permission, to avoid "type" collisions between
+        apps.
 
     :>json int id: the id of the team.
     :>json str url: the URL of the team.
@@ -676,7 +686,8 @@ Teams
         {
             "type": "org:admin",
             "object_id": "2",
-            "properties": {}
+            "metadata": {},
+            "namespace": "seed_auth"
         }
 
     **Example response**:
@@ -695,7 +706,8 @@ Teams
                     "id": 17,
                     "type": "org:admin",
                     "object_id": "2",
-                    "properties": {}
+                    "metadata": {},
+                    "namespace": "seed_auth"
                 }
             ],
             "url": "https://example.org/teams/2",
