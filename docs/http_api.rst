@@ -103,6 +103,20 @@ user:create
         }
       ]
 
+**Permission structure**:
+
+Each permission is an object containing the following fields.
+
+id
+    The unique ID for the permission
+type
+    The string representing the type of permission.
+object_id
+    A string that uniquely identifies the object that this permission acts
+    upon. "null" if this permission does not act on a specific object.
+properties
+    A flat object that can be used to add any additional information that
+    might be needed for the permission.
 
 .. _pagination:
 
@@ -507,13 +521,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 201: Successfully created team.
     :status 422: Missing required information to create team.
 
@@ -554,13 +562,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: Successfully retrieved team.
 
     **Example request**:
@@ -596,13 +598,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: successfully updated team.
 
     **Example request**:
@@ -667,13 +663,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: successfully added permission to the team.
 
     **Example request**:
@@ -721,13 +711,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: successfully removed permission from the team.
 
     **Example request**:
@@ -763,13 +747,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: successfully added the user to the team.
 
     **Example request**:
@@ -814,13 +792,7 @@ Teams
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions:
-        The permission list of the team. Each permission is an object
-        containing the fields "id", "type", "object_id", and "properties",
-        where "id" is the id of the permission, "type" is a string representing
-        the type of permission, "object_id" is a string or null, representing
-        the object that the permission acts on, and properties is a flat object
-        to add any additional properties.
+    :>json list permissions: The permission list for the team.
     :status 200: successfully removed the user from the team.
 
     **Example request**:
