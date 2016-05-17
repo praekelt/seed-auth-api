@@ -11,9 +11,9 @@ Seed Auth's HTTP API.
 
 Authentication
 ^^^^^^^^^^^^^^
-Authentication is done via JSON Web Token (JWT) token authentication.
-The tokens endpoint can be used to create a token. The token can then
-be placed in the header for requests to the other endpoints.
+Authentication is done via token authentication.The tokens endpoint can be
+used to create a token. The token can then be placed in the header for
+requests to the other endpoints.
 
 **Example request**:
 
@@ -21,7 +21,7 @@ be placed in the header for requests to the other endpoints.
 
    POST /endpoint/ HTTP/1.1
    Content-Type: application/json
-   Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+   Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 
 
 .. _permissions:
@@ -62,6 +62,47 @@ team:read
 user:create
     Can create new users.
 
+.. http:get:: /permissions
+
+   Verify that an existing token is valid, and return the token's permissions.
+
+   :>header Authorization: "Token " followed by the token to verify
+   :status 200: The token is valid.
+   :status 400: The token is invalid.
+
+   **Example request**:
+
+   .. sourcecode:: http
+
+      GET /token HTTP/1.1
+      Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
+
+
+   **Example response**:
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Content-Type: application/json
+
+      [
+        {
+            "id": 2,
+            "type": "org:admins",
+            "object_id": "3",
+            "properties": {}
+        },
+        {
+            "id": 5,
+            "type": "foo:bar:baz",
+            "object_id": "7",
+            "properties": {
+                "example": "property",
+                "number": 7
+            }
+        }
+      ]
+
 
 .. _pagination:
 
@@ -97,7 +138,8 @@ For the token endpoints, no authentication is required.
 
 .. http:post:: /tokens/
 
-   Create a new token for the provided user.
+   Create a new token for the provided user. This will invalidate all other
+   tokens for that user.
 
    :<json str username: The username of the user to create the token for.
    :<json str password: The password of the user to create the token for.
@@ -112,7 +154,10 @@ For the token endpoints, no authentication is required.
       POST /tokens/ HTTP/1.1
       Content-Type: application/json
 
-      {"username":"testuser","password":"testpassword"}
+      {
+        "username": "testuser",
+        "password": "testpassword"
+      }
 
 
    **Example response**:
@@ -122,34 +167,10 @@ For the token endpoints, no authentication is required.
       HTTP/1.1 201 Created
       Content-Type: application/json
 
-      {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"}
+      {
+        "token": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"
+      }
 
-
-.. http:get:: /token
-
-   Verify that an existing token is valid, and return the token's payload.
-
-   :>header Authorization: "JWT " followed by the token to verify
-   :>json obj payload: The payload of the token.
-   :status 200: The token is valid.
-   :status 400: The token is invalid.
-
-   **Example request**:
-
-   .. sourcecode:: http
-
-      GET /token HTTP/1.1
-      Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
-
-
-   **Example response**:
-
-   .. sourcecode:: http
-
-      HTTP/1.1 200 OK
-      Content-Type: application/json
-
-      {"payload":{"sub":"1234567890","name":"John Doe","admin":true}}
 
 
 Password resets
@@ -447,8 +468,9 @@ Teams
                     [
                         {
                             "id": 2,
-                            "permission": "org:admins",
-                            "object_id": "3"
+                            "type": "org:admins",
+                            "object_id": "3",
+                            "properties": {}
                         }
                     ],
                 "url": "https://example.org/teams/4",
@@ -462,8 +484,9 @@ Teams
                     [
                         {
                             "id": 3,
-                            "permission": "org:write",
-                            "object_id": "3"
+                            "type": "org:write",
+                            "object_id": "3",
+                            "properties": {}
                         }
                     ],
                 "url": "https://exmple.org/teams/6",
