@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # auth api
-    'authapi',
+    'authapi.apps.AuthapiConfig',
+    # external
+    'rest_framework',
 ]
 
 MIDDLEWARE_CLASSES = [

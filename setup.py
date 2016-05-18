@@ -13,6 +13,7 @@ setup(
         'Django==1.9.6',
         'dj_database_url==0.4.1',
         'psycopg2==2.6.1',
+        'djangorestframework==3.3.3',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
