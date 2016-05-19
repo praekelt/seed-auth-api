@@ -12,14 +12,26 @@ from authapi.serializers import (
 from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 
 
-class UserTests(APITestCase):
+class AuthAPITestCase(APITestCase):
     def get_context(self, url):
+        '''Returns the request context for a given url.'''
         factory = APIRequestFactory()
         request = factory.get(url)
         return {
             'request': Request(request)
         }
 
+    def get_full_url(self, viewname, *args, **kwargs):
+        '''Returns the full URL, with host and port. Takes the same arguments
+        as reverse.'''
+        factory = APIRequestFactory()
+        part_url = reverse(viewname, *args, **kwargs)
+        request = factory.get(part_url)
+        kwargs['request'] = request
+        return drt_reverse(viewname, *args, **kwargs)
+
+
+class UserTests(AuthAPITestCase):
     def test_get_account_list_empty(self):
         '''If there are no accounts, and empty list should be returned.'''
         response = self.client.get(reverse('user-list'))
@@ -108,7 +120,7 @@ class UserTests(APITestCase):
         team = SeedTeam.objects.create(organization=organization)
         team.users.add(user)
 
-        url = reverse('user-detail', args=[user.id])
+        url = self.get_full_url('user-detail', args=[user.id])
         context = self.get_context(url)
 
         data = UserSerializer(instance=user, context=context).data
@@ -122,7 +134,7 @@ class UserTests(APITestCase):
                 instance=team, context=context).data],
             'organizations': [OrganizationSummarySerializer(
                 instance=organization, context=context).data],
-            'url': data['url'],
+            'url': url,
         }
 
         self.assertEqual(data, expected)
@@ -131,24 +143,17 @@ class UserTests(APITestCase):
         '''The user summary serializer should return the correct summarized
         information.'''
         user = User.objects.create_user('user@example.org')
-        url = reverse('user-detail', args=[user.id])
+        url = self.get_full_url('user-detail', args=[user.id])
         context = self.get_context(url)
 
         data = UserSummarySerializer(instance=user, context=context).data
         self.assertEqual(data, {
-            'url': data['url'],
+            'url': url,
             'id': user.id,
         })
 
 
-class TeamTests(APITestCase):
-    def get_context(self, url):
-        factory = APIRequestFactory()
-        request = factory.get(url)
-        return {
-            'request': Request(request)
-        }
-
+class TeamTests(AuthAPITestCase):
     def test_get_team_list(self):
         '''A GET request on the teams endpoint should return a list of teams.'''
         organization = SeedOrganization.objects.create()
@@ -217,12 +222,12 @@ class TeamTests(APITestCase):
         team.users.add(user)
         permission = SeedPermission.objects.create()
         team.permissions.add(permission)
-        url = reverse('seedteam-detail', args=[team.id])
+        url = self.get_full_url('seedteam-detail', args=[team.id])
         context = self.get_context(url)
 
         data = TeamSerializer(instance=team, context=context).data
         self.assertEqual(data, {
-            'url': data['url'],
+            'url': url,
             'organization': organization.id,
             'permissions': [
                 PermissionSerializer(instance=permission, context=context).data
@@ -237,31 +242,17 @@ class TeamTests(APITestCase):
         information.'''
         organization = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=organization)
-        url = reverse('seedteam-detail', args=[team.id])
+        url = self.get_full_url('seedteam-detail', args=[team.id])
         context = self.get_context(url)
 
         data = TeamSummarySerializer(instance=team, context=context).data
         self.assertEqual(data, {
-            'url': data['url'],
+            'url': url,
             'id': team.id
         })
 
 
-class OrganizationTests(APITestCase):
-    def get_context(self, url):
-        factory = APIRequestFactory()
-        request = factory.get(url)
-        return {
-            'request': Request(request)
-        }
-
-    def get_full_url(self, viewname, *args, **kwargs):
-        factory = APIRequestFactory()
-        part_url = reverse(viewname, *args, **kwargs)
-        request = factory.get(part_url)
-        kwargs['request'] = request
-        return drt_reverse(viewname, *args, **kwargs)
-
+class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list(self):
         '''A GET request to the organizations endpoint should return a list
         of organizations.'''
