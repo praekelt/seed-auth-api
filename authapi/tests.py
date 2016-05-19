@@ -5,8 +5,9 @@ from rest_framework.request import Request
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from authapi.serializers import (
-    UserSerializer, OrganizationSummarySerializer, TeamSummarySerializer)
-from authapi.models import SeedTeam, SeedOrganization
+    UserSerializer, TeamSerializer, OrganizationSummarySerializer,
+    TeamSummarySerializer, PermissionSerializer, UserSummarySerializer)
+from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 
 
 class UserTests(APITestCase):
@@ -123,3 +124,122 @@ class UserTests(APITestCase):
         }
 
         self.assertEqual(data, expected)
+
+    def test_user_summary_serializer(self):
+        '''The user summary serializer should return the correct summarized
+        information.'''
+        user = User.objects.create_user('user@example.org')
+        url = reverse('user-detail', args=[user.id])
+        context = self.get_context(url)
+
+        data = UserSummarySerializer(instance=user, context=context).data
+        self.assertEqual(data, {
+            'url': data['url'],
+            'id': user.id,
+        })
+
+
+class TeamTests(APITestCase):
+    def get_context(self, url):
+        factory = APIRequestFactory()
+        request = factory.get(url)
+        return {
+            'request': Request(request)
+        }
+
+    def test_get_team_list(self):
+        '''A GET request on the teams endpoint should return a list of teams.'''
+        organization = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=organization)
+        team2 = SeedTeam.objects.create(organization=organization)
+        url = reverse('seedteam-list')
+
+        context = self.get_context(url)
+        expected = [
+            TeamSerializer(instance=t, context=context).data
+            for t in [team1, team2]
+        ]
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(sorted(expected), sorted(response.data))
+
+    def test_create_team(self):
+        '''A POST request on the teams endpoint should create a team.'''
+        organization = SeedOrganization.objects.create()
+        response = self.client.post(reverse('seedteam-list'), data={
+            'organization': organization.id,
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        [team] = SeedTeam.objects.all()
+        self.assertEqual(team.organization, organization)
+
+    def test_create_team_no_required_fields(self):
+        '''An error should be returned if there is no organization field.'''
+        response = self.client.post(reverse('seedteam-list'), data={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data, {'organization': ['This field is required.']})
+
+    def test_update_team(self):
+        '''A PUT request to a team's endpoint should update an existing team.'''
+        organization1 = SeedOrganization.objects.create()
+        organization2 = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=organization1)
+        url = reverse('seedteam-detail', args=[team.id])
+
+        response = self.client.put(url, data={'organization': organization2.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        team.refresh_from_db()
+        self.assertEqual(team.organization, organization2)
+
+    def test_get_team(self):
+        '''A GET request to a team's endpoint should return that team's
+        details.'''
+        organization = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=organization)
+        url = reverse('seedteam-detail', args=[team.id])
+        context = self.get_context(url)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = TeamSerializer(instance=team, context=context)
+        self.assertEqual(response.data, expected.data)
+
+    def test_serializer(self):
+        '''The TeamSerializer should return the correct information.'''
+        organization = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=organization)
+        user = User.objects.create_user('foo@bar.org')
+        team.users.add(user)
+        permission = SeedPermission.objects.create()
+        team.permissions.add(permission)
+        url = reverse('seedteam-detail', args=[team.id])
+        context = self.get_context(url)
+
+        data = TeamSerializer(instance=team, context=context).data
+        self.assertEqual(data, {
+            'url': data['url'],
+            'organization': organization.id,
+            'permissions': [
+                PermissionSerializer(instance=permission, context=context).data
+            ],
+            'id': team.id,
+            'users': [
+                UserSummarySerializer(instance=user, context=context).data],
+        })
+
+    def test_summary_serializer(self):
+        '''The TeamSummarySerializer should return the correct summary
+        information.'''
+        organization = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=organization)
+        url = reverse('seedteam-detail', args=[team.id])
+        context = self.get_context(url)
+
+        data = TeamSummarySerializer(instance=team, context=context).data
+        self.assertEqual(data, {
+            'url': data['url'],
+            'id': team.id
+        })
