@@ -2,11 +2,13 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.request import Request
+from rest_framework.reverse import reverse as drt_reverse
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from authapi.serializers import (
     UserSerializer, TeamSerializer, OrganizationSummarySerializer,
-    TeamSummarySerializer, PermissionSerializer, UserSummarySerializer)
+    TeamSummarySerializer, PermissionSerializer, UserSummarySerializer,
+    OrganizationSerializer)
 from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 
 
@@ -242,4 +244,95 @@ class TeamTests(APITestCase):
         self.assertEqual(data, {
             'url': data['url'],
             'id': team.id
+        })
+
+
+class OrganizationTests(APITestCase):
+    def get_context(self, url):
+        factory = APIRequestFactory()
+        request = factory.get(url)
+        return {
+            'request': Request(request)
+        }
+
+    def get_full_url(self, viewname, *args, **kwargs):
+        factory = APIRequestFactory()
+        part_url = reverse(viewname, *args, **kwargs)
+        request = factory.get(part_url)
+        kwargs['request'] = request
+        return drt_reverse(viewname, *args, **kwargs)
+
+    def test_get_organization_list(self):
+        '''A GET request to the organizations endpoint should return a list
+        of organizations.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        url = reverse('seedorganization-list')
+        context = self.get_context(url)
+
+        expected = [
+            OrganizationSerializer(instance=o, context=context).data
+            for o in [org1, org2]
+        ]
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(sorted(expected), sorted(response.data))
+
+    def test_create_organization(self):
+        '''A POST request to the organizations endpoint should create a new
+        organization.'''
+        response = self.client.post(reverse('seedorganization-list'), data={})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        [org] = SeedOrganization.objects.all()
+        self.assertEqual(org.id, response.data['id'])
+
+    def test_get_organization(self):
+        '''A GET request to an organization's endpoint should return the
+        organization's details.'''
+        organization = SeedOrganization.objects.create()
+        url = reverse('seedorganization-detail', args=[organization.id])
+        context = self.get_context(url)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = OrganizationSerializer(
+            instance=organization, context=context)
+        self.assertEqual(response.data, expected.data)
+
+    def test_serializer(self):
+        '''The organization serializer should return the correct information.'''
+        organization = SeedOrganization.objects.create()
+        user = User.objects.create_user('foo@bar.org')
+        organization.users.add(user)
+        team = organization.seedteam_set.create()
+        url = self.get_full_url(
+            'seedorganization-detail', args=[organization.id])
+        context = self.get_context(url)
+
+        data = OrganizationSerializer(
+            instance=organization, context=context).data
+        self.assertEqual(data, {
+            'url': url,
+            'id': organization.id,
+            'users': [
+                UserSummarySerializer(instance=user, context=context).data],
+            'teams': [
+                TeamSummarySerializer(instance=team, context=context).data],
+        })
+
+    def test_summary_serializer(self):
+        '''The organization summary serializer should return the correct
+        summarized information.'''
+        organization = SeedOrganization.objects.create()
+        url = self.get_full_url(
+            'seedorganization-detail', args=[organization.id])
+        context = self.get_context(url)
+
+        data = OrganizationSummarySerializer(
+            instance=organization, context=context).data
+        self.assertEqual(data, {
+            'url': url,
+            'id': organization.id,
         })
