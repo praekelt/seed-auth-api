@@ -4,30 +4,30 @@ from rest_framework import serializers
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 
 
-class OrganizationSummarySerializer(serializers.HyperlinkedModelSerializer):
+class OrganizationSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedOrganization
         fields = ('id', 'url')
 
 
-class UserSummarySerializer(serializers.HyperlinkedModelSerializer):
+class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'url')
 
 
-class TeamSummarySerializer(serializers.HyperlinkedModelSerializer):
+class TeamSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedTeam
         fields = ('id', 'url')
 
 
-class PermissionSerializer(serializers.HyperlinkedModelSerializer):
+class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedPermission
 
 
-class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
+class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='seedteam_set', read_only=True)
     users = UserSummarySerializer(many=True, read_only=True)
@@ -37,7 +37,7 @@ class OrganizationSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'url', 'teams', 'users')
 
 
-class TeamSerializer(serializers.HyperlinkedModelSerializer):
+class TeamSerializer(serializers.ModelSerializer):
     users = UserSummarySerializer(many=True, read_only=True)
     permissions = PermissionSerializer(many=True, read_only=True)
 
@@ -46,7 +46,7 @@ class TeamSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'permissions', 'users', 'url', 'organization')
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='seedteam_set', read_only=True)
     organizations = OrganizationSummarySerializer(
