@@ -51,11 +51,45 @@ class UserSerializer(serializers.ModelSerializer):
         many=True, source='seedteam_set', read_only=True)
     organizations = OrganizationSummarySerializer(
         many=True, source='seedorganization_set', read_only=True)
-    email = serializers.EmailField(source='username')
-    admin = serializers.BooleanField(source='is_superuser')
+    email = serializers.EmailField()
+    admin = serializers.BooleanField(source='is_superuser', required=False)
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True)
+    active = serializers.BooleanField(default=True, source='is_active')
 
     class Meta:
         model = User
         fields = (
             'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
-            'organizations')
+            'organizations', 'password', 'active')
+
+    def create(self, validated_data):
+        '''We want to set the username to be the same as the email, and use the
+        correct create function to make use of password hashing.'''
+        validated_data['username'] = validated_data['email']
+        admin = validated_data.pop('is_superuser', None)
+
+        if admin is True:
+            user = User.objects.create_superuser(**validated_data)
+        else:
+            user = User.objects.create_user(**validated_data)
+
+        return user
+
+    def update(self, instance, validated_data):
+        '''We want to set all the required fields if admin is set, and we want
+        to use the password hashing method if password is set.'''
+        admin = validated_data.pop('is_superuser', None)
+        password = validated_data.pop('password', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if admin is not None:
+            instance.is_staff = admin
+            instance.is_admin = admin
+            instance.is_superuser = admin
+        if password is not None:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
