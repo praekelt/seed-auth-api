@@ -12,7 +12,7 @@ setup(
     install_requires=[
         'Django==1.9.6',
         'dj_database_url==0.4.1',
-        'psycopg2==2.6.1',
+        'psycopg2cffi==2.7.4',
         'djangorestframework==3.3.3',
     ],
     classifiers=[
@@ -22,6 +22,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
