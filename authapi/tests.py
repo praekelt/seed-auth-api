@@ -49,7 +49,9 @@ class UserTests(AuthAPITestCase):
         ]
 
         response = self.client.get(reverse('user-list'))
-        self.assertEqual(sorted(expected), sorted(response.data))
+        self.assertEqual(
+            sorted(expected, key=lambda i: i['id']),
+            sorted(response.data, key=lambda i: i['id']))
 
     def test_create_user_no_required_fields(self):
         '''A POST request to the user endpoint should return an error if there
@@ -170,7 +172,9 @@ class TeamTests(AuthAPITestCase):
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(sorted(expected), sorted(response.data))
+        self.assertEqual(
+            sorted(expected, key=lambda i: i['id']),
+            sorted(response.data, key=lambda i: i['id']))
 
     def test_create_team(self):
         '''A POST request on the teams endpoint should create a team.'''
@@ -271,7 +275,9 @@ class OrganizationTests(AuthAPITestCase):
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(sorted(expected), sorted(response.data))
+        self.assertEqual(
+            sorted(expected, key=lambda i: i['id']),
+            sorted(response.data, key=lambda i: i['id']))
 
     def test_create_organization(self):
         '''A POST request to the organizations endpoint should create a new
