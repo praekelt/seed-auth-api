@@ -155,7 +155,8 @@ class UserTests(AuthAPITestCase):
 
 class TeamTests(AuthAPITestCase):
     def test_get_team_list(self):
-        '''A GET request on the teams endpoint should return a list of teams.'''
+        '''A GET request on the teams endpoint should return a list of
+        teams.'''
         organization = SeedOrganization.objects.create()
         team1 = SeedTeam.objects.create(organization=organization)
         team2 = SeedTeam.objects.create(organization=organization)
@@ -190,13 +191,15 @@ class TeamTests(AuthAPITestCase):
             response.data, {'organization': ['This field is required.']})
 
     def test_update_team(self):
-        '''A PUT request to a team's endpoint should update an existing team.'''
+        '''A PUT request to a team's endpoint should update an existing
+        team.'''
         organization1 = SeedOrganization.objects.create()
         organization2 = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=organization1)
         url = reverse('seedteam-detail', args=[team.id])
 
-        response = self.client.put(url, data={'organization': organization2.id})
+        response = self.client.put(
+            url, data={'organization': organization2.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         team.refresh_from_db()
         self.assertEqual(team.organization, organization2)
@@ -293,7 +296,8 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.data, expected.data)
 
     def test_serializer(self):
-        '''The organization serializer should return the correct information.'''
+        '''The organization serializer should return the correct
+        information.'''
         organization = SeedOrganization.objects.create()
         user = User.objects.create_user('foo@bar.org')
         organization.users.add(user)
