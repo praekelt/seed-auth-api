@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer,
-    OrganizationUserSerializer, PermissionSerializer)
+    ExistingUserSerializer, PermissionSerializer)
 
 
 class OrganizationViewSet(viewsets.ModelViewSet):
@@ -33,12 +33,11 @@ class OrganizationUsersViewSet(viewsets.ViewSet):
     organizations.'''
     def create(self, request, organization_pk=None):
         '''Add a user to an organization.'''
-        serializer = OrganizationUserSerializer(data=request.data)
+        serializer = ExistingUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(User, pk=serializer.data['user_id'])
         org = get_object_or_404(SeedOrganization, pk=organization_pk)
         org.users.add(user)
-        org.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def destroy(self, request, pk=None, organization_pk=None):
@@ -46,7 +45,6 @@ class OrganizationUsersViewSet(viewsets.ViewSet):
         user = get_object_or_404(User, pk=pk)
         org = get_object_or_404(SeedOrganization, pk=organization_pk)
         org.users.remove(user)
-        org.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -97,6 +95,26 @@ class TeamPermissionViewSet(viewsets.ViewSet):
         team.permissions.remove(permission)
         permission.archived = True
         permission.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TeamUsersViewSet(viewsets.ViewSet):
+    '''Nested viewset that allows users to add or remove users from teams.'''
+
+    def create(self, request, team_pk=None):
+        '''Add a user to a team.'''
+        serializer = ExistingUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(User, pk=serializer.data['user_id'])
+        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team.users.add(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def destroy(self, request, pk=None, team_pk=None):
+        '''Remove a user from an organization.'''
+        user = get_object_or_404(User, pk=pk)
+        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
