@@ -244,6 +244,42 @@ class TeamTests(AuthAPITestCase):
         response = self.client.get(reverse('seedteam-list'))
         self.assertEqual(len(response.data), 0)
 
+    def test_get_team_list_filter_permission_type(self):
+        '''If the querystring argument permission_contains is present, we
+        should only display teams that have that permission type.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team1 = SeedTeam.objects.create(name='team 1', organization=org)
+        perm = team1.permissions.create(
+            permission_type='bar:foo:bar', object_id='2', namespace='bar')
+        team2 = SeedTeam.objects.create(name='team 2', organization=org)
+        team2.permissions.create(
+            permission_type='bar:bar:bar', object_id='3', namespace='foo')
+
+        response = self.client.get(
+            '%s?permission_contains=foo' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            response.data[0]['permissions'][0]['permission_type'],
+            perm.permission_type)
+
+    def test_get_team_list_filter_object_id(self):
+        '''If the querystring argument object_id is present, we should only
+        display teams that have that object id in one of their permissions.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team1 = SeedTeam.objects.create(name='team 1', organization=org)
+        perm = team1.permissions.create(
+            permission_type='bar:foo:bar', object_id='2', namespace='bar')
+        team2 = SeedTeam.objects.create(name='team 2', organization=org)
+        team2.permissions.create(
+            permission_type='bar:bar:bar', object_id='3', namespace='foo')
+
+        response = self.client.get(
+            '%s?object_id=2' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            response.data[0]['permissions'][0]['object_id'],
+            perm.object_id)
+
     def test_create_team(self):
         '''A POST request on the teams endpoint should create a team.'''
         organization = SeedOrganization.objects.create()
