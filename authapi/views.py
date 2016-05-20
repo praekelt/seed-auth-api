@@ -11,6 +11,13 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = SeedOrganization.objects.all()
     serializer_class = OrganizationSerializer
 
+    def get_queryset(self):
+        '''We want to still be able to modify archived organizations, but they
+        shouldn't show up on list views.'''
+        if self.action == 'list':
+            return SeedOrganization.objects.filter(archived=False)
+        return self.queryset
+
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = SeedTeam.objects.all()
