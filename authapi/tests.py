@@ -58,7 +58,8 @@ class UserTests(AuthAPITestCase):
         is no email field, as it is required.'''
         response = self.client.post(reverse('user-list'), data={})
         self.assertEqual(response.data, {
-            'email': ['This field is required.']
+            'email': ['This field is required.'],
+            'password': ['This field is required.'],
         })
 
     def test_create_user(self):
