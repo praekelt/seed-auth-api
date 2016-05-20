@@ -138,6 +138,18 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected)
 
+    def test_delete_user(self):
+        '''A DELETE request on a user should not delete it, but instead set
+        the user to be inactive.'''
+        user = User.objects.create_user(username='user@example.org')
+        self.assertTrue(user.is_active)
+
+        response = self.client.delete(reverse('user-detail', args=[user.id]))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
     def test_user_serializer(self):
         '''The user serializer should properly serialize the correct user
         data and foreign links.'''
