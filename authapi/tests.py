@@ -54,6 +54,20 @@ class UserTests(AuthAPITestCase):
             sorted(expected, key=lambda i: i['id']),
             sorted(response.data, key=lambda i: i['id']))
 
+    def test_get_user_list_no_inactive(self):
+        '''If there are any inactive users, they shouldn't appear in the list
+        of users.'''
+        user = User.objects.create_user('user@example.org')
+
+        response = self.client.get(reverse('user-list'))
+        self.assertEqual(len(response.data), 1)
+
+        user.is_active = False
+        user.save()
+
+        response = self.client.get(reverse('user-list'))
+        self.assertEqual(len(response.data), 0)
+
     def test_create_user_no_required_fields(self):
         '''A POST request to the user endpoint should return an error if there
         is no email field, as it is required.'''
