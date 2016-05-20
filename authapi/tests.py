@@ -88,6 +88,7 @@ class UserTests(AuthAPITestCase):
         user = User.objects.create_user('user@example.org')
         data = {
             'email': 'new@email.org',
+            'password': 'newpassword',
             'first_name': 'new',
             'last_name': 'user',
             'admin': True,
@@ -101,6 +102,7 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
 
     def test_get_user(self):
         '''A GET request to a specific user's endpoint should return the

@@ -81,6 +81,8 @@ class UserSerializer(serializers.ModelSerializer):
         to use the password hashing method if password is set.'''
         admin = validated_data.pop('is_superuser', None)
         password = validated_data.pop('password', None)
+        if validated_data.get('email') is not None:
+            validated_data['username'] = validated_data['email']
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
