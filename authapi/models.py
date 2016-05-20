@@ -16,7 +16,10 @@ class SeedPermission(models.Model):
 
 
 class SeedTeam(models.Model):
-    # TODO: Implement SeedTeam model
+    name = models.CharField(max_length=64)
     organization = models.ForeignKey(SeedOrganization)
     users = models.ManyToManyField(User)
     permissions = models.ManyToManyField(SeedPermission)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    archived = models.BooleanField(default=False)
