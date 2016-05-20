@@ -73,6 +73,12 @@ class TeamViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def destroy(self, request, pk=None):
+        team = self.get_object()
+        team.archived = True
+        team.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
