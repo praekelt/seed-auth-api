@@ -63,15 +63,36 @@ class UserTests(AuthAPITestCase):
             'password': ['This field is required.'],
         })
 
-    def test_create_user(self):
+    def test_create_superuser(self):
         '''A POST request to the user endpoint should create a user with all
-        of the supplied details.'''
+        of the supplied details. If admin is True a superuser should be
+        created.'''
         data = {
             'email': 'user1@example.org',
             'password': 'testpassword',
             'first_name': 'user1',
             'last_name': 'example',
             'admin': True,
+        }
+        response = self.client.post(reverse('user-list'), data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        [user] = User.objects.all()
+        self.assertEqual(user.username, data['email'])
+        self.assertEqual(user.first_name, data['first_name'])
+        self.assertEqual(user.last_name, data['last_name'])
+        self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
+
+    def test_create_user(self):
+        '''A POST request to the user endpoint should create a user with all
+        of the supplied details. If admin is false a normal user should be
+        created.'''
+        data = {
+            'email': 'user1@example.org',
+            'password': 'testpassword',
+            'first_name': 'user1',
+            'last_name': 'example',
+            'admin': False,
         }
         response = self.client.post(reverse('user-list'), data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
