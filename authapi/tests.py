@@ -431,3 +431,32 @@ class OrganizationTests(AuthAPITestCase):
             'url': url,
             'id': organization.id,
         })
+
+    def test_add_user_to_organization(self):
+        '''Adding a user to an organization should create a relationship
+        between the two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        user = User.objects.create_user(username='test@example.org')
+        self.assertEqual(len(org.users.all()), 0)
+
+        response = self.client.post(
+            reverse('seedorganization-users-list', args=[org.id]), {
+                'user_id': user.id
+            })
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        org.refresh_from_db()
+        self.assertEqual(len(org.users.all()), 1)
+
+    def test_remove_user_from_organization(self):
+        '''Removing a user from an organization should remove the relationship
+        between the two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        user = User.objects.create_user(username='test@example.org')
+        org.users.add(user)
+        self.assertEqual(len(org.users.all()), 1)
+
+        response = self.client.delete(
+            reverse('seedorganization-users-detail', args=[org.id, user.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        org.refresh_from_db()
+        self.assertEqual(len(org.users.all()), 0)
