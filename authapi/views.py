@@ -54,6 +54,25 @@ class TeamViewSet(viewsets.ModelViewSet):
     queryset = SeedTeam.objects.all()
     serializer_class = TeamSerializer
 
+    def get_queryset(self):
+        '''Add query parameters permission_contains and object_id.'''
+        if self.action == 'list':
+            queryset = SeedTeam.objects.filter(archived=False)
+        else:
+            queryset = self.queryset
+
+        permission = self.request.query_params.get('permission_contains', None)
+        if permission is not None:
+            # TODO: Implement when permissions are implemented
+            pass
+
+        object_id = self.request.query_params.get('object_id', None)
+        if object_id is not None:
+            # TODO: Implement when permissions are implemented.
+            pass
+
+        return queryset
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
