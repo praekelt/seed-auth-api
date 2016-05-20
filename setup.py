@@ -14,6 +14,7 @@ setup(
         'dj_database_url==0.4.1',
         'psycopg2cffi==2.7.4',
         'djangorestframework==3.3.3',
+        'drf-nested-routers==0.11.1',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
