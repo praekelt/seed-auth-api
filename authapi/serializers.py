@@ -27,6 +27,11 @@ class PermissionSerializer(serializers.ModelSerializer):
         model = SeedPermission
 
 
+class OrganizationUserSerializer(serializers.Serializer):
+    '''Serializer for adding a user to an organization.'''
+    user_id = serializers.IntegerField()
+
+
 class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='seedteam_set', read_only=True)
