@@ -18,6 +18,13 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             return SeedOrganization.objects.filter(archived=False)
         return self.queryset
 
+    def destroy(self, request, pk=None):
+        '''For DELETE actions, archive the organization, don't delete.'''
+        org = self.get_object()
+        org.archived = True
+        org.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = SeedTeam.objects.all()
