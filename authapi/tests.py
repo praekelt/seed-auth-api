@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.request import Request
@@ -53,19 +54,36 @@ class UserTests(AuthAPITestCase):
             sorted(expected, key=lambda i: i['id']),
             sorted(response.data, key=lambda i: i['id']))
 
+    def test_get_user_list_no_inactive(self):
+        '''If there are any inactive users, they shouldn't appear in the list
+        of users.'''
+        user = User.objects.create_user('user@example.org')
+
+        response = self.client.get(reverse('user-list'))
+        self.assertEqual(len(response.data), 1)
+
+        user.is_active = False
+        user.save()
+
+        response = self.client.get(reverse('user-list'))
+        self.assertEqual(len(response.data), 0)
+
     def test_create_user_no_required_fields(self):
         '''A POST request to the user endpoint should return an error if there
         is no email field, as it is required.'''
         response = self.client.post(reverse('user-list'), data={})
         self.assertEqual(response.data, {
-            'email': ['This field is required.']
+            'email': ['This field is required.'],
+            'password': ['This field is required.'],
         })
 
-    def test_create_user(self):
+    def test_create_superuser(self):
         '''A POST request to the user endpoint should create a user with all
-        of the supplied details.'''
+        of the supplied details. If admin is True a superuser should be
+        created.'''
         data = {
             'email': 'user1@example.org',
+            'password': 'testpassword',
             'first_name': 'user1',
             'last_name': 'example',
             'admin': True,
@@ -77,6 +95,27 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
+
+    def test_create_user(self):
+        '''A POST request to the user endpoint should create a user with all
+        of the supplied details. If admin is false a normal user should be
+        created.'''
+        data = {
+            'email': 'user1@example.org',
+            'password': 'testpassword',
+            'first_name': 'user1',
+            'last_name': 'example',
+            'admin': False,
+        }
+        response = self.client.post(reverse('user-list'), data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        [user] = User.objects.all()
+        self.assertEqual(user.username, data['email'])
+        self.assertEqual(user.first_name, data['first_name'])
+        self.assertEqual(user.last_name, data['last_name'])
+        self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
 
     def test_update_user(self):
         '''A PUT request to the user's endpoint should update that specific
@@ -84,6 +123,7 @@ class UserTests(AuthAPITestCase):
         user = User.objects.create_user('user@example.org')
         data = {
             'email': 'new@email.org',
+            'password': 'newpassword',
             'first_name': 'new',
             'last_name': 'user',
             'admin': True,
@@ -97,6 +137,7 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
 
     def test_get_user(self):
         '''A GET request to a specific user's endpoint should return the
@@ -110,6 +151,18 @@ class UserTests(AuthAPITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected)
+
+    def test_delete_user(self):
+        '''A DELETE request on a user should not delete it, but instead set
+        the user to be inactive.'''
+        user = User.objects.create_user(username='user@example.org')
+        self.assertTrue(user.is_active)
+
+        response = self.client.delete(reverse('user-detail', args=[user.id]))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
 
     def test_user_serializer(self):
         '''The user serializer should properly serialize the correct user
@@ -127,16 +180,17 @@ class UserTests(AuthAPITestCase):
 
         data = UserSerializer(instance=user, context=context).data
         expected = {
-            'email': 'user@example.org',
-            'admin': True,
-            'first_name': 'user',
-            'last_name': 'example',
+            'email': user.email,
+            'admin': user.is_superuser,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
             'id': user.id,
             'teams': [TeamSummarySerializer(
                 instance=team, context=context).data],
             'organizations': [OrganizationSummarySerializer(
                 instance=organization, context=context).data],
             'url': url,
+            'active': user.is_active,
         }
 
         self.assertEqual(data, expected)

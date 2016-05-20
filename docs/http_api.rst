@@ -857,6 +857,7 @@ Users
                 "last_name": "Snow",
                 "email": "jonsnow@castleblack.net",
                 "admin": false,
+                "active": true,
                 "teams": [
                     {
                         "id": 2,
@@ -880,7 +881,12 @@ Users
     :<json str last_name: The (optional) last name of the user.
     :<json str email: The email address of the user.
     :<json str password: The password for the user.
-    :<json bool admin: True if the user is an admin user.
+    :<json bool admin:
+        (optional) True if the user is an admin user. Defaults to False.
+    :<json bool active:
+        (optional) False if the user is inactive. Inactive users cannot have
+        tokens created, and permissions are also inactive. They do not show
+        up in any users listing. Defaults to True.
 
     :>json int id: The ID for the user.
     :>json str url: The URL for the user.
@@ -888,6 +894,7 @@ Users
     :>json str last_name: The (optional) last name of the user.
     :>json str email: The email address of the user.
     :>json bool admin: True if the user is an admin user.
+    :>json bool active: True if the user is active.
     :>json list teams: A list of all the teams a user is a member of.
     :>json list organizations:
         A list of all the organizations the user is a member of.
@@ -923,6 +930,7 @@ Users
             "last_name": "Snow",
             "email": "jonsnow@castleblack.net",
             "admin": false,
+            "active": true,
             "teams": [],
             "organizations": []
         }
@@ -937,6 +945,7 @@ Users
     :>json str last_name: The (optional) last name of the user.
     :>json str email: The email address of the user.
     :>json bool admin: True if the user is an admin user.
+    :>json bool active: True if the user is active.
     :>json list teams: A list of all the teams a user is a member of.
     :>json list organizations:
         A list of all the organizations the user is a member of.
@@ -961,6 +970,7 @@ Users
             "last_name": "Snow",
             "email": "jonsnow@castleblack.net",
             "admin": false,
+            "active": true,
             "teams": [
                 {
                     "id": 2,
@@ -983,7 +993,9 @@ Users
     :<json str first_name: The (optional) first name of the user.
     :<json str last_name: The (optional) last name of the user.
     :<json str email: The email address of the user.
-    :<json bool admin: True if the user is an admin user.
+    :<json str password: The password for the user.
+    :<json bool admin: (optional) True if the user is an admin user.
+    :<json bool active: (optional) True if the user is active.
 
     :>json int id: The ID for the user.
     :>json str url: The URL for the user.
@@ -991,6 +1003,7 @@ Users
     :>json str last_name: The (optional) last name of the user.
     :>json str email: The email address of the user.
     :>json bool admin: True if the user is an admin user.
+    :>json bool active: True if the user is active.
     :>json list teams: A list of all the teams a user is a member of.
     :>json list organizations:
         A list of all the organizations the user is a member of.
@@ -1008,6 +1021,7 @@ Users
             "first_name": "Jon",
             "last_name": "Snow",
             "email": "jonsnow@castleblack.org",
+            "password": "gh0st",
             "admin": true
         }
 
@@ -1025,13 +1039,15 @@ Users
             "last_name": "Snow",
             "email": "jonsnow@castleblack.org",
             "admin": true,
+            "active": true,
             "teams": [],
             "organizations": []
         }
 
 .. http:delete:: /users/(int:user_id)
 
-    Remove an existing user.
+    Remove an existing user. Sets the user to inactive instead of deleting
+    the user.
 
     :status 204: Successfully deleted the user.
 
