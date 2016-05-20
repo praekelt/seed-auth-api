@@ -127,16 +127,17 @@ class UserTests(AuthAPITestCase):
 
         data = UserSerializer(instance=user, context=context).data
         expected = {
-            'email': 'user@example.org',
-            'admin': True,
-            'first_name': 'user',
-            'last_name': 'example',
+            'email': user.email,
+            'admin': user.is_superuser,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
             'id': user.id,
             'teams': [TeamSummarySerializer(
                 instance=team, context=context).data],
             'organizations': [OrganizationSummarySerializer(
                 instance=organization, context=context).data],
             'url': url,
+            'active': user.is_active,
         }
 
         self.assertEqual(data, expected)
