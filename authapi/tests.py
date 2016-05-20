@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.request import Request
@@ -67,6 +68,7 @@ class UserTests(AuthAPITestCase):
         of the supplied details.'''
         data = {
             'email': 'user1@example.org',
+            'password': 'testpassword',
             'first_name': 'user1',
             'last_name': 'example',
             'admin': True,
@@ -78,6 +80,7 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
+        self.assertTrue(check_password(data['password'], user.password))
 
     def test_update_user(self):
         '''A PUT request to the user's endpoint should update that specific
