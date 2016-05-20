@@ -28,8 +28,8 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = ('id', 'permission_type', 'object_id', 'namespace')
 
 
-class OrganizationUserSerializer(serializers.Serializer):
-    '''Serializer for adding a user to an organization.'''
+class ExistingUserSerializer(serializers.Serializer):
+    '''Serializer for adding/removing an existing user.'''
     user_id = serializers.IntegerField()
 
 
