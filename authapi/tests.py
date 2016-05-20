@@ -233,34 +233,45 @@ class TeamTests(AuthAPITestCase):
     def test_create_team(self):
         '''A POST request on the teams endpoint should create a team.'''
         organization = SeedOrganization.objects.create()
-        response = self.client.post(reverse('seedteam-list'), data={
+        data = {
             'organization': organization.id,
-        })
+            'name': 'test team',
+        }
+        response = self.client.post(reverse('seedteam-list'), data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         [team] = SeedTeam.objects.all()
         self.assertEqual(team.organization, organization)
+        self.assertEqual(team.name, data['name'])
 
     def test_create_team_no_required_fields(self):
         '''An error should be returned if there is no organization field.'''
         response = self.client.post(reverse('seedteam-list'), data={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
-            response.data, {'organization': ['This field is required.']})
+            response.data, {
+                'organization': ['This field is required.'],
+                'name': ['This field is required.'],
+            })
 
     def test_update_team(self):
         '''A PUT request to a team's endpoint should update an existing
         team.'''
-        organization1 = SeedOrganization.objects.create()
-        organization2 = SeedOrganization.objects.create()
-        team = SeedTeam.objects.create(organization=organization1)
+        organization1 = SeedOrganization.objects.create(name='org one')
+        organization2 = SeedOrganization.objects.create(name='org two')
+        team = SeedTeam.objects.create(
+            organization=organization1, name='test team')
         url = reverse('seedteam-detail', args=[team.id])
 
-        response = self.client.put(
-            url, data={'organization': organization2.id})
+        data = {
+            'organization': organization2.id,
+            'name': 'new team',
+        }
+        response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         team.refresh_from_db()
         self.assertEqual(team.organization, organization2)
+        self.assertEqual(team.name, data['name'])
 
     def test_get_team(self):
         '''A GET request to a team's endpoint should return that team's
@@ -278,7 +289,8 @@ class TeamTests(AuthAPITestCase):
     def test_serializer(self):
         '''The TeamSerializer should return the correct information.'''
         organization = SeedOrganization.objects.create()
-        team = SeedTeam.objects.create(organization=organization)
+        team = SeedTeam.objects.create(
+            organization=organization, name='test team')
         user = User.objects.create_user('foo@bar.org')
         team.users.add(user)
         permission = SeedPermission.objects.create()
@@ -288,6 +300,7 @@ class TeamTests(AuthAPITestCase):
 
         data = TeamSerializer(instance=team, context=context).data
         self.assertEqual(data, {
+            'name': team.name,
             'url': url,
             'organization': organization.id,
             'permissions': [
@@ -296,6 +309,7 @@ class TeamTests(AuthAPITestCase):
             'id': team.id,
             'users': [
                 UserSummarySerializer(instance=user, context=context).data],
+            'archived': team.archived,
         })
 
     def test_summary_serializer(self):
