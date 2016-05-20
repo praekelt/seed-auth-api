@@ -352,6 +352,50 @@ class TeamTests(AuthAPITestCase):
             'id': team.id
         })
 
+    def test_add_permission_to_team(self):
+        '''When adding a permission to a team, it should create a permission
+        and link it to that team.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+        self.assertEqual(len(team.permissions.all()), 0)
+
+        data = {
+            'permission_type': 'foo:bar',
+            'object_id': '2',
+            'namespace': 'foo',
+        }
+        response = self.client.post(
+            reverse('seedteam-permissions-list', args=[team.id]), data=data)
+
+        [permission] = SeedPermission.objects.all()
+        self.assertEqual(response.data, {
+            'permission_type': data['permission_type'],
+            'object_id': data['object_id'],
+            'namespace': data['namespace'],
+            'id': permission.id
+        })
+        self.assertEqual(len(team.permissions.all()), 1)
+
+    def test_remove_permission_from_team(self):
+        '''When removing a permission from a team, it should remove the
+        relation between the team and permission, and archive that
+        permission.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+        permission = team.permissions.create(
+            permission_type='foo:bar', object_id='2', namespace='foo')
+        self.assertFalse(permission.archived)
+        self.assertEqual(len(team.permissions.all()), 1)
+
+        response = self.client.delete(
+            reverse(
+                'seedteam-permissions-detail', args=[team.id, permission.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertEqual(len(team.permissions.all()), 0)
+        permission.refresh_from_db()
+        self.assertTrue(permission.archived)
+
 
 class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list(self):
