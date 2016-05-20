@@ -230,6 +230,20 @@ class TeamTests(AuthAPITestCase):
             sorted(expected, key=lambda i: i['id']),
             sorted(response.data, key=lambda i: i['id']))
 
+    def test_get_team_list_archived(self):
+        '''When getting the list of teams, archived teams should not be
+        shown.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(organization=org, name='test team')
+
+        response = self.client.get(reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+
+        team.archived = True
+        team.save()
+        response = self.client.get(reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 0)
+
     def test_create_team(self):
         '''A POST request on the teams endpoint should create a team.'''
         organization = SeedOrganization.objects.create()
