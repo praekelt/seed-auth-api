@@ -25,6 +25,7 @@ class TeamSummarySerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedPermission
+        fields = ('id', 'permission_type', 'object_id', 'namespace')
 
 
 class OrganizationUserSerializer(serializers.Serializer):
@@ -51,7 +52,6 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'permissions', 'users', 'url', 'organization',
             'archived')
-
 
 
 class UserSerializer(serializers.ModelSerializer):
