@@ -432,6 +432,37 @@ class TeamTests(AuthAPITestCase):
         permission.refresh_from_db()
         self.assertTrue(permission.archived)
 
+    def test_add_user_to_team(self):
+        '''Adding a user to a team should create a relationship between the
+        two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+        user = User.objects.create_user(username='test@example.org')
+        self.assertEqual(len(team.users.all()), 0)
+
+        response = self.client.post(
+            reverse('seedteam-users-list', args=[team.id]), {
+                'user_id': user.id
+            })
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        team.refresh_from_db()
+        self.assertEqual(len(team.users.all()), 1)
+
+    def test_remove_user_from_team(self):
+        '''Removing a user from a team should remove the relationship between
+        the two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+        user = User.objects.create_user(username='test@example.org')
+        team.users.add(user)
+        self.assertEqual(len(team.users.all()), 1)
+
+        response = self.client.delete(
+            reverse('seedteam-users-detail', args=[team.id, user.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        team.refresh_from_db()
+        self.assertEqual(len(team.users.all()), 0)
+
 
 class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list(self):
