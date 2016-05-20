@@ -12,7 +12,6 @@ install:
   - "pip install -r requirements-dev.txt"
   - "pip install coveralls pytest-cov pytest-flake8"
 script:
-  - "flake8 --exclude=migrations ."
   - "py.test --ds=seed_auth_api.testsettings --cov=authapi --flake8 */tests.py"
 after_success:
   - "coveralls"
