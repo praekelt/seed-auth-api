@@ -88,7 +88,6 @@ class UserSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         if admin is not None:
             instance.is_staff = admin
-            instance.is_admin = admin
             instance.is_superuser = admin
         if password is not None:
             instance.set_password(password)
