@@ -258,6 +258,18 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(team.organization, organization)
         self.assertEqual(team.name, data['name'])
 
+    def test_delete_team(self):
+        '''Deleting a team should archive the team instead of removing it.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(organization=org, name='test team')
+
+        self.assertEqual(team.archived, False)
+
+        self.client.delete(reverse('seedteam-detail', args=[team.id]))
+
+        team.refresh_from_db()
+        self.assertEqual(team.archived, True)
+
     def test_create_team_no_required_fields(self):
         '''An error should be returned if there is no organization field.'''
         response = self.client.post(reverse('seedteam-list'), data={})
