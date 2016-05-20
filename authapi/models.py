@@ -11,8 +11,12 @@ class SeedOrganization(models.Model):
 
 
 class SeedPermission(models.Model):
-    # TODO: Implement SeedPermission model
-    pass
+    permission_type = models.CharField(max_length=128)
+    object_id = models.CharField(max_length=64)
+    namespace = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    archived = models.BooleanField(default=False)
 
 
 class SeedTeam(models.Model):
