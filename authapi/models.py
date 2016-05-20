@@ -3,8 +3,11 @@ from django.db import models
 
 
 class SeedOrganization(models.Model):
-    # TODO: Implement SeedOrganization model
+    name = models.CharField(max_length=64)
     users = models.ManyToManyField(User)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    archived = models.BooleanField(default=False)
 
 
 class SeedPermission(models.Model):
