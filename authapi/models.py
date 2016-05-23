@@ -9,6 +9,9 @@ class SeedOrganization(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
 
+    def get_active_teams(self):
+        return self.seedteam_set.filter(archived=False)
+
 
 class SeedPermission(models.Model):
     permission_type = models.CharField(max_length=128)

@@ -35,7 +35,7 @@ class ExistingUserSerializer(serializers.Serializer):
 
 class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
-        many=True, source='seedteam_set', read_only=True)
+        many=True, source='get_active_teams', read_only=True)
     users = UserSummarySerializer(many=True, read_only=True)
 
     class Meta:

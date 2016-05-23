@@ -541,6 +541,20 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.get(reverse('seedorganization-list'))
         self.assertEqual(len(response.data), 1)
 
+    def test_get_organization_list_archived_teams(self):
+        '''When getting the list of organizations, the archived teams should
+        not be visible.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data[0]['teams']), 1)
+
+        team.archived = True
+        team.save()
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data[0]['teams']), 0)
+
     def test_create_organization_no_required(self):
         '''If the POST request is missing required field, an error should be
         returned.'''
