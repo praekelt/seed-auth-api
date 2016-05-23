@@ -333,14 +333,85 @@ class OrganizationTests(AuthAPITestCase):
             sorted(expected, key=lambda i: i['id']),
             sorted(response.data, key=lambda i: i['id']))
 
+    def test_get_organization_list_archived(self):
+        '''Archived organizations should not appear on the list of
+        organizations.'''
+        org = SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+        org.archived = True
+        org.save()
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_organization_list_archived_true_queryparam(self):
+        '''If the queryparam archived is true, show only archived
+        organizations.'''
+        org = SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(
+            '%s?archived=true' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 0)
+
+        org.archived = True
+        org.save()
+        response = self.client.get(
+            '%s?archived=true' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_organization_list_archived_false_queryparam(self):
+        '''If the queryparam archived is false, show only non-archived
+        organizations.'''
+        org = SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(
+            '%s?archived=false' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+        org.archived = True
+        org.save()
+        response = self.client.get(
+            '%s?archived=false' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_organization_list_archived_both_queryparam(self):
+        '''If the queryparam archived is both, show all organizations.'''
+        org1 = SeedOrganization.objects.create(name='test org')
+        org1.archived = True
+        org1.save()
+        SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(
+            '%s?archived=both' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 2)
+
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+    def test_create_organization_no_required(self):
+        '''If the POST request is missing required field, an error should be
+        returned.'''
+        response = self.client.post(reverse('seedorganization-list'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'name': ['This field is required.']
+        })
+
     def test_create_organization(self):
         '''A POST request to the organizations endpoint should create a new
         organization.'''
-        response = self.client.post(reverse('seedorganization-list'), data={})
+        data = {
+            'name': 'test org',
+        }
+        response = self.client.post(
+            reverse('seedorganization-list'), data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         [org] = SeedOrganization.objects.all()
         self.assertEqual(org.id, response.data['id'])
+        self.assertEqual(org.name, data['name'])
 
     def test_get_organization(self):
         '''A GET request to an organization's endpoint should return the
@@ -355,10 +426,21 @@ class OrganizationTests(AuthAPITestCase):
             instance=organization, context=context)
         self.assertEqual(response.data, expected.data)
 
+    def test_delete_organization(self):
+        '''A DELETE request on an organization should archive it.'''
+        org = SeedOrganization.objects.create(name='test org')
+        self.assertFalse(org.archived)
+
+        response = self.client.delete(
+            reverse('seedorganization-detail', args=[org.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        org.refresh_from_db()
+        self.assertTrue(org.archived)
+
     def test_serializer(self):
         '''The organization serializer should return the correct
         information.'''
-        organization = SeedOrganization.objects.create()
+        organization = SeedOrganization.objects.create(name='testorg')
         user = User.objects.create_user('foo@bar.org')
         organization.users.add(user)
         team = organization.seedteam_set.create()
@@ -375,6 +457,8 @@ class OrganizationTests(AuthAPITestCase):
                 UserSummarySerializer(instance=user, context=context).data],
             'teams': [
                 TeamSummarySerializer(instance=team, context=context).data],
+            'archived': organization.archived,
+            'name': organization.name,
         })
 
     def test_summary_serializer(self):
@@ -391,3 +475,32 @@ class OrganizationTests(AuthAPITestCase):
             'url': url,
             'id': organization.id,
         })
+
+    def test_add_user_to_organization(self):
+        '''Adding a user to an organization should create a relationship
+        between the two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        user = User.objects.create_user(username='test@example.org')
+        self.assertEqual(len(org.users.all()), 0)
+
+        response = self.client.post(
+            reverse('seedorganization-users-list', args=[org.id]), {
+                'user_id': user.id
+            })
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        org.refresh_from_db()
+        self.assertEqual(len(org.users.all()), 1)
+
+    def test_remove_user_from_organization(self):
+        '''Removing a user from an organization should remove the relationship
+        between the two.'''
+        org = SeedOrganization.objects.create(name='test org')
+        user = User.objects.create_user(username='test@example.org')
+        org.users.add(user)
+        self.assertEqual(len(org.users.all()), 1)
+
+        response = self.client.delete(
+            reverse('seedorganization-users-detail', args=[org.id, user.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        org.refresh_from_db()
+        self.assertEqual(len(org.users.all()), 0)
