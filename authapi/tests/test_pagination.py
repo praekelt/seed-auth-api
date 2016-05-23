@@ -1,6 +1,5 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.test import APITestCase
-from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
 from authapi.serializers import OrganizationSummarySerializer
