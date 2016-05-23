@@ -298,6 +298,10 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Get a list of existing organizations
 
+    :queryparam archived:
+        (optional) If true, shows archived organizations. If false, shows
+        organizations that are not archived. Defaults to false.
+
     **Example request**:
 
     .. sourcecode:: http

@@ -15,9 +15,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         '''We want to still be able to modify archived organizations, but they
-        shouldn't show up on list views.'''
+        shouldn't show up on list views. We have an archived query param to
+        show archived organizations.'''
         if self.action == 'list':
-            return SeedOrganization.objects.filter(archived=False)
+            archived = bool(self.request.query_params.get('archived', False))
+            return self.queryset.filter(archived=archived)
         return self.queryset
 
     def destroy(self, request, pk=None):
