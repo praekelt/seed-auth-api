@@ -6,7 +6,7 @@ class SeedOrganization(models.Model):
     title = models.CharField(max_length=64)
     users = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
 
     def get_active_teams(self):
@@ -21,7 +21,7 @@ class SeedPermission(models.Model):
     object_id = models.CharField(max_length=64)
     namespace = models.CharField(max_length=64)
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class SeedTeam(models.Model):
@@ -30,7 +30,7 @@ class SeedTeam(models.Model):
     users = models.ManyToManyField(User)
     permissions = models.ManyToManyField(SeedPermission)
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
 
     def get_active_users(self):
