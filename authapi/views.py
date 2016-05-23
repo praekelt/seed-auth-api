@@ -61,20 +61,33 @@ class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
 
     def get_queryset(self):
-        '''Add query parameters permission_contains and object_id.'''
+        '''We want to still be able to modify archived organizations, but they
+        shouldn't show up on list views.
+
+        We have an archived query param, where 'true' shows archived, 'false'
+        omits them, and 'both' shows both.
+
+        We also have the query params permission_contains and object_id, which
+        allow users to filter the teams based on the permissions they
+        contain.'''
+        queryset = self.queryset
         if self.action == 'list':
-            queryset = SeedTeam.objects.filter(archived=False)
-        else:
-            queryset = self.queryset
+            archived = self.request.query_params.get(
+                'archived', 'false').lower()
+            if archived == 'true':
+                queryset = queryset.filter(archived=True)
+            if archived == 'false':
+                queryset = queryset.filter(archived=False)
 
-        permission = self.request.query_params.get('permission_contains', None)
-        if permission is not None:
-            queryset = queryset.filter(
-                permissions__type__contains=permission)
+            permission = self.request.query_params.get(
+                'permission_contains', None)
+            if permission is not None:
+                queryset = queryset.filter(
+                    permissions__type__contains=permission)
 
-        object_id = self.request.query_params.get('object_id', None)
-        if object_id is not None:
-            queryset = queryset.filter(permissions__object_id=object_id)
+            object_id = self.request.query_params.get('object_id', None)
+            if object_id is not None:
+                queryset = queryset.filter(permissions__object_id=object_id)
 
         return queryset
 
@@ -130,10 +143,18 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        '''We want to still directly manage deactivated users, but not show
-        them on our list of users.'''
+        '''We want to still be able to modify archived users, but they
+        shouldn't show up on list views.
+
+        We have an archived query param, where 'true' shows archived, 'false'
+        omits them, and 'both' shows both.'''
         if self.action == 'list':
-            return User.objects.filter(is_active=True)
+            active = self.request.query_params.get(
+                'active', 'true').lower()
+            if active == 'true':
+                return self.queryset.filter(is_active=True)
+            if active == 'false':
+                return self.queryset.filter(is_active=False)
         return self.queryset
 
     def destroy(self, request, pk=None):

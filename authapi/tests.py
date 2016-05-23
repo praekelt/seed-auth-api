@@ -68,6 +68,36 @@ class UserTests(AuthAPITestCase):
         response = self.client.get(reverse('user-list'))
         self.assertEqual(len(response.data), 0)
 
+    def test_get_user_list_active_queryparam_true(self):
+        '''If the queryparam active is set to false, then we should return
+        all active users.'''
+        user = User.objects.create_user('test user')
+
+        response = self.client.get(
+            '%s?active=false' % reverse('user-list'))
+        self.assertEqual(len(response.data), 0)
+
+        user.is_active = False
+        user.save()
+        response = self.client.get(
+            '%s?active=false' % reverse('user-list'))
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_user_list_active_queryparam_both(self):
+        '''If the queryparam active is set to both, then we should return
+        both active and inactive users.'''
+        user = User.objects.create_user('test user')
+        user.is_active = False
+        user.save()
+        User.objects.create_user('test user 2')
+
+        response = self.client.get(reverse('user-list'))
+        self.assertEqual(len(response.data), 1)
+
+        response = self.client.get(
+            '%s?active=both' % reverse('user-list'))
+        self.assertEqual(len(response.data), 2)
+
     def test_create_user_no_required_fields(self):
         '''A POST request to the user endpoint should return an error if there
         is no email field, as it is required.'''
@@ -243,6 +273,38 @@ class TeamTests(AuthAPITestCase):
         team.save()
         response = self.client.get(reverse('seedteam-list'))
         self.assertEqual(len(response.data), 0)
+
+    def test_get_team_list_archived_queryparam_true(self):
+        '''If the queryparam archived is set to true, then we should return
+        all archived teams.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(organization=org, name='test team')
+
+        response = self.client.get(
+            '%s?archived=true' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 0)
+
+        team.archived = True
+        team.save()
+        response = self.client.get(
+            '%s?archived=true' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_team_list_archived_queryparam_both(self):
+        '''If the queryparam archived is set to both, then we should return
+        both archived and non-archived teams.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(organization=org, name='test team')
+        team.archived = True
+        team.save()
+        SeedTeam.objects.create(organization=org, name='test team')
+
+        response = self.client.get(reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+
+        response = self.client.get(
+            '%s?archived=both' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 2)
 
     def test_get_team_list_filter_permission_type(self):
         '''If the querystring argument permission_contains is present, we
@@ -436,7 +498,6 @@ class TeamTests(AuthAPITestCase):
         team = SeedTeam.objects.create(name='test team', organization=org)
         permission = team.permissions.create(
             type='foo:bar', object_id='2', namespace='foo')
-        self.assertFalse(permission.archived)
         self.assertEqual(len(team.permissions.all()), 1)
 
         response = self.client.delete(
