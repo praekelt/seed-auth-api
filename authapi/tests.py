@@ -346,8 +346,8 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.get(reverse('seedorganization-list'))
         self.assertEqual(len(response.data), 0)
 
-    def test_get_organization_list_archived_queryparam(self):
-        '''If the queryparam archived is True, show only archived
+    def test_get_organization_list_archived_true_queryparam(self):
+        '''If the queryparam archived is true, show only archived
         organizations.'''
         org = SeedOrganization.objects.create(name='test org')
 
@@ -359,6 +359,35 @@ class OrganizationTests(AuthAPITestCase):
         org.save()
         response = self.client.get(
             '%s?archived=true' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_organization_list_archived_false_queryparam(self):
+        '''If the queryparam archived is false, show only non-archived
+        organizations.'''
+        org = SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(
+            '%s?archived=false' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 1)
+
+        org.archived = True
+        org.save()
+        response = self.client.get(
+            '%s?archived=false' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 0)
+
+    def test_get_organization_list_archived_both_queryparam(self):
+        '''If the queryparam archived is both, show all organizations.'''
+        org1 = SeedOrganization.objects.create(name='test org')
+        org1.archived = True
+        org1.save()
+        SeedOrganization.objects.create(name='test org')
+
+        response = self.client.get(
+            '%s?archived=both' % reverse('seedorganization-list'))
+        self.assertEqual(len(response.data), 2)
+
+        response = self.client.get(reverse('seedorganization-list'))
         self.assertEqual(len(response.data), 1)
 
     def test_create_organization_no_required(self):

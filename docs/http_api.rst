@@ -300,7 +300,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     :queryparam archived:
         (optional) If true, shows archived organizations. If false, shows
-        organizations that are not archived. Defaults to false.
+        organizations that are not archived. If both, shows all organizations.
+        Defaults to false.
 
     **Example request**:
 
