@@ -268,7 +268,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Creates a new organization.
 
-    :>json str name: The name of the created organization.
+    :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
@@ -282,7 +282,7 @@ to belong to exactly one organization, but an organization can have many teams.
        POST /organizations/ HTTP/1.1
        Content-Type: application/json
 
-       {"name":"Nights Watch"}
+       {"title":"Nights Watch"}
 
 
     **Example response**:
@@ -292,7 +292,7 @@ to belong to exactly one organization, but an organization can have many teams.
         HTTP/1.1 201 Created
         Content-Type: application/json
 
-        {"name":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+        {"title":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
 
 .. http:get:: /organizations/
 
@@ -316,13 +316,13 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       [{"name":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}]
+       [{"title":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}]
 
 .. http:get:: /organizations/(int:organization_id)
 
     Get the details of an organization.
 
-    :>json str name: The name of the created organization.
+    :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
 
@@ -339,13 +339,13 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       {"name":"Night's Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+       {"title":"Night's Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
 
 .. http:put:: /organizations/(int:organization_id)
 
     Update an existing organization.
 
-    :<json str name: The name of the organization.
+    :<json str title: The title of the organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
@@ -359,7 +359,7 @@ to belong to exactly one organization, but an organization can have many teams.
        PUT /organizations/4 HTTP/1.1
        Content-Type: application/json
 
-       {"name": "Brotherhood Without Banners"}
+       {"title": "Brotherhood Without Banners"}
 
     **Example response**:
 
@@ -368,7 +368,7 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       {"name":"Brotherhood Without Banners","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+       {"title":"Brotherhood Without Banners","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
 
 .. http:delete:: /organizations/(int:organization_id)
 
@@ -451,7 +451,7 @@ Teams
         [
             {
                 "id": 4,
-                "name": "admins",
+                "title": "admins",
                 "permissions": [],
                 "users": [],
                 "url": "https://example.org/teams/4",
@@ -486,7 +486,7 @@ Teams
         [
             {
                 "id": 4,
-                "name": "organization admins",
+                "title": "organization admins",
                 "users": [],
                 "permissions":
                     [
@@ -503,7 +503,7 @@ Teams
             },
             {
                 "id": 7,
-                "name": "organization editors",
+                "title": "organization editors",
                 "users": [],
                 "permissions":
                     [
@@ -525,12 +525,12 @@ Teams
 
     Create a new team.
 
-    :<json str name: The name of the team.
+    :<json str title: The title of the team.
     :<json int organization: The id of the organization that the team belongs to.
 
     :>json int id: The ID of the created team.
     :>json str url: The URL of the created team.
-    :>json str name: the name of the team.
+    :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
@@ -545,7 +545,7 @@ Teams
         Content-Type: application/json
 
         {
-            "name": "Lord Commanders",
+            "title": "Lord Commanders",
             "organization": 7
         }
 
@@ -558,7 +558,7 @@ Teams
 
         {
             "id": 2,
-            "name": "Lord Commanders",
+            "title": "Lord Commanders",
             "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2",
@@ -571,7 +571,7 @@ Teams
 
     :>json int id: the ID of the team.
     :>json str url: the URL of the team.
-    :>json str name: the name of the team.
+    :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
@@ -592,7 +592,7 @@ Teams
 
         {
             "id": 2,
-            "name": "Lord Commanders",
+            "title": "Lord Commanders",
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
@@ -603,11 +603,11 @@ Teams
 
     Update the details of a team.
 
-    :<json str name: The name of the team.
+    :<json str title: The title of the team.
 
     :>json int id: the id of the updated team.
     :>json str url: The URL of the updated team.
-    :>json str name: the name of the team.
+    :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
     :>json int organization: The id of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
@@ -621,7 +621,7 @@ Teams
         Content-Type: application/json
 
         {
-            "name": "Brotherhood without banners"
+            "title": "Brotherhood without banners"
         }
 
     **Example reponse**:
@@ -633,7 +633,7 @@ Teams
 
         {
             "id": 2,
-            "name": "Brotherhood without banners",
+            "title": "Brotherhood without banners",
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",

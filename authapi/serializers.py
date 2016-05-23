@@ -41,7 +41,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SeedOrganization
-        fields = ('name', 'id', 'url', 'teams', 'users', 'archived')
+        fields = ('title', 'id', 'url', 'teams', 'users', 'archived')
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedTeam
         fields = (
-            'id', 'name', 'permissions', 'users', 'url', 'organization',
+            'id', 'title', 'permissions', 'users', 'url', 'organization',
             'archived')
 
 
