@@ -101,8 +101,7 @@ class TeamPermissionViewSet(viewsets.ViewSet):
         team = get_object_or_404(SeedTeam, pk=team_pk)
         permission = get_object_or_404(SeedPermission, pk=pk)
         team.permissions.remove(permission)
-        permission.archived = True
-        permission.save()
+        permission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

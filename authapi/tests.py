@@ -430,7 +430,7 @@ class TeamTests(AuthAPITestCase):
 
     def test_remove_permission_from_team(self):
         '''When removing a permission from a team, it should remove the
-        relation between the team and permission, and archive that
+        relation between the team and permission, and delete that
         permission.'''
         org = SeedOrganization.objects.create(name='test org')
         team = SeedTeam.objects.create(name='test team', organization=org)
@@ -445,8 +445,7 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.assertEqual(len(team.permissions.all()), 0)
-        permission.refresh_from_db()
-        self.assertTrue(permission.archived)
+        self.assertEqual(len(SeedPermission.objects.all()), 0)
 
     def test_add_user_to_team(self):
         '''Adding a user to a team should create a relationship between the
