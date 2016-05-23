@@ -250,17 +250,17 @@ class TeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create(name='test org')
         team1 = SeedTeam.objects.create(name='team 1', organization=org)
         perm = team1.permissions.create(
-            permission_type='bar:foo:bar', object_id='2', namespace='bar')
+            type='bar:foo:bar', object_id='2', namespace='bar')
         team2 = SeedTeam.objects.create(name='team 2', organization=org)
         team2.permissions.create(
-            permission_type='bar:bar:bar', object_id='3', namespace='foo')
+            type='bar:bar:bar', object_id='3', namespace='foo')
 
         response = self.client.get(
             '%s?permission_contains=foo' % reverse('seedteam-list'))
         self.assertEqual(len(response.data), 1)
         self.assertEqual(
-            response.data[0]['permissions'][0]['permission_type'],
-            perm.permission_type)
+            response.data[0]['permissions'][0]['type'],
+            perm.type)
 
     def test_get_team_list_filter_object_id(self):
         '''If the querystring argument object_id is present, we should only
@@ -268,10 +268,10 @@ class TeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create(name='test org')
         team1 = SeedTeam.objects.create(name='team 1', organization=org)
         perm = team1.permissions.create(
-            permission_type='bar:foo:bar', object_id='2', namespace='bar')
+            type='bar:foo:bar', object_id='2', namespace='bar')
         team2 = SeedTeam.objects.create(name='team 2', organization=org)
         team2.permissions.create(
-            permission_type='bar:bar:bar', object_id='3', namespace='foo')
+            type='bar:bar:bar', object_id='3', namespace='foo')
 
         response = self.client.get(
             '%s?object_id=2' % reverse('seedteam-list'))
@@ -412,7 +412,7 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(len(team.permissions.all()), 0)
 
         data = {
-            'permission_type': 'foo:bar',
+            'type': 'foo:bar',
             'object_id': '2',
             'namespace': 'foo',
         }
@@ -421,7 +421,7 @@ class TeamTests(AuthAPITestCase):
 
         [permission] = SeedPermission.objects.all()
         self.assertEqual(response.data, {
-            'permission_type': data['permission_type'],
+            'type': data['type'],
             'object_id': data['object_id'],
             'namespace': data['namespace'],
             'id': permission.id
@@ -435,7 +435,7 @@ class TeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create(name='test org')
         team = SeedTeam.objects.create(name='test team', organization=org)
         permission = team.permissions.create(
-            permission_type='foo:bar', object_id='2', namespace='foo')
+            type='foo:bar', object_id='2', namespace='foo')
         self.assertFalse(permission.archived)
         self.assertEqual(len(team.permissions.all()), 1)
 

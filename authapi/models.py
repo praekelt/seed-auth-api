@@ -17,7 +17,7 @@ class SeedOrganization(models.Model):
 
 
 class SeedPermission(models.Model):
-    permission_type = models.CharField(max_length=128)
+    type =  models.CharField(max_length=128)
     object_id = models.CharField(max_length=64)
     namespace = models.CharField(max_length=64)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -70,7 +70,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         permission = self.request.query_params.get('permission_contains', None)
         if permission is not None:
             queryset = queryset.filter(
-                permissions__permission_type__contains=permission)
+                permissions__type__contains=permission)
 
         object_id = self.request.query_params.get('object_id', None)
         if object_id is not None:

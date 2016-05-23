@@ -88,14 +88,14 @@ user:create
       [
         {
             "id": 2,
-            "permission_type": "org:admins",
+            "type": "org:admins",
             "object_id": "3",
             "metadata": {},
             "namespace": "seed_auth"
         },
         {
             "id": 5,
-            "permission_type": "foo:bar:baz",
+            "type": "foo:bar:baz",
             "object_id": "7",
             "metadata": {
                 "example": "property",
@@ -111,7 +111,7 @@ Each permission is an object containing the following fields.
 
 id
     The unique ID for the permission
-permission_type
+type
     The string representing the type of permission.
 object_id
     A string that uniquely identifies the object that this permission acts
@@ -464,7 +464,7 @@ Teams
     Allows filtering of teams to retreive a subset.
 
     :query string type_contains:
-        The permission_type field on one of the resulting team's permissions must contain
+        The type field on one of the resulting team's permissions must contain
         this string.
     :query string object_id:
         All the object_id fields on one of the resulting team's permissions
@@ -492,7 +492,7 @@ Teams
                     [
                         {
                             "id": 2,
-                            "permission_type": "org:admins",
+                            "type": "org:admins",
                             "object_id": "3",
                             "metadata": {},
                             "namespace": "seed_auth"
@@ -509,7 +509,7 @@ Teams
                     [
                         {
                             "id": 3,
-                            "permission_type": "org:write",
+                            "type": "org:write",
                             "object_id": "3",
                             "metadata": {},
                             "namespace": "seed_auth"
@@ -662,7 +662,7 @@ Teams
 
     Add a permission to a team.
 
-    :<json str permission_type: The string representing the permission.
+    :<json str type: The string representing the permission.
     :<json str object_id:
         The id of the object that the permission acts on. "null" if it doesn't
         act on any object.
@@ -689,7 +689,7 @@ Teams
         Content-Type: application/json
 
         {
-            "permission_type": "org:admin",
+            "type": "org:admin",
             "object_id": "2",
             "metadata": {},
             "namespace": "seed_auth"
@@ -709,7 +709,7 @@ Teams
             "permissions": [
                 {
                     "id": 17,
-                    "permission_type": "org:admin",
+                    "type": "org:admin",
                     "object_id": "2",
                     "metadata": {},
                     "namespace": "seed_auth"
