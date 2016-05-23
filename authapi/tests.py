@@ -280,6 +280,22 @@ class TeamTests(AuthAPITestCase):
             response.data[0]['permissions'][0]['object_id'],
             perm.object_id)
 
+    def test_get_team_list_archived_users(self):
+        '''When getting the list of teams, inactive users should not appear
+        on the list of users.'''
+        org = SeedOrganization.objects.create(name='test org')
+        team = SeedTeam.objects.create(name='test team', organization=org)
+        user = User.objects.create_user('test user')
+        team.users.add(user)
+
+        response = self.client.get(reverse('seedteam-list'))
+        self.assertEqual(len(response.data[0]['users']), 1)
+
+        user.is_active = False
+        user.save()
+        response = self.client.get(reverse('seedteam-list'))
+        self.assertEqual(len(response.data[0]['users']), 0)
+
     def test_create_team(self):
         '''A POST request on the teams endpoint should create a team.'''
         organization = SeedOrganization.objects.create()
@@ -554,6 +570,21 @@ class OrganizationTests(AuthAPITestCase):
         team.save()
         response = self.client.get(reverse('seedorganization-list'))
         self.assertEqual(len(response.data[0]['teams']), 0)
+
+    def test_get_organization_list_inactive_users(self):
+        '''When getting the list of organizations, the inactive users should
+        not be shown in the list of users.'''
+        org = SeedOrganization.objects.create(name='test org')
+        user = User.objects.create_user('test user')
+        org.users.add(user)
+
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data[0]['users']), 1)
+
+        user.is_active = False
+        user.save()
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(len(response.data[0]['users']), 0)
 
     def test_create_organization_no_required(self):
         '''If the POST request is missing required field, an error should be

@@ -36,7 +36,8 @@ class ExistingUserSerializer(serializers.Serializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='get_active_teams', read_only=True)
-    users = UserSummarySerializer(many=True, read_only=True)
+    users = UserSummarySerializer(
+        many=True, source='get_active_users', read_only=True)
 
     class Meta:
         model = SeedOrganization
@@ -44,7 +45,8 @@ class OrganizationSerializer(serializers.ModelSerializer):
 
 
 class TeamSerializer(serializers.ModelSerializer):
-    users = UserSummarySerializer(many=True, read_only=True)
+    users = UserSummarySerializer(
+        many=True, read_only=True, source='get_active_users')
     permissions = PermissionSerializer(many=True, read_only=True)
 
     class Meta:

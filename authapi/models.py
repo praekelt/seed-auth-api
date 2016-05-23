@@ -12,6 +12,9 @@ class SeedOrganization(models.Model):
     def get_active_teams(self):
         return self.seedteam_set.filter(archived=False)
 
+    def get_active_users(self):
+        return self.users.filter(is_active=True)
+
 
 class SeedPermission(models.Model):
     permission_type = models.CharField(max_length=128)
@@ -30,3 +33,6 @@ class SeedTeam(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     archived = models.BooleanField(default=False)
+
+    def get_active_users(self):
+        return self.users.filter(is_active=True)
