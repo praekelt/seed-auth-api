@@ -98,6 +98,16 @@ class UserTests(AuthAPITestCase):
             '%s?active=both' % reverse('user-list'))
         self.assertEqual(len(response.data), 2)
 
+    def test_get_user_list_active_invalid_queryparam(self):
+        '''If the active querystring parameter is not one of true, false, or
+        both, an appropriate error should be returned.'''
+        response = self.client.get(
+            '%s?active=foo' % reverse('user-list'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'active': ['Must be one of [both, false, true]'],
+        })
+
     def test_create_user_no_required_fields(self):
         '''A POST request to the user endpoint should return an error if there
         is no email field, as it is required.'''
@@ -305,6 +315,16 @@ class TeamTests(AuthAPITestCase):
         response = self.client.get(
             '%s?archived=both' % reverse('seedteam-list'))
         self.assertEqual(len(response.data), 2)
+
+    def test_get_team_list_archived_invalid_queryparam(self):
+        '''If the archived querystring parameter is not one of true, false, or
+        both, an appropriate error should be returned.'''
+        response = self.client.get(
+            '%s?archived=foo' % reverse('seedteam-list'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'archived': ['Must be one of [both, false, true]'],
+        })
 
     def test_get_team_list_filter_permission_type(self):
         '''If the querystring argument permission_contains is present, we
@@ -616,6 +636,16 @@ class OrganizationTests(AuthAPITestCase):
 
         response = self.client.get(reverse('seedorganization-list'))
         self.assertEqual(len(response.data), 1)
+
+    def test_get_organization_list_archived_invalid_queryparam(self):
+        '''If the archived querystring parameter is not one of true, false, or
+        both, an appropriate error should be returned.'''
+        response = self.client.get(
+            '%s?archived=foo' % reverse('seedorganization-list'))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'archived': ['Must be one of [both, false, true]'],
+        })
 
     def test_get_organization_list_archived_teams(self):
         '''When getting the list of organizations, the archived teams should
