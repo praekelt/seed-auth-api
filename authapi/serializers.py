@@ -25,30 +25,36 @@ class TeamSummarySerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedPermission
+        fields = ('id', 'type', 'object_id', 'namespace')
 
 
-class OrganizationUserSerializer(serializers.Serializer):
-    '''Serializer for adding a user to an organization.'''
-    user_id = serializers.IntegerField()
+class ExistingUserSerializer(serializers.Serializer):
+    '''Serializer for adding/removing an existing user.'''
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
-        many=True, source='seedteam_set', read_only=True)
-    users = UserSummarySerializer(many=True, read_only=True)
+        many=True, source='get_active_teams', read_only=True)
+    users = UserSummarySerializer(
+        many=True, source='get_active_users', read_only=True)
 
     class Meta:
         model = SeedOrganization
-        fields = ('name', 'id', 'url', 'teams', 'users', 'archived')
+        fields = ('title', 'id', 'url', 'teams', 'users', 'archived')
 
 
 class TeamSerializer(serializers.ModelSerializer):
-    users = UserSummarySerializer(many=True, read_only=True)
+    users = UserSummarySerializer(
+        many=True, read_only=True, source='get_active_users')
     permissions = PermissionSerializer(many=True, read_only=True)
 
     class Meta:
         model = SeedTeam
-        fields = ('id', 'permissions', 'users', 'url', 'organization')
+        fields = (
+            'id', 'title', 'permissions', 'users', 'url', 'organization',
+            'archived')
 
 
 class UserSerializer(serializers.ModelSerializer):
