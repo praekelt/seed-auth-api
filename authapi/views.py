@@ -43,7 +43,7 @@ class OrganizationUsersViewSet(viewsets.ViewSet):
         '''Add a user to an organization.'''
         serializer = ExistingUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, pk=serializer.data['user_id'])
+        user = serializer.validated_data.get('user_id')
         org = get_object_or_404(SeedOrganization, pk=organization_pk)
         org.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)

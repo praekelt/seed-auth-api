@@ -30,7 +30,8 @@ class PermissionSerializer(serializers.ModelSerializer):
 
 class ExistingUserSerializer(serializers.Serializer):
     '''Serializer for adding/removing an existing user.'''
-    user_id = serializers.IntegerField()
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all())
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

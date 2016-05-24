@@ -747,6 +747,20 @@ class OrganizationTests(AuthAPITestCase):
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 1)
 
+    def test_add_missing_user_to_organization(self):
+        '''If a non-existing user is trying to be added to an organization,
+        an appropriate error should be returned.'''
+        org = SeedOrganization.objects.create(title='test org')
+
+        response = self.client.post(
+            reverse('seedorganization-users-list', args=[org.id]), {
+                'user_id': 7,
+            })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'user_id': ['Invalid pk "7" - object does not exist.']
+        })
+
     def test_remove_user_from_organization(self):
         '''Removing a user from an organization should remove the relationship
         between the two.'''
