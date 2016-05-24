@@ -3,7 +3,7 @@ from django.db import models
 
 
 class SeedOrganization(models.Model):
-    title = models.CharField(max_length=64)
+    title = models.TextField()
     users = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -17,15 +17,15 @@ class SeedOrganization(models.Model):
 
 
 class SeedPermission(models.Model):
-    type = models.CharField(max_length=128)
-    object_id = models.CharField(max_length=64)
-    namespace = models.CharField(max_length=64)
+    type = models.TextField()
+    object_id = models.TextField()
+    namespace = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class SeedTeam(models.Model):
-    title = models.CharField(max_length=64)
+    title = models.TextField()
     organization = models.ForeignKey(SeedOrganization)
     users = models.ManyToManyField(User)
     permissions = models.ManyToManyField(SeedPermission)
