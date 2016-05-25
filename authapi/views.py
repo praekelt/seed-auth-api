@@ -2,6 +2,10 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets, status, serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.mixins import (
+    DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
+    ListModelMixin)
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
@@ -72,7 +76,9 @@ class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TeamViewSet(viewsets.ModelViewSet):
+class TeamViewSetNoCreate(
+        NestedViewSetMixin, RetrieveModelMixin, UpdateModelMixin,
+        DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = SeedTeam.objects.all()
     serializer_class = TeamSerializer
 
@@ -86,7 +92,7 @@ class TeamViewSet(viewsets.ModelViewSet):
         We also have the query params permission_contains and object_id, which
         allow users to filter the teams based on the permissions they
         contain.'''
-        queryset = self.queryset
+        queryset = super(TeamViewSetNoCreate, self).get_queryset()
         if self.action == 'list':
             archived = get_true_false_both(
                 self.request.query_params, 'archived', 'false')
@@ -107,11 +113,16 @@ class TeamViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def destroy(self, request, pk=None):
-        team = self.get_object()
-        team.archived = True
-        team.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def perform_destroy(self, instance):
+        instance.archived = True
+        instance.save()
+
+
+class TeamViewSet(TeamViewSetNoCreate, CreateModelMixin):
+    def create(self, request, parent_lookup_organization=None):
+        if parent_lookup_organization is not None:
+            request.data['organization'] = parent_lookup_organization
+        return super(TeamViewSet, self).create(request)
 
 
 class TeamPermissionViewSet(

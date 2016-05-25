@@ -6,7 +6,7 @@ from authapi import views
 router = routers.ExtendedSimpleRouter()
 
 org_router = router.register(r'organizations', views.OrganizationViewSet)
-team_router = router.register(r'teams', views.TeamViewSet)
+team_router = router.register(r'teams', views.TeamViewSetNoCreate)
 router.register(r'users', views.UserViewSet)
 
 org_router.register(

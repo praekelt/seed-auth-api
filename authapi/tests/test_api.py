@@ -379,18 +379,10 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(len(response.data[0]['users']), 0)
 
     def test_create_team(self):
-        '''A POST request on the teams endpoint should create a team.'''
-        organization = SeedOrganization.objects.create()
-        data = {
-            'organization': organization.id,
-            'title': 'test team',
-        }
-        response = self.client.post(reverse('seedteam-list'), data=data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        [team] = SeedTeam.objects.all()
-        self.assertEqual(team.organization, organization)
-        self.assertEqual(team.title, data['title'])
+        '''Creating teams on this endpoint should not be allowed.'''
+        response = self.client.post(reverse('seedteam-list'), data={})
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_team(self):
         '''Deleting a team should archive the team instead of removing it.'''
@@ -403,16 +395,6 @@ class TeamTests(AuthAPITestCase):
 
         team.refresh_from_db()
         self.assertEqual(team.archived, True)
-
-    def test_create_team_no_required_fields(self):
-        '''An error should be returned if there is no organization field.'''
-        response = self.client.post(reverse('seedteam-list'), data={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data, {
-                'organization': ['This field is required.'],
-                'title': ['This field is required.'],
-            })
 
     def test_update_team(self):
         '''A PUT request to a team's endpoint should update an existing
