@@ -455,7 +455,10 @@ Teams
                 "permissions": [],
                 "users": [],
                 "url": "https://example.org/teams/4",
-                "organization": 7
+                "organization": {
+                    "url": "https://example.org/organizations/7/",
+                    "id": 7
+                }
             }
         ]
 
@@ -499,7 +502,10 @@ Teams
                         }
                     ],
                 "url": "https://example.org/teams/4",
-                "organization": 3
+                "organization": {
+                    "url": "https://example.org/organizations/3/",
+                    "id": 3
+                }
             },
             {
                 "id": 7,
@@ -516,7 +522,10 @@ Teams
                         }
                     ],
                 "url": "https://exmple.org/teams/6",
-                "organization": 3
+                "organization": {
+                    "url": "https://example.org/organizations/3/",
+                    "id": 3
+                }
             }
         ]
 
@@ -532,7 +541,7 @@ Teams
     :>json str url: The URL of the created team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: An object representing the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 201: Successfully created team.
     :status 422: Missing required information to create team.
@@ -562,7 +571,10 @@ Teams
             "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:get:: /teams/(int:team_id)
@@ -573,7 +585,7 @@ Teams
     :>json str url: the URL of the team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: An object representing the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: Successfully retrieved team.
 
@@ -596,7 +608,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:put:: /teams/(int:team_id)
@@ -604,6 +619,7 @@ Teams
     Update the details of a team.
 
     :<json str title: The title of the team.
+    :<json int organization: The id of the organization that the team belongs to.
 
     :>json int id: the id of the updated team.
     :>json str url: The URL of the updated team.
@@ -621,7 +637,8 @@ Teams
         Content-Type: application/json
 
         {
-            "title": "Brotherhood without banners"
+            "title": "Brotherhood without banners",
+            "organization": 7
         }
 
     **Example reponse**:
@@ -637,7 +654,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:delete:: /teams/(int:team_id)
@@ -716,7 +736,10 @@ Teams
                 }
             ],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)
@@ -750,7 +773,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:post:: /teams/(int:team_id)/users/
@@ -797,7 +823,10 @@ Teams
                     }
                 ],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:delete:: /teams/(int:team_id)/users/1
@@ -831,7 +860,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 Users
