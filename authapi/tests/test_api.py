@@ -890,3 +890,53 @@ class OrganizationTests(AuthAPITestCase):
             ))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_add_user_to_organizations_team(self):
+        '''Should be able to add an existing user to an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user('test user')
+        data = {
+            'user_id': user.pk,
+        }
+
+        response = self.client.post(
+            reverse(
+                'seedorganization-teams-users-list',
+                args=[org.pk, team.pk]),
+            data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        [teamuser] = team.users.all()
+        self.assertEqual(teamuser, user)
+
+    def test_remove_user_from_organizations_team(self):
+        '''Should be able to remove an existing user from an organization's
+        team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user('test user')
+        team.users.add(user)
+
+        self.assertEqual(len(team.users.all()), 1)
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-users-detail',
+                args=[org.pk, team.pk, user.pk]))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(team.users.all()), 0)
+
+    def test_remove_user_from_other_organizations_team(self):
+        '''Should not be able to remove user's from a team belonging to
+        another organization.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org1)
+        user = User.objects.create_user('test user')
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-users-detail',
+                args=[org2.pk, team.pk, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

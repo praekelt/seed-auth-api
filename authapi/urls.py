@@ -22,6 +22,11 @@ orgteam_router.register(
     r'permissions', views.TeamPermissionViewSet,
     base_name='seedorganization-teams-permissions',
     parents_query_lookups=['seedteam__organization', 'seedteam'])
+orgteam_router.register(
+    r'users', views.TeamUsersViewSet,
+    base_name='seedorganization-teams-users',
+    parents_query_lookups=['seedteam__organization', 'seedteam'])
+
 
 team_router.register(
     r'permissions', views.TeamPermissionViewSet,

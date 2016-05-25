@@ -130,22 +130,24 @@ class TeamPermissionViewSet(
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class TeamUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
+class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):
     '''Nested viewset that allows users to add or remove users from teams.'''
+    queryset = User.objects.all()
+    serializer_class = ExistingUserSerializer
 
-    def create(self, request, parent_lookup_team=None):
+    def create(self, request, parent_lookup_seedteam=None, **kwargs):
         '''Add a user to a team.'''
-        serializer = ExistingUserSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(User, pk=serializer.data['user_id'])
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
         team.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, pk=None, parent_lookup_team=None):
+    def destroy(self, request, pk=None, parent_lookup_seedteam=None, **kwargs):
         '''Remove a user from an organization.'''
-        user = get_object_or_404(User, pk=pk)
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
+        user = self.get_object()
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
         team.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
