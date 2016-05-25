@@ -116,7 +116,10 @@ class TeamViewSet(viewsets.ModelViewSet):
 
 class TeamPermissionViewSet(NestedViewSetMixin, viewsets.ViewSet):
     '''Nested viewset to add and remove permissions from teams.'''
-    def create(self, request, parent_lookup_team=None):
+    queryset = SeedPermission.objects.all()
+    serializer_class = PermissionSerializer
+
+    def create(self, request, parent_lookup_seedteam=None, **kwargs):
         '''Add a permission to a team.'''
         serializer = PermissionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

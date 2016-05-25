@@ -13,15 +13,19 @@ org_router.register(
     r'users', views.OrganizationUsersViewSet,
     base_name='seedorganization-users',
     parents_query_lookups=['organization'])
+orgteam_router = org_router.register(
+    r'teams', views.TeamViewSet,
+    base_name='seedorganization-teams',
+    parents_query_lookups=['organization'])
 
 team_router.register(
     r'permissions', views.TeamPermissionViewSet,
     base_name='seedteam-permissions',
-    parents_query_lookups=['team'])
+    parents_query_lookups=['seedteam'])
 team_router.register(
     r'users', views.TeamUsersViewSet,
     base_name='seedteam-users',
-    parents_query_lookups=['team'])
+    parents_query_lookups=['seedteam'])
 
 urlpatterns = [
     url(r'^', include(router.urls)),

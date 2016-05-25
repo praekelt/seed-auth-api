@@ -804,3 +804,34 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 0)
+
+    def test_create_team_for_organization(self):
+        '''Should create a team and the relation between the team and
+        organization.'''
+        org = SeedOrganization.objects.create(title='test org')
+        data = {
+            'title': 'test team',
+        }
+
+        response = self.client.post(
+            reverse('seedorganization-teams-list', args=[org.id]), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        [team] = SeedTeam.objects.all()
+        self.assertEqual(team.organization, org)
+        self.assertEqual(team.title, data['title'])
+
+    def test_get_teams_for_organization(self):
+        '''Getting a list of teams for an organization should only return that
+        organization's teams.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        SeedTeam.objects.create(title='test team', organization=org2)
+
+        response = self.client.get(
+            reverse('seedorganization-teams-list', args=[org1.pk]))
+        [team] = response.data
+
+        self.assertEqual(team['id'], team1.id)
+
