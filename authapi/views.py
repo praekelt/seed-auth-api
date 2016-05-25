@@ -114,27 +114,20 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TeamPermissionViewSet(NestedViewSetMixin, viewsets.ViewSet):
+class TeamPermissionViewSet(
+        NestedViewSetMixin, DestroyModelMixin, GenericViewSet):
     '''Nested viewset to add and remove permissions from teams.'''
     queryset = SeedPermission.objects.all()
     serializer_class = PermissionSerializer
 
     def create(self, request, parent_lookup_seedteam=None, **kwargs):
         '''Add a permission to a team.'''
-        serializer = PermissionSerializer(data=request.data)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
-        permission = team.permissions.create(**serializer.data)
-        serializer = PermissionSerializer(permission)
-        return Response(serializer.data)
-
-    def destroy(self, request, pk=None, parent_lookup_team=None):
-        '''Remove a permission from a team.'''
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
-        permission = get_object_or_404(SeedPermission, pk=pk)
-        team.permissions.remove(permission)
-        permission.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        permission = team.permissions.create(**serializer.validated_data)
+        serializer = self.get_serializer(instance=permission)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TeamUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):

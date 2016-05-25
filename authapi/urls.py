@@ -18,6 +18,11 @@ orgteam_router = org_router.register(
     base_name='seedorganization-teams',
     parents_query_lookups=['organization'])
 
+orgteam_router.register(
+    r'permissions', views.TeamPermissionViewSet,
+    base_name='seedorganization-teams-permissions',
+    parents_query_lookups=['seedteam__organization', 'seedteam'])
+
 team_router.register(
     r'permissions', views.TeamPermissionViewSet,
     base_name='seedteam-permissions',

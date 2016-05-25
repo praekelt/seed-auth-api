@@ -835,3 +835,58 @@ class OrganizationTests(AuthAPITestCase):
 
         self.assertEqual(team['id'], team1.id)
 
+    def test_create_permission_for_organizations_team(self):
+        '''Should be able to create a permission for an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        data = {
+            'type': 'foo:bar',
+            'object_id': '2',
+            'namespace': 'foo',
+        }
+
+        self.assertEqual(len(team.permissions.all()), 0)
+
+        print self.client.post(
+            reverse(
+                'seedorganization-teams-permissions-list',
+                args=[org.pk, team.pk]
+            ),
+            data=data)
+
+        self.assertEqual(len(team.permissions.all()), 1)
+
+    def test_remove_permission_for_organizations_team(self):
+        '''Should be able to remove a permission for an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        permission = team.permissions.create(
+            type='foo:bar', object_id='2', namespace='foo')
+
+        self.assertEqual(len(team.permissions.all()), 1)
+
+        self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org.pk, team.pk, permission.pk]
+            ))
+
+        self.assertEqual(len(team.permissions.all()), 0)
+
+    def test_remove_permission_for_other_organization_team(self):
+        '''Should not be able to remove a permission for another
+        organization's team.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        team2 = SeedTeam.objects.create(title='test team', organization=org2)
+        permission = team1.permissions.create(
+            type='foo:bar', object_id='2', namespace='foo')
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org2.pk, team2.pk, permission.pk]
+            ))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
