@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets, status, serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
@@ -49,22 +50,24 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class OrganizationUsersViewSet(viewsets.ViewSet):
+class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
     '''Nested viewset that allows users to add or remove users from
     organizations.'''
-    def create(self, request, organization_pk=None):
+    def create(self, request, parent_lookup_organization=None):
         '''Add a user to an organization.'''
         serializer = ExistingUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data.get('user_id')
-        org = get_object_or_404(SeedOrganization, pk=organization_pk)
+        org = get_object_or_404(
+            SeedOrganization, pk=parent_lookup_organization)
         org.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, pk=None, organization_pk=None):
+    def destroy(self, request, pk=None, parent_lookup_organization=None):
         '''Remove a user from an organization.'''
         user = get_object_or_404(User, pk=pk)
-        org = get_object_or_404(SeedOrganization, pk=organization_pk)
+        org = get_object_or_404(
+            SeedOrganization, pk=parent_lookup_organization)
         org.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -111,42 +114,42 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TeamPermissionViewSet(viewsets.ViewSet):
+class TeamPermissionViewSet(NestedViewSetMixin, viewsets.ViewSet):
     '''Nested viewset to add and remove permissions from teams.'''
-    def create(self, request, team_pk=None):
+    def create(self, request, parent_lookup_team=None):
         '''Add a permission to a team.'''
         serializer = PermissionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
         permission = team.permissions.create(**serializer.data)
         serializer = PermissionSerializer(permission)
         return Response(serializer.data)
 
-    def destroy(self, request, pk=None, team_pk=None):
+    def destroy(self, request, pk=None, parent_lookup_team=None):
         '''Remove a permission from a team.'''
-        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
         permission = get_object_or_404(SeedPermission, pk=pk)
         team.permissions.remove(permission)
         permission.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TeamUsersViewSet(viewsets.ViewSet):
+class TeamUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
     '''Nested viewset that allows users to add or remove users from teams.'''
 
-    def create(self, request, team_pk=None):
+    def create(self, request, parent_lookup_team=None):
         '''Add a user to a team.'''
         serializer = ExistingUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(User, pk=serializer.data['user_id'])
-        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
         team.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, pk=None, team_pk=None):
+    def destroy(self, request, pk=None, parent_lookup_team=None):
         '''Remove a user from an organization.'''
         user = get_object_or_404(User, pk=pk)
-        team = get_object_or_404(SeedTeam, pk=team_pk)
+        team = get_object_or_404(SeedTeam, pk=parent_lookup_team)
         team.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
