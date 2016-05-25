@@ -4,6 +4,21 @@ from rest_framework import serializers
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 
 
+class SerializerPkField(serializers.PrimaryKeyRelatedField):
+    '''Field that uses a serializer representation when reading the field, but
+    a primary key value when writing to the field.'''
+    def __init__(self, **kwargs):
+        self.serializer = kwargs.pop('serializer')
+        return super(SerializerPkField, self).__init__(**kwargs)
+
+    def use_pk_only_optimization(self):
+        return False
+
+    def to_representation(self, value):
+        print value
+        return self.serializer(instance=value, context=self.context).data
+
+
 class OrganizationSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = SeedOrganization
@@ -49,6 +64,9 @@ class TeamSerializer(serializers.ModelSerializer):
     users = UserSummarySerializer(
         many=True, read_only=True, source='get_active_users')
     permissions = PermissionSerializer(many=True, read_only=True)
+    organization = SerializerPkField(
+        serializer=OrganizationSummarySerializer,
+        queryset=SeedOrganization.objects.all())
 
     class Meta:
         model = SeedTeam
