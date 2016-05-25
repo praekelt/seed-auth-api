@@ -15,7 +15,6 @@ class SerializerPkField(serializers.PrimaryKeyRelatedField):
         return False
 
     def to_representation(self, value):
-        print value
         return self.serializer(instance=value, context=self.context).data
 
 
