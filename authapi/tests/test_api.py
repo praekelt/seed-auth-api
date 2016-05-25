@@ -442,7 +442,8 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(data, {
             'title': team.title,
             'url': url,
-            'organization': organization.id,
+            'organization': OrganizationSummarySerializer(
+                instance=organization, context=context).data,
             'permissions': [
                 PermissionSerializer(instance=permission, context=context).data
             ],
