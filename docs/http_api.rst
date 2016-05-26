@@ -498,7 +498,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
 .. http:delete:: /organizations/(int:organization_id)/teams/(int:team:id)/
 
-    See `Delete team`_. Limited to teams that belong to the organization.
+    See `Archive team`_. Limited to teams that belong to the organization.
 
 .. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/permissions/
 
@@ -703,7 +703,7 @@ Teams
             }
         }
 
-.. _Delete team:
+.. _Archive team:
 .. http:delete:: /teams/(int:team_id)
 
     Archive a team. The team will by default no longer be shown when
