@@ -412,6 +412,23 @@ class TeamTests(AuthAPITestCase):
         team.refresh_from_db()
         self.assertEqual(team.title, data['title'])
 
+    def test_update_team_organization(self):
+        '''You shouldn't be able to change a team's organization.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(organization=org1, title='test team')
+        url = reverse('seedteam-detail', args=[team.id])
+
+        data = {
+            'title': 'new title',
+            'organization': org2.pk,
+        }
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'organization': ['This field can only be set on creation.']
+        })
+
     def test_get_team(self):
         '''A GET request to a team's endpoint should return that team's
         details.'''
