@@ -85,9 +85,9 @@ class UserSerializer(serializers.ModelSerializer):
         many=True, source='seedorganization_set', read_only=True)
     email = serializers.EmailField()
     admin = serializers.BooleanField(source='is_superuser', required=False)
-    password = serializers.CharField(
-        style={'input_type': 'password'}, write_only=True)
     active = serializers.BooleanField(default=True, source='is_active')
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True, required=False)
 
     class Meta:
         model = User
@@ -96,8 +96,8 @@ class UserSerializer(serializers.ModelSerializer):
             'organizations', 'password', 'active')
 
     def create(self, validated_data):
-        '''We want to set the username to be the same as the email, and use the
-        correct create function to make use of password hashing.'''
+        '''We want to set the username to be the same as the email, and use
+        the correct create function to make use of password hashing.'''
         validated_data['username'] = validated_data['email']
         admin = validated_data.pop('is_superuser', None)
 
@@ -126,3 +126,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class NewUserSerializer(UserSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True, required=True)
