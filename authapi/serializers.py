@@ -92,11 +92,14 @@ class NewUserSerializer(BaseUserSerializer):
 
 
 class UserSerializer(BaseUserSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True, required=False)
+
     class Meta:
         model = User
         fields = (
             'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
-            'organizations', 'active')
+            'organizations', 'active', 'password')
 
     def update(self, instance, validated_data):
         '''We want to set all the required fields if admin is set, and we want
@@ -111,6 +114,8 @@ class UserSerializer(BaseUserSerializer):
         if admin is not None:
             instance.is_staff = admin
             instance.is_superuser = admin
+        if password is not None:
+            instance.set_password(password)
 
         instance.save()
         return instance

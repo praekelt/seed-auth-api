@@ -192,6 +192,26 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
 
+    def test_update_user_password(self):
+        '''A PUT request to the user's endpoint with a password field should
+        reset the user's password.'''
+        user = User.objects.create_user('user@example.org')
+
+        data = {
+            'email': 'new@email.org',
+            'first_name': 'new',
+            'last_name': 'user',
+            'admin': True,
+            'password': 'testpassword',
+        }
+
+        response = self.client.put(
+            reverse('user-detail', args=[user.id]), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertTrue(check_password(data['password'], user.password))
+
     def test_get_user(self):
         '''A GET request to a specific user's endpoint should return the
         details for that user.'''
