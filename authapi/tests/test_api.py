@@ -157,6 +157,21 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.is_superuser, data['admin'])
         self.assertTrue(check_password(data['password'], user.password))
 
+    def test_create_user_no_password(self):
+        '''A POST request to the user endpoint without a password field should
+        yield a validation error response'''
+        data = {
+            'email': 'user1@example.org',
+            'first_name': 'user1',
+            'last_name': 'example',
+            'admin': False,
+        }
+        response = self.client.post(reverse('user-list'), data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'password': ['This field is required.'],
+        })
+
     def test_update_user(self):
         '''A PUT request to the user's endpoint should update that specific
         user's details.'''
