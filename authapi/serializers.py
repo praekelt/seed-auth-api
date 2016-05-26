@@ -57,16 +57,19 @@ class TeamSerializer(serializers.ModelSerializer):
             'archived')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='seedteam_set', read_only=True)
     organizations = OrganizationSummarySerializer(
         many=True, source='seedorganization_set', read_only=True)
     email = serializers.EmailField()
     admin = serializers.BooleanField(source='is_superuser', required=False)
+    active = serializers.BooleanField(default=True, source='is_active')
+
+
+class NewUserSerializer(BaseUserSerializer):
     password = serializers.CharField(
         style={'input_type': 'password'}, write_only=True)
-    active = serializers.BooleanField(default=True, source='is_active')
 
     class Meta:
         model = User
@@ -87,6 +90,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
+
+class UserSerializer(BaseUserSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
+            'organizations', 'active')
+
     def update(self, instance, validated_data):
         '''We want to set all the required fields if admin is set, and we want
         to use the password hashing method if password is set.'''
@@ -100,8 +111,6 @@ class UserSerializer(serializers.ModelSerializer):
         if admin is not None:
             instance.is_staff = admin
             instance.is_superuser = admin
-        if password is not None:
-            instance.set_password(password)
 
         instance.save()
         return instance

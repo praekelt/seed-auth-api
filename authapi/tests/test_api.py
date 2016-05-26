@@ -7,9 +7,9 @@ from rest_framework.reverse import reverse as drt_reverse
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from authapi.serializers import (
-    UserSerializer, TeamSerializer, OrganizationSummarySerializer,
-    TeamSummarySerializer, PermissionSerializer, UserSummarySerializer,
-    OrganizationSerializer)
+    UserSerializer, NewUserSerializer, TeamSerializer,
+    OrganizationSummarySerializer, TeamSummarySerializer, PermissionSerializer,
+    UserSummarySerializer, OrganizationSerializer)
 from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 
 
@@ -163,7 +163,6 @@ class UserTests(AuthAPITestCase):
         user = User.objects.create_user('user@example.org')
         data = {
             'email': 'new@email.org',
-            'password': 'newpassword',
             'first_name': 'new',
             'last_name': 'user',
             'admin': True,
@@ -177,7 +176,6 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
-        self.assertTrue(check_password(data['password'], user.password))
 
     def test_get_user(self):
         '''A GET request to a specific user's endpoint should return the
@@ -219,6 +217,37 @@ class UserTests(AuthAPITestCase):
         context = self.get_context(url)
 
         data = UserSerializer(instance=user, context=context).data
+        expected = {
+            'email': user.email,
+            'admin': user.is_superuser,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'id': user.id,
+            'teams': [TeamSummarySerializer(
+                instance=team, context=context).data],
+            'organizations': [OrganizationSummarySerializer(
+                instance=organization, context=context).data],
+            'url': url,
+            'active': user.is_active,
+        }
+
+        self.assertEqual(data, expected)
+
+    def test_new_user_serializer(self):
+        '''The new user serializer should properly serialize the correct user
+        data and foreign links.'''
+        user = User.objects.create_superuser(
+            'user@example.org', 'user@example.org', 'testpass',
+            first_name='user', last_name='example')
+        organization = SeedOrganization.objects.create()
+        organization.users.add(user)
+        team = SeedTeam.objects.create(organization=organization)
+        team.users.add(user)
+
+        url = self.get_full_url('user-detail', args=[user.id])
+        context = self.get_context(url)
+
+        data = NewUserSerializer(instance=user, context=context).data
         expected = {
             'email': user.email,
             'admin': user.is_superuser,

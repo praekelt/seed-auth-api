@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
-    OrganizationSerializer, TeamSerializer, UserSerializer,
+    OrganizationSerializer, TeamSerializer, UserSerializer, NewUserSerializer,
     ExistingUserSerializer, PermissionSerializer)
 
 
@@ -153,7 +153,12 @@ class TeamUsersViewSet(viewsets.ViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return NewUserSerializer
+        else:
+            return UserSerializer
 
     def get_queryset(self):
         '''We want to still be able to modify archived users, but they
