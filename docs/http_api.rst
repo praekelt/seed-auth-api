@@ -429,9 +429,84 @@ to belong to exactly one organization, but an organization can have many teams.
 
         HTTP/1.1 204 No Content
 
+.. http:post:: /organizations/(int:organization_id)/teams/
+
+    Create a new team.
+
+    :<json str title: The title of the team.
+
+    :>json int id: The ID of the created team.
+    :>json str url: The URL of the created team.
+    :>json str title: the title of the team.
+    :>json list users: The list of users that belong to this team.
+    :>json int organization: The id of the organization that the team belongs to.
+    :>json list permissions: The permission list for the team.
+    :status 201: Successfully created team.
+    :status 422: Missing required information to create team.
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /organizations/7/teams/ HTTP/1.1
+        Content-Type: application/json
+
+        {
+            "title": "Lord Commanders",
+        }
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 201 Created
+        Content-Type: application/json
+
+        {
+            "id": 2,
+            "title": "Lord Commanders",
+            "users": [],
+            "permissions": [],
+            "url": "https://example.org/teams/2",
+            "organization": 7
+        }
+
+.. http:get:: /organizations/(int:organization_id)/teams/
+
+    See `Get list of teams`_. Limited to teams that belong to the organization.
+
+.. http:get:: /organizations/(int:organization_id)/teams/(int:team:id)/
+
+    See `Get team details`_. Limited to teams that belong to the organization.
+
+.. http:put:: /organizations/(int:organization_id)/teams/(int:team:id)/
+
+    See `Update team details`_. Limited to teams that belong to the organization.
+
+.. http:delete:: /organizations/(int:organization_id)/teams/(int:team:id)/
+
+    See `Delete team`_. Limited to teams that belong to the organization.
+
+.. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/permissions/
+
+    See `Add permission to team`_. Limited to teams that belong to the organization.
+
+.. http:delete:: /organizations/(int:organization_id)/teams/(int:team:id)/permissions/(int:permission_id)/
+
+    See `Remove permission from team`_. Limited to teams that belong to the organization.
+
+.. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/users/
+
+    See `Add user to team`_. Limited to teams that belong to the organization.
+
+.. http:delete:: /organizations/(int:organization_id)/teams/(int:team:id)/user/(int:user_id)/
+
+    See `Remove user from team`_. Limited to teams that belong to the organization.
+
 Teams
 ^^^^^
 
+.. _Get list of teams:
 .. http:get:: /teams/
 
     Get a list of all the teams you have read access to.
@@ -521,50 +596,7 @@ Teams
         ]
 
 
-.. http:post:: /teams/
-
-    Create a new team.
-
-    :<json str title: The title of the team.
-    :<json int organization: The id of the organization that the team belongs to.
-
-    :>json int id: The ID of the created team.
-    :>json str url: The URL of the created team.
-    :>json str title: the title of the team.
-    :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
-    :>json list permissions: The permission list for the team.
-    :status 201: Successfully created team.
-    :status 422: Missing required information to create team.
-
-    **Example request**:
-
-    .. sourcecode:: http
-
-        POST /teams/ HTTP/1.1
-        Content-Type: application/json
-
-        {
-            "title": "Lord Commanders",
-            "organization": 7
-        }
-
-    **Example response**:
-
-    .. sourcecode:: http
-
-        HTTP/1.1 201 Created
-        Content-Type: application/json
-
-        {
-            "id": 2,
-            "title": "Lord Commanders",
-            "users": [],
-            "permissions": [],
-            "url": "https://example.org/teams/2",
-            "organization": 7
-        }
-
+.. _Get team details:
 .. http:get:: /teams/(int:team_id)
 
     Get the details of a team.
@@ -599,6 +631,7 @@ Teams
             "organization": 7
         }
 
+.. _Update team details:
 .. http:put:: /teams/(int:team_id)
 
     Update the details of a team.
@@ -640,6 +673,7 @@ Teams
             "organization": 7
         }
 
+.. _Delete team:
 .. http:delete:: /teams/(int:team_id)
 
     Remove a team.
@@ -658,6 +692,7 @@ Teams
 
         HTTP/1.1 204 No Content
 
+.. _Add permission to team:
 .. http:post:: /teams/(int:team_id)/permissions/
 
     Add a permission to a team.
@@ -719,6 +754,7 @@ Teams
             "organization": 7
         }
 
+.. _Remove permission from team:
 .. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)
 
     Remove a permission from a team.
@@ -753,6 +789,7 @@ Teams
             "organization": 7
         }
 
+.. _Add user to team:
 .. http:post:: /teams/(int:team_id)/users/
 
     Add an existing user to an existing team.
@@ -800,6 +837,7 @@ Teams
             "organization": 7
         }
 
+.. _Remove user from team:
 .. http:delete:: /teams/(int:team_id)/users/1
 
     Remove a user from a team.

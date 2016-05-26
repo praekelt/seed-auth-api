@@ -379,18 +379,10 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(len(response.data[0]['users']), 0)
 
     def test_create_team(self):
-        '''A POST request on the teams endpoint should create a team.'''
-        organization = SeedOrganization.objects.create()
-        data = {
-            'organization': organization.id,
-            'title': 'test team',
-        }
-        response = self.client.post(reverse('seedteam-list'), data=data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        [team] = SeedTeam.objects.all()
-        self.assertEqual(team.organization, organization)
-        self.assertEqual(team.title, data['title'])
+        '''Creating teams on this endpoint should not be allowed.'''
+        response = self.client.post(reverse('seedteam-list'), data={})
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_team(self):
         '''Deleting a team should archive the team instead of removing it.'''
@@ -403,16 +395,6 @@ class TeamTests(AuthAPITestCase):
 
         team.refresh_from_db()
         self.assertEqual(team.archived, True)
-
-    def test_create_team_no_required_fields(self):
-        '''An error should be returned if there is no organization field.'''
-        response = self.client.post(reverse('seedteam-list'), data={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.data, {
-                'organization': ['This field is required.'],
-                'title': ['This field is required.'],
-            })
 
     def test_update_team(self):
         '''A PUT request to a team's endpoint should update an existing
@@ -804,3 +786,139 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 0)
+
+    def test_create_team_for_organization(self):
+        '''Should create a team and the relation between the team and
+        organization.'''
+        org = SeedOrganization.objects.create(title='test org')
+        data = {
+            'title': 'test team',
+        }
+
+        response = self.client.post(
+            reverse('seedorganization-teams-list', args=[org.id]), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        [team] = SeedTeam.objects.all()
+        self.assertEqual(team.organization, org)
+        self.assertEqual(team.title, data['title'])
+
+    def test_get_teams_for_organization(self):
+        '''Getting a list of teams for an organization should only return that
+        organization's teams.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        SeedTeam.objects.create(title='test team', organization=org2)
+
+        response = self.client.get(
+            reverse('seedorganization-teams-list', args=[org1.pk]))
+        [team] = response.data
+
+        self.assertEqual(team['id'], team1.id)
+
+    def test_create_permission_for_organizations_team(self):
+        '''Should be able to create a permission for an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        data = {
+            'type': 'foo:bar',
+            'object_id': '2',
+            'namespace': 'foo',
+        }
+
+        self.assertEqual(len(team.permissions.all()), 0)
+
+        self.client.post(
+            reverse(
+                'seedorganization-teams-permissions-list',
+                args=[org.pk, team.pk]
+            ),
+            data=data)
+
+        self.assertEqual(len(team.permissions.all()), 1)
+
+    def test_remove_permission_for_organizations_team(self):
+        '''Should be able to remove a permission for an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        permission = team.permissions.create(
+            type='foo:bar', object_id='2', namespace='foo')
+
+        self.assertEqual(len(team.permissions.all()), 1)
+
+        self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org.pk, team.pk, permission.pk]
+            ))
+
+        self.assertEqual(len(team.permissions.all()), 0)
+
+    def test_remove_permission_for_other_organization_team(self):
+        '''Should not be able to remove a permission for another
+        organization's team.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        team2 = SeedTeam.objects.create(title='test team', organization=org2)
+        permission = team1.permissions.create(
+            type='foo:bar', object_id='2', namespace='foo')
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org2.pk, team2.pk, permission.pk]
+            ))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_add_user_to_organizations_team(self):
+        '''Should be able to add an existing user to an organization's team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user('test user')
+        data = {
+            'user_id': user.pk,
+        }
+
+        response = self.client.post(
+            reverse(
+                'seedorganization-teams-users-list',
+                args=[org.pk, team.pk]),
+            data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        [teamuser] = team.users.all()
+        self.assertEqual(teamuser, user)
+
+    def test_remove_user_from_organizations_team(self):
+        '''Should be able to remove an existing user from an organization's
+        team.'''
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user('test user')
+        team.users.add(user)
+
+        self.assertEqual(len(team.users.all()), 1)
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-users-detail',
+                args=[org.pk, team.pk, user.pk]))
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(team.users.all()), 0)
+
+    def test_remove_user_from_other_organizations_team(self):
+        '''Should not be able to remove user's from a team belonging to
+        another organization.'''
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org1)
+        user = User.objects.create_user('test user')
+
+        response = self.client.delete(
+            reverse(
+                'seedorganization-teams-users-detail',
+                args=[org2.pk, team.pk, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
