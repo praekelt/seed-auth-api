@@ -439,7 +439,7 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json str url: The URL of the created team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 201: Successfully created team.
     :status 422: Missing required information to create team.
@@ -468,7 +468,10 @@ to belong to exactly one organization, but an organization can have many teams.
             "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.com/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:get:: /organizations/(int:organization_id)/teams/
@@ -530,7 +533,10 @@ Teams
                 "permissions": [],
                 "users": [],
                 "url": "https://example.org/teams/4",
-                "organization": 7
+                "organization": {
+                    "url": "https://example.org/organizations/7/",
+                    "id": 7
+                }
             }
         ]
 
@@ -574,7 +580,10 @@ Teams
                         }
                     ],
                 "url": "https://example.org/teams/4",
-                "organization": 3
+                "organization": {
+                    "url": "https://example.org/organizations/3/",
+                    "id": 3
+                }
             },
             {
                 "id": 7,
@@ -591,7 +600,10 @@ Teams
                         }
                     ],
                 "url": "https://exmple.org/teams/6",
-                "organization": 3
+                "organization": {
+                    "url": "https://example.org/organizations/3/",
+                    "id": 3
+                }
             }
         ]
 
@@ -605,7 +617,7 @@ Teams
     :>json str url: the URL of the team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: An object representing the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: Successfully retrieved team.
 
@@ -628,7 +640,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. _Update team details:
@@ -642,7 +657,7 @@ Teams
     :>json str url: The URL of the updated team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully updated team.
 
@@ -654,7 +669,7 @@ Teams
         Content-Type: application/json
 
         {
-            "title": "Brotherhood without banners"
+            "title": "Brotherhood without banners",
         }
 
     **Example reponse**:
@@ -670,7 +685,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. _Delete team:
@@ -712,7 +730,7 @@ Teams
     :>json str url: the URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully added permission to the team.
 
@@ -751,7 +769,10 @@ Teams
                 }
             ],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. _Remove permission from team:
@@ -763,7 +784,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully removed permission from the team.
 
@@ -786,7 +807,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. _Add user to team:
@@ -800,7 +824,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully added the user to the team.
 
@@ -834,7 +858,10 @@ Teams
                     }
                 ],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 .. _Remove user from team:
@@ -846,7 +873,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully removed the user from the team.
 
@@ -869,7 +896,10 @@ Teams
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.org/organizations/7/",
+                "id": 7
+            }
         }
 
 Users
