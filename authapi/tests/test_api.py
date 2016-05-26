@@ -7,9 +7,9 @@ from rest_framework.reverse import reverse as drt_reverse
 from rest_framework.test import APITestCase, APIRequestFactory
 
 from authapi.serializers import (
-    UserSerializer, TeamSerializer, OrganizationSummarySerializer,
-    TeamSummarySerializer, PermissionSerializer, UserSummarySerializer,
-    OrganizationSerializer)
+    UserSerializer, NewUserSerializer, TeamSerializer,
+    OrganizationSummarySerializer, TeamSummarySerializer, PermissionSerializer,
+    UserSummarySerializer, OrganizationSerializer)
 from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 
 
@@ -157,13 +157,27 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.is_superuser, data['admin'])
         self.assertTrue(check_password(data['password'], user.password))
 
+    def test_create_user_no_password(self):
+        '''A POST request to the user endpoint without a password field should
+        yield a validation error response'''
+        data = {
+            'email': 'user1@example.org',
+            'first_name': 'user1',
+            'last_name': 'example',
+            'admin': False,
+        }
+        response = self.client.post(reverse('user-list'), data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data, {
+            'password': ['This field is required.'],
+        })
+
     def test_update_user(self):
         '''A PUT request to the user's endpoint should update that specific
         user's details.'''
         user = User.objects.create_user('user@example.org')
         data = {
             'email': 'new@email.org',
-            'password': 'newpassword',
             'first_name': 'new',
             'last_name': 'user',
             'admin': True,
@@ -177,6 +191,25 @@ class UserTests(AuthAPITestCase):
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.is_superuser, data['admin'])
+
+    def test_update_user_password(self):
+        '''A PUT request to the user's endpoint with a password field should
+        reset the user's password.'''
+        user = User.objects.create_user('user@example.org')
+
+        data = {
+            'email': 'new@email.org',
+            'first_name': 'new',
+            'last_name': 'user',
+            'admin': True,
+            'password': 'testpassword',
+        }
+
+        response = self.client.put(
+            reverse('user-detail', args=[user.id]), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
         self.assertTrue(check_password(data['password'], user.password))
 
     def test_get_user(self):
@@ -219,6 +252,37 @@ class UserTests(AuthAPITestCase):
         context = self.get_context(url)
 
         data = UserSerializer(instance=user, context=context).data
+        expected = {
+            'email': user.email,
+            'admin': user.is_superuser,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'id': user.id,
+            'teams': [TeamSummarySerializer(
+                instance=team, context=context).data],
+            'organizations': [OrganizationSummarySerializer(
+                instance=organization, context=context).data],
+            'url': url,
+            'active': user.is_active,
+        }
+
+        self.assertEqual(data, expected)
+
+    def test_new_user_serializer(self):
+        '''The new user serializer should properly serialize the correct user
+        data and foreign links.'''
+        user = User.objects.create_superuser(
+            'user@example.org', 'user@example.org', 'testpass',
+            first_name='user', last_name='example')
+        organization = SeedOrganization.objects.create()
+        organization.users.add(user)
+        team = SeedTeam.objects.create(organization=organization)
+        team.users.add(user)
+
+        url = self.get_full_url('user-detail', args=[user.id])
+        context = self.get_context(url)
+
+        data = NewUserSerializer(instance=user, context=context).data
         expected = {
             'email': user.email,
             'admin': user.is_superuser,
