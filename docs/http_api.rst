@@ -439,7 +439,7 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json str url: The URL of the created team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 201: Successfully created team.
     :status 422: Missing required information to create team.
@@ -657,7 +657,7 @@ Teams
     :>json str url: The URL of the updated team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully updated team.
 
