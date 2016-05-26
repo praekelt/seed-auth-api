@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
@@ -7,6 +7,19 @@ from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer,
     ExistingUserSerializer, PermissionSerializer)
+
+
+def get_true_false_both(query_params, field_name, default):
+    '''Tries to get and return a valid of true, false, or both from the field
+    name in the query string, raises a ValidationError for invalid values.'''
+    valid = ('true', 'false', 'both')
+    value = query_params.get(field_name, default).lower()
+    if value in valid:
+        return value
+    v = ', '.join(sorted(valid))
+    raise serializers.ValidationError({
+        field_name: ['Must be one of [%s]' % v],
+    })
 
 
 class OrganizationViewSet(viewsets.ModelViewSet):
@@ -20,8 +33,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         We have an archived query param, where 'true' shows archived, 'false'
         omits them, and 'both' shows both.'''
         if self.action == 'list':
-            archived = self.request.query_params.get(
-                'archived', 'false').lower()
+            archived = get_true_false_both(
+                self.request.query_params, 'archived', 'false')
             if archived == 'true':
                 return self.queryset.filter(archived=True)
             if archived == 'false':
@@ -72,11 +85,11 @@ class TeamViewSet(viewsets.ModelViewSet):
         contain.'''
         queryset = self.queryset
         if self.action == 'list':
-            archived = self.request.query_params.get(
-                'archived', 'false').lower()
+            archived = get_true_false_both(
+                self.request.query_params, 'archived', 'false')
             if archived == 'true':
                 queryset = queryset.filter(archived=True)
-            if archived == 'false':
+            elif archived == 'false':
                 queryset = queryset.filter(archived=False)
 
             permission = self.request.query_params.get(
@@ -149,8 +162,8 @@ class UserViewSet(viewsets.ModelViewSet):
         We have an archived query param, where 'true' shows archived, 'false'
         omits them, and 'both' shows both.'''
         if self.action == 'list':
-            active = self.request.query_params.get(
-                'active', 'true').lower()
+            active = get_true_false_both(
+                self.request.query_params, 'active', 'true')
             if active == 'true':
                 return self.queryset.filter(is_active=True)
             if active == 'false':
