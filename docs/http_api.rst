@@ -294,6 +294,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
         {"title":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
 
+.. _organizations-list:
 .. http:get:: /organizations/
 
     Get a list of existing organizations
@@ -341,6 +342,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
        {"title":"Night's Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
 
+.. _organizations-update:
 .. http:put:: /organizations/(int:organization_id)
 
     Update an existing organization.
@@ -372,9 +374,17 @@ to belong to exactly one organization, but an organization can have many teams.
 
 .. http:delete:: /organizations/(int:organization_id)
 
-    Remove an existing organization.
+    Archive an organization. The organization will by default no longer be
+    shown when :ref:`listing organizations <organizations-list>`, the
+    organization's teams will by default no longer be shown when :ref:`listing
+    teams <teams-list>`, and any permissions associated with the organization's
+    teams will no longer take effect when checking whether a user has
+    permission to perform an action.
 
-    :status 204: Resource successfully deleted
+    Archiving can be reversed by setting ``archived`` to ``true`` when
+    :ref:`updating <organizations-update>` an organization.
+
+    :status 204: Organization successfully archived
 
    **Example request**:
 
@@ -488,7 +498,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
 .. http:delete:: /organizations/(int:organization_id)/teams/(int:team:id)/
 
-    See `Delete team`_. Limited to teams that belong to the organization.
+    See `Archive team`_. Limited to teams that belong to the organization.
 
 .. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/permissions/
 
@@ -510,6 +520,7 @@ Teams
 ^^^^^
 
 .. _Get list of teams:
+.. _teams-list:
 .. http:get:: /teams/
 
     Get a list of all the teams you have read access to.
@@ -647,6 +658,7 @@ Teams
         }
 
 .. _Update team details:
+.. _teams-update:
 .. http:put:: /teams/(int:team_id)
 
     Update the details of a team.
@@ -691,12 +703,18 @@ Teams
             }
         }
 
-.. _Delete team:
+.. _Archive team:
 .. http:delete:: /teams/(int:team_id)
 
-    Remove a team.
+    Archive a team. The team will by default no longer be shown when
+    :ref:`listing teams <teams-list>`, and any permissions associated with the
+    team will no longer take effect when checking whether a user has permission
+    to perform an action.
 
-    :status 204: Team successfully deleted.
+    Archiving can be reversed by setting ``archived`` to ``true`` when
+    :ref:`updating <teams-update>` a team.
+
+    :status 204: Team successfully archived.
 
     **Example request**:
 
