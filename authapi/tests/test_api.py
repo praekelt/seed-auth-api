@@ -829,7 +829,7 @@ class OrganizationTests(AuthAPITestCase):
 
         self.assertEqual(len(team.permissions.all()), 0)
 
-        print self.client.post(
+        self.client.post(
             reverse(
                 'seedorganization-teams-permissions-list',
                 args=[org.pk, team.pk]
