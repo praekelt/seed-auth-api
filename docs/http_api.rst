@@ -468,7 +468,10 @@ to belong to exactly one organization, but an organization can have many teams.
             "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2",
-            "organization": 7
+            "organization": {
+                "url": "https://example.com/organizations/7/",
+                "id": 7
+            }
         }
 
 .. http:get:: /organizations/(int:organization_id)/teams/
@@ -649,7 +652,6 @@ Teams
     Update the details of a team.
 
     :<json str title: The title of the team.
-    :<json int organization: The id of the organization that the team belongs to.
 
     :>json int id: the id of the updated team.
     :>json str url: The URL of the updated team.
@@ -668,7 +670,6 @@ Teams
 
         {
             "title": "Brotherhood without banners",
-            "organization": 7
         }
 
     **Example reponse**:
@@ -729,7 +730,7 @@ Teams
     :>json str url: the URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully added permission to the team.
 
@@ -783,7 +784,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully removed permission from the team.
 
@@ -823,7 +824,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully added the user to the team.
 
@@ -872,7 +873,7 @@ Teams
     :>json str url: The URL of the team.
     :>json str name: the name of the team.
     :>json list users: The list of users that belong to this team.
-    :>json int organization: The id of the organization that the team belongs to.
+    :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
     :status 200: successfully removed the user from the team.
 
