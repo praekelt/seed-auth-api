@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
+from authapi.validators import CreateOnly
 
 
 class SerializerPkField(serializers.PrimaryKeyRelatedField):
@@ -65,7 +66,10 @@ class TeamSerializer(serializers.ModelSerializer):
     permissions = PermissionSerializer(many=True, read_only=True)
     organization = SerializerPkField(
         serializer=OrganizationSummarySerializer,
-        queryset=SeedOrganization.objects.all())
+        queryset=SeedOrganization.objects.all(), validators=[CreateOnly()],
+        # Need to set required to false for it not to be required on updates,
+        # it will always be there for create because it is in the URL.
+        required=False)
 
     class Meta:
         model = SeedTeam
