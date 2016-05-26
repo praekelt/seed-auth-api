@@ -6,7 +6,7 @@ from authapi import views
 router = routers.ExtendedSimpleRouter()
 
 org_router = router.register(r'organizations', views.OrganizationViewSet)
-team_router = router.register(r'teams', views.TeamViewSetNoCreate)
+team_router = router.register(r'teams', views.TeamViewSet)
 router.register(r'users', views.UserViewSet)
 
 org_router.register(
@@ -14,7 +14,7 @@ org_router.register(
     base_name='seedorganization-users',
     parents_query_lookups=['organization'])
 orgteam_router = org_router.register(
-    r'teams', views.TeamViewSet,
+    r'teams', views.OrganizationTeamViewSet,
     base_name='seedorganization-teams',
     parents_query_lookups=['organization'])
 

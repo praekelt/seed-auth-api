@@ -76,7 +76,7 @@ class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TeamViewSetNoCreate(
+class BaseTeamViewSet(
         NestedViewSetMixin, RetrieveModelMixin, UpdateModelMixin,
         DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = SeedTeam.objects.all()
@@ -92,7 +92,7 @@ class TeamViewSetNoCreate(
         We also have the query params permission_contains and object_id, which
         allow users to filter the teams based on the permissions they
         contain.'''
-        queryset = super(TeamViewSetNoCreate, self).get_queryset()
+        queryset = super(BaseTeamViewSet, self).get_queryset()
         if self.action == 'list':
             archived = get_true_false_both(
                 self.request.query_params, 'archived', 'false')
@@ -118,11 +118,15 @@ class TeamViewSetNoCreate(
         instance.save()
 
 
-class TeamViewSet(TeamViewSetNoCreate, CreateModelMixin):
+class TeamViewSet(BaseTeamViewSet):
+    pass
+
+
+class OrganizationTeamViewSet(BaseTeamViewSet, CreateModelMixin):
     def create(self, request, parent_lookup_organization=None):
         if parent_lookup_organization is not None:
             request.data['organization'] = parent_lookup_organization
-        return super(TeamViewSet, self).create(request)
+        return super(OrganizationTeamViewSet, self).create(request)
 
 
 class TeamPermissionViewSet(
