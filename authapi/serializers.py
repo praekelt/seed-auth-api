@@ -66,20 +66,9 @@ class BaseUserSerializer(serializers.ModelSerializer):
     admin = serializers.BooleanField(source='is_superuser', required=False)
     active = serializers.BooleanField(default=True, source='is_active')
 
-
-class NewUserSerializer(BaseUserSerializer):
-    password = serializers.CharField(
-        style={'input_type': 'password'}, write_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
-            'organizations', 'password', 'active')
-
     def create(self, validated_data):
-        '''We want to set the username to be the same as the email, and use the
-        correct create function to make use of password hashing.'''
+        '''We want to set the username to be the same as the email, and use
+        the correct create function to make use of password hashing.'''
         validated_data['username'] = validated_data['email']
         admin = validated_data.pop('is_superuser', None)
 
@@ -89,17 +78,6 @@ class NewUserSerializer(BaseUserSerializer):
             user = User.objects.create_user(**validated_data)
 
         return user
-
-
-class UserSerializer(BaseUserSerializer):
-    password = serializers.CharField(
-        style={'input_type': 'password'}, write_only=True, required=False)
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
-            'organizations', 'active', 'password')
 
     def update(self, instance, validated_data):
         '''We want to set all the required fields if admin is set, and we want
@@ -119,3 +97,25 @@ class UserSerializer(BaseUserSerializer):
 
         instance.save()
         return instance
+
+
+class NewUserSerializer(BaseUserSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
+            'organizations', 'password', 'active')
+
+
+class UserSerializer(BaseUserSerializer):
+    password = serializers.CharField(
+        style={'input_type': 'password'}, write_only=True, required=False)
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
+            'organizations', 'active', 'password')
