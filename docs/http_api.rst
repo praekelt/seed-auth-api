@@ -376,10 +376,10 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Archive an organization. The organization will by default no longer be
     shown when :ref:`listing organizations <organizations-list>`, the
-    organization's teams will no longer be shown when :ref:`listing teams
-    <teams-list>`, and any permissions associated with the organization's teams
-    will no longer take effect when checking whether a user has permission to
-    perform an action.
+    organization's teams will by default no longer be shown when :ref:`listing
+    teams <teams-list>`, and any permissions associated with the organization's
+    teams will no longer take effect when checking whether a user has
+    permission to perform an action.
 
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <organizations-update>` an organization.
@@ -706,10 +706,10 @@ Teams
 .. _Delete team:
 .. http:delete:: /teams/(int:team_id)
 
-    Archive a team. The team will no longer be shown when :ref:`listing teams
-    <teams-list>`, and any permissions associated with the team will no longer
-    take effect when checking whether a user has permission to perform an
-    action.
+    Archive a team. The team will by default no longer be shown when
+    :ref:`listing teams <teams-list>`, and any permissions associated with the
+    team will no longer take effect when checking whether a user has permission
+    to perform an action.
 
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <teams-update>` a team.
