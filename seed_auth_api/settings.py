@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'authapi.apps.AuthapiConfig',
     # external
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -102,5 +103,11 @@ STATICFILES_FINDERS = (
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'authapi.pagination.LinkHeaderPagination'
+    'DEFAULT_PAGINATION_CLASS': 'authapi.pagination.LinkHeaderPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
 }
