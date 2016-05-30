@@ -1022,11 +1022,19 @@ class TokenTests(AuthAPITestCase):
         [token] = Token.objects.filter(user=user)
         self.assertEqual(token.key, response.data['token'])
 
-    def test_create_token_invalid_user(self):
-        '''An invalid email, or incorrect password should return an
-        unauthorized response.'''
+    def test_create_token_invalid_user_email(self):
+        '''An invalid email should return an unauthorized response.'''
         response = self.client.post(reverse('create-token'), data={
             'email': 'foo@bar.com', 'password': 'foo'})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_create_token_invalid_user_password(self):
+        '''An incorrect password should return an unauthorized response.'''
+        email = 'foo@bar.com'
+        User.objects.create_user(
+            username=email, email=email, password='password')
+        response = self.client.post(reverse('create-token'), data={
+            'email': email, 'password': 'wrongpassword'})
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_inactive_user(self):
