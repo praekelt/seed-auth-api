@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.mixins import (
     DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     ListModelMixin)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
@@ -14,7 +15,8 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer, NewUserSerializer,
-    ExistingUserSerializer, PermissionSerializer, CreateTokenSerializer)
+    ExistingUserSerializer, PermissionSerializer, CreateTokenSerializer,
+    PermissionsUserSerializer)
 
 
 def get_true_false_both(query_params, field_name, default):
@@ -222,3 +224,14 @@ class TokenView(APIView):
 
         return Response(
             status=status.HTTP_201_CREATED, data={'token': token.key})
+
+
+class UserPermissionsView(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request):
+        '''Get user information, with a list of permissions for that user.'''
+        user = request.user
+        serializer = PermissionsUserSerializer(
+            instance=user, context={'request': request})
+        return Response(data=serializer.data)
