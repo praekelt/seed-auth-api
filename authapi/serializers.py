@@ -78,22 +78,12 @@ class TeamSerializer(serializers.ModelSerializer):
             'archived')
 
 
-class UserSerializer(serializers.ModelSerializer):
-    teams = TeamSummarySerializer(
-        many=True, source='seedteam_set', read_only=True)
-    organizations = OrganizationSummarySerializer(
-        many=True, source='seedorganization_set', read_only=True)
+class BaseUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     admin = serializers.BooleanField(source='is_superuser', required=False)
     active = serializers.BooleanField(default=True, source='is_active')
     password = serializers.CharField(
         style={'input_type': 'password'}, write_only=True, required=False)
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
-            'organizations', 'password', 'active')
 
     def create(self, validated_data):
         '''We want to set the username to be the same as the email, and use
@@ -126,6 +116,41 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class UserSerializer(BaseUserSerializer):
+    teams = TeamSummarySerializer(
+        many=True, source='seedteam_set', read_only=True)
+    organizations = OrganizationSummarySerializer(
+        many=True, source='seedorganization_set', read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'url', 'first_name', 'last_name', 'email', 'admin', 'teams',
+            'organizations', 'password', 'active')
+
+
+class PermissionsUserSerializer(BaseUserSerializer):
+    permissions = serializers.SerializerMethodField()
+
+    def get_permissions(self, user):
+        permissions = SeedPermission.objects.all()
+        # User must be on a team that grants the permission
+        permissions = permissions.filter(seedteam__users=user)
+        # The team must be active
+        permissions = permissions.filter(seedteam__archived=False)
+        # The organization of that team must be active
+        permissions = permissions.filter(
+            seedteam__organization__archived=False)
+        serializer = PermissionSerializer(instance=permissions, many=True)
+        return serializer.data
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'url', 'first_name', 'last_name', 'email', 'admin',
+            'password', 'active', 'permissions')
 
 
 class NewUserSerializer(UserSerializer):
