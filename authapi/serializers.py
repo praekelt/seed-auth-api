@@ -131,3 +131,8 @@ class UserSerializer(serializers.ModelSerializer):
 class NewUserSerializer(UserSerializer):
     password = serializers.CharField(
         style={'input_type': 'password'}, write_only=True, required=True)
+
+
+class CreateTokenSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'})

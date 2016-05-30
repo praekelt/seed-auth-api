@@ -155,26 +155,27 @@ Tokens
 
 For the token endpoints, no authentication is required.
 
-.. http:post:: /tokens/
+.. http:post:: /user/tokens/
 
    Create a new token for the provided user. This will invalidate all other
    tokens for that user.
 
-   :<json str username: The username of the user to create the token for.
+   :<json str email: The username of the user to create the token for.
    :<json str password: The password of the user to create the token for.
    :>json str token: The generated token.
    :status 201: When the token is successfully generated.
-   :status 422: When the user credentials are incorrect.
+   :status 401: When the user credentials are incorrect.
+   :status 403: When the user is inactive.
 
    **Example request**:
 
    .. sourcecode:: http
 
-      POST /tokens/ HTTP/1.1
+      POST /user/tokens/ HTTP/1.1
       Content-Type: application/json
 
       {
-        "username": "testuser",
+        "email": "testuser",
         "password": "testpassword"
       }
 

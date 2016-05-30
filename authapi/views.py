@@ -1,17 +1,20 @@
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from rest_framework import viewsets, status, serializers
+from rest_framework.authtoken.models import Token
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.mixins import (
     DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     ListModelMixin)
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer, NewUserSerializer,
-    ExistingUserSerializer, PermissionSerializer)
+    ExistingUserSerializer, PermissionSerializer, CreateTokenSerializer)
 
 
 def get_true_false_both(query_params, field_name, default):
@@ -197,3 +200,25 @@ class UserViewSet(viewsets.ModelViewSet):
         user.is_active = False
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TokenView(APIView):
+    def post(self, request):
+        '''Create a token, given an email and password. Removes all other
+        tokens for that user.'''
+        serializer = CreateTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+        user = authenticate(username=email, password=password)
+        if not user:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        if not user.is_active:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        Token.objects.filter(user=user).delete()
+        token = Token.objects.create(user=user)
+
+        return Response(
+            status=status.HTTP_201_CREATED, data={'token': token.key})
