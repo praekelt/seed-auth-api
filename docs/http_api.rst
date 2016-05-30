@@ -155,7 +155,7 @@ Tokens
 
 For the token endpoints, no authentication is required.
 
-.. http:post:: /user/token/
+.. http:post:: /user/tokens/
 
    Create a new token for the provided user. This will invalidate all other
    tokens for that user.
@@ -171,7 +171,7 @@ For the token endpoints, no authentication is required.
 
    .. sourcecode:: http
 
-      POST /user/token/ HTTP/1.1
+      POST /user/tokens/ HTTP/1.1
       Content-Type: application/json
 
       {
