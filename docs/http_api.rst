@@ -62,19 +62,20 @@ team:read
 user:create
     Can create new users.
 
-.. http:get:: /user/permissions/
+.. http:get:: /user
 
-   Verify that an existing token is valid, and return the token's permissions.
+   Get the user details, and list of permissions that a user currently has
+   access to, for the user authorized by the given token.
 
    :>header Authorization: "Token " followed by the token to verify
    :status 200: The token is valid.
-   :status 401: The token is invalid.
+   :status 401: The token is invalid/missing.
 
    **Example request**:
 
    .. sourcecode:: http
 
-      GET /user/permissions/ HTTP/1.1
+      GET /user HTTP/1.1
       Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 
 
@@ -82,28 +83,32 @@ user:create
 
    .. sourcecode:: http
 
-      HTTP/1.1 200 OK
-      Content-Type: application/json
+    HTTP/1.1 200 OK
+    Content-Type: application/json
 
-      [
-        {
-            "id": 2,
-            "type": "org:admins",
-            "object_id": "3",
-            "metadata": {},
-            "namespace": "seed_auth"
-        },
-        {
-            "id": 5,
-            "type": "foo:bar:baz",
-            "object_id": "7",
-            "metadata": {
-                "example": "property",
-                "number": 7
+    {
+        "id": 1,
+        "url": "https://example.org/users/1",
+        "first_name": "Jon",
+        "last_name": "Snow",
+        "email": "jonsnow@castleblack.net",
+        "admin": false,
+        "active": true,
+        "permissions": [
+            {
+                "id": 2,
+                "type": "org:admins",
+                "object_id": "3",
+                "namespace": "seed_auth"
             },
-            "namespace": "foo_app"
-        }
-      ]
+            {
+                "id": 5,
+                "type": "foo:bar:baz",
+                "object_id": "7",
+                "namespace": "foo_app"
+            }
+        ]
+    }
 
 **Permission structure**:
 
