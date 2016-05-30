@@ -39,5 +39,5 @@ team_router.register(
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^/tokens/$', views.TokenView.as_view(), name='create-token'),
+    url(r'^/user/token/$', views.TokenView.as_view(), name='create-token'),
 ]
