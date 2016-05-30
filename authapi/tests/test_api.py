@@ -1108,11 +1108,12 @@ class UserPermissionsTests(AuthAPITestCase):
         url = reverse('get-user-permissions')
         response = self.client.get(url)
 
-        permissions = sorted(response.data['permissions'])
+        permissions = sorted(
+            response.data['permissions'], key=lambda p: p['id'])
         context = self.get_context(url)
         expected_permissions = sorted(PermissionSerializer(
             instance=[teams[0].permissions.get(), teams[1].permissions.get()],
-            many=True, context=context).data)
+            many=True, context=context).data, key=lambda p: p['id'])
         self.assertEqual(permissions, expected_permissions)
 
     def test_get_permissions_from_archived_teams(self):
