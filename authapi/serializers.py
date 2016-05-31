@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
+from authapi.utils import get_user_permissions
 from authapi.validators import CreateOnly
 
 
@@ -135,14 +136,7 @@ class PermissionsUserSerializer(BaseUserSerializer):
     permissions = serializers.SerializerMethodField()
 
     def get_permissions(self, user):
-        permissions = SeedPermission.objects.all()
-        # User must be on a team that grants the permission
-        permissions = permissions.filter(seedteam__users=user)
-        # The team must be active
-        permissions = permissions.filter(seedteam__archived=False)
-        # The organization of that team must be active
-        permissions = permissions.filter(
-            seedteam__organization__archived=False)
+        permissions = get_user_permissions(user)
         serializer = PermissionSerializer(instance=permissions, many=True)
         return serializer.data
 
