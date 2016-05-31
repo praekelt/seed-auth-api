@@ -17,11 +17,7 @@ class AllowPermission(BasePermissionComponent):
         user = request.user
         permissions = get_user_permissions(user)
         permissions = find_permission(permissions, self.permission_type)
-        if permissions.count() >= 1:
-            return True
-
-    def has_object_permission(self, permission, request, view, obj):
-        return self.has_permission(permission, request, view)
+        return permissions.count() >= 1
 
 
 class AllowObjectPermission(AllowPermission):
@@ -32,14 +28,7 @@ class AllowObjectPermission(AllowPermission):
         permissions = get_user_permissions(user)
         permissions = find_permission(
             permissions, self.permission_type, str(obj.pk))
-        if permissions.count() >= 1:
-            return True
-
-
-class AllowCreate(BasePermissionComponent):
-    '''Only allows POST requests.'''
-    def has_permission(self, permission, request, view):
-        return request.method == 'POST'
+        return permissions.count() >= 1
 
 
 class AllowUpdate(BasePermissionComponent):
@@ -77,12 +66,16 @@ class OrganizationPermission(BaseComposedPermision):
     def object_permission_set(self):
         '''
         All users can read. admins, org:admins, and users with org:write
-        permission for the specific organization can update. admins and
-        org:admins can create.
+        permission for the specific organization can update. admins can create.
         '''
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
-            And(Or(AllowCreate, AllowModify), AllowPermission('org:admin')),
-            And(AllowModify, AllowObjectPermission('org:write'))
+            And(
+                AllowModify,
+                Or(
+                    AllowObjectPermission('org:write'),
+                    AllowObjectPermission('org:admin'),
+                )
+            )
         )

@@ -247,8 +247,7 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_permission_create_organization(self):
-        '''Only admin users, and users with org:admin permissions should be
-        allowed to create organizations.'''
+        '''Only admin users should be allowed to create organizations.'''
         # Unauthenticated request
         data = {
             'title': 'test org',
@@ -267,11 +266,6 @@ class OrganizationTests(AuthAPITestCase):
         self.add_permission(user, 'org:write')
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authenticated request, correct permissions
-        self.add_permission(user, 'org:admin')
-        response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # Admin user
         _, token = self.create_admin_user()
@@ -329,9 +323,15 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Authenticated request, org:admin permissions
+        # Authenticated request, org:admin permissions, wrong org
         SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:admin')
+        self.add_permission(user, 'org:admin', org2.pk)
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, org:admin permissions, correct org
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin', org1.pk)
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -370,9 +370,15 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Authenticated request, org:admin permissions
+        # Authenticated request, org:admin permissions, wrong org
         SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:admin')
+        self.add_permission(user, 'org:admin', org2.pk)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, org:admin permissions, correct org
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin', org1.pk)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
