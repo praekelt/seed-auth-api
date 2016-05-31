@@ -19,7 +19,6 @@ class AllowPermission(BasePermissionComponent):
         permissions = find_permission(permissions, self.permission_type)
         if permissions.count() >= 1:
             return True
-        return False
 
     def has_object_permission(self, permission, request, view, obj):
         return self.has_permission(permission, request, view)
@@ -38,6 +37,18 @@ class AllowObjectPermission(AllowPermission):
         return False
 
 
+class AllowCreate(BasePermissionComponent):
+    '''Only allows POST requests.'''
+    def has_permission(self, permission, request, view):
+        return request.method == 'POST'
+
+
+class AllowUpdate(BasePermissionComponent):
+    '''Only allows PUT and PATCH requests.'''
+    def has_permission(self, permission, request, view):
+        return request.method in ('PUT', 'PATCH')
+
+
 class AllowAdmin(BasePermissionComponent):
     '''
     This component will always allow admin users, and deny all other users.
@@ -52,26 +63,21 @@ class AllowAdmin(BasePermissionComponent):
 class OrganizationPermission(BaseComposedPermision):
     '''Permissions for the OrganizationViewSet.'''
     def global_permission_set(self):
-        '''All users can read, admins and org:admins can create.'''
+        '''All users must be authenticated.'''
         return And(
             AllowOnlyAuthenticated,
-            Or(
-                AllowOnlySafeHttpMethod,
-                AllowAdmin,
-                lambda _: AllowPermission('org:admin')
-            )
+            self.object_permission_set()
         )
 
     def object_permission_set(self):
         '''
-        All users can read, admins, org:admins, and users with org:write
-        permission for the specific organization can update.'''
-        return And(
-            AllowOnlyAuthenticated,
-            Or(
-                AllowOnlySafeHttpMethod,
-                AllowAdmin,
-                lambda _: AllowPermission('org:admin'),
-                lambda _: AllowObjectPermission('org:write')
-            )
+        All users can read. admins, org:admins, and users with org:write
+        permission for the specific organization can update. admins and
+        org:admins can create.
+        '''
+        return Or(
+            AllowOnlySafeHttpMethod,
+            AllowAdmin,
+            And(Or(AllowCreate, AllowUpdate), AllowPermission('org:admin')),
+            And(AllowUpdate, AllowObjectPermission('org:write'))
         )
