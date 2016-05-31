@@ -13,6 +13,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list(self):
         '''A GET request to the organizations endpoint should return a list
         of organizations.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create()
         org2 = SeedOrganization.objects.create()
         url = reverse('seedorganization-list')
@@ -32,6 +34,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_archived(self):
         '''Archived organizations should not appear on the list of
         organizations.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
         response = self.client.get(reverse('seedorganization-list'))
@@ -45,6 +49,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_archived_true_queryparam(self):
         '''If the queryparam archived is true, show only archived
         organizations.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
         response = self.client.get(
@@ -60,6 +66,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_archived_false_queryparam(self):
         '''If the queryparam archived is false, show only non-archived
         organizations.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
         response = self.client.get(
@@ -74,6 +82,8 @@ class OrganizationTests(AuthAPITestCase):
 
     def test_get_organization_list_archived_both_queryparam(self):
         '''If the queryparam archived is both, show all organizations.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create(title='test org')
         org1.archived = True
         org1.save()
@@ -89,6 +99,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_archived_invalid_queryparam(self):
         '''If the archived querystring parameter is not one of true, false, or
         both, an appropriate error should be returned.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         response = self.client.get(
             '%s?archived=foo' % reverse('seedorganization-list'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -99,6 +111,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_archived_teams(self):
         '''When getting the list of organizations, the archived teams should
         not be visible.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
 
@@ -113,6 +127,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization_list_inactive_users(self):
         '''When getting the list of organizations, the inactive users should
         not be shown in the list of users.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         user = User.objects.create_user('test user')
         org.users.add(user)
@@ -128,6 +144,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_create_organization_no_required(self):
         '''If the POST request is missing required field, an error should be
         returned.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         response = self.client.post(reverse('seedorganization-list'))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, {
@@ -137,6 +155,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_create_organization(self):
         '''A POST request to the organizations endpoint should create a new
         organization.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         data = {
             'title': 'test org',
         }
@@ -151,6 +171,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_get_organization(self):
         '''A GET request to an organization's endpoint should return the
         organization's details.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         organization = SeedOrganization.objects.create()
         url = reverse('seedorganization-detail', args=[organization.id])
         context = self.get_context(url)
@@ -163,6 +185,8 @@ class OrganizationTests(AuthAPITestCase):
 
     def test_delete_organization(self):
         '''A DELETE request on an organization should archive it.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         self.assertFalse(org.archived)
 

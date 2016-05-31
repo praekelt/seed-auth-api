@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from rest_framework.authtoken.models import Token
 from rest_framework.request import Request
 from rest_framework.reverse import reverse as drt_reverse
 from rest_framework.test import APITestCase, APIRequestFactory
@@ -21,3 +23,11 @@ class AuthAPITestCase(APITestCase):
         request = factory.get(part_url)
         kwargs['request'] = request
         return drt_reverse(viewname, *args, **kwargs)
+
+    def create_admin_user(
+            self, email='test@example.org', password='password'):
+        '''Creates an admin user, and creates a token for that admin user.'''
+        user = User.objects.create_superuser(
+            username=email, email=email, password=password)
+        token = Token.objects.create(user=user)
+        return (user, token)
