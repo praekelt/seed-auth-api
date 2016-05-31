@@ -15,6 +15,7 @@ setup(
         'psycopg2cffi==2.7.4',
         'djangorestframework==3.3.3',
         'drf-extensions==0.2.8',
+        'djangorestframework-composed-permissions==0.1',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
