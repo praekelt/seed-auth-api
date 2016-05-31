@@ -388,9 +388,13 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+
+class OrganizationUserTests(AuthAPITestCase):
     def test_add_user_to_organization(self):
         '''Adding a user to an organization should create a relationship
         between the two.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         user = User.objects.create_user(username='test@example.org')
         self.assertEqual(len(org.users.all()), 0)
@@ -406,6 +410,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_add_missing_user_to_organization(self):
         '''If a non-existing user is trying to be added to an organization,
         an appropriate error should be returned.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
         response = self.client.post(
@@ -420,6 +426,8 @@ class OrganizationTests(AuthAPITestCase):
     def test_remove_user_from_organization(self):
         '''Removing a user from an organization should remove the relationship
         between the two.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         user = User.objects.create_user(username='test@example.org')
         org.users.add(user)
