@@ -10,7 +10,7 @@ class AllowPermission(BasePermissionComponent):
     '''
     This component checks whether a user has a specific permission type.
     '''
-    def __init__(self, permission_type, object_id=None):
+    def __init__(self, permission_type):
         self.permission_type = permission_type
 
     def has_permission(self, permission, request, view):
