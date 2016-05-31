@@ -274,6 +274,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Creates a new organization.
 
+    Requires admin user.
+
     :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
@@ -305,6 +307,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Get a list of existing organizations
 
+    Requires any user.
+
     :queryparam archived:
         (optional) If true, shows archived organizations. If false, shows
         organizations that are not archived. If both, shows all organizations.
@@ -329,6 +333,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Get the details of an organization.
 
+    Requires any user.
+
     :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
@@ -352,6 +358,9 @@ to belong to exactly one organization, but an organization can have many teams.
 .. http:put:: /organizations/(int:organization_id)
 
     Update an existing organization.
+
+    Requires admin user, or any user that has 'org:admin' or 'org:write'
+    permissions, with object_id equal to organization_id.
 
     :<json str title: The title of the organization.
     :>json int id: The id of the created organization.
@@ -390,6 +399,9 @@ to belong to exactly one organization, but an organization can have many teams.
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <organizations-update>` an organization.
 
+    Requires admin user, or any user that has 'org:admin' or 'org:write'
+    permissions, with object_id equal to organization_id.
+
     :status 204: Organization successfully archived
 
    **Example request**:
@@ -407,6 +419,9 @@ to belong to exactly one organization, but an organization can have many teams.
 .. http:post:: /organizations/(int:organization_id)/users/
 
     Add a user to an existing organization.
+
+    Requires admin user, or any user that has 'org:admin' or 'org:write'
+    permissions, with object_id equal to organization_id.
 
     :<json int user_id: The ID of the user to add.
 
@@ -430,6 +445,9 @@ to belong to exactly one organization, but an organization can have many teams.
 .. http:delete:: /organizations/(int:organization_id)/users/(int:user_id)
 
     Remove a user from an organization.
+
+    Requires admin user, or any user that has 'org:admin' or 'org:write'
+    permissions, with object_id equal to organization_id.
 
     :status 204: User was successfully removed from an organization
 
