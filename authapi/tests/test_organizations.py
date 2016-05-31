@@ -5,7 +5,7 @@ from rest_framework import status
 from authapi.serializers import (
     OrganizationSummarySerializer, TeamSummarySerializer,
     UserSummarySerializer, OrganizationSerializer)
-from authapi.models import SeedTeam, SeedOrganization
+from authapi.models import SeedTeam, SeedOrganization, SeedPermission
 from authapi.tests.base import AuthAPITestCase
 
 
@@ -234,6 +234,112 @@ class OrganizationTests(AuthAPITestCase):
             'url': url,
             'id': organization.id,
         })
+
+    def test_permission_list_organization(self):
+        '''Any authenticated user should be able to get a list of
+        organizations.'''
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        _, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.get(reverse('seedorganization-list'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_permission_create_organization(self):
+        '''Only admin users, and users with org:admin permissions should be
+        allowed to create organizations.'''
+        # Unauthenticated request
+        data = {
+            'title': 'test org',
+        }
+        url = reverse('seedorganization-list')
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticated request, no permissions
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, wrong permission
+        self.add_permission(user, 'org:write')
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, correct permissions
+        self.add_permission(user, 'org:admin')
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Admin user
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_permission_get_organization(self):
+        '''Any authenticated user should be able to get the details of an
+        organization.'''
+        org = SeedOrganization.objects.create()
+        url = reverse('seedorganization-detail', args=(org.pk,))
+
+        # Unauthenticated request
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticated request
+        _, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_permission_update_organization(self):
+        '''Only admin users, users with org:admin permissions, and users with
+        org:write permissions for the organization should be able to update
+        organizations.'''
+        data = {
+            'title': 'test org',
+        }
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        url = reverse('seedorganization-detail', args=(org1.pk,))
+
+        # Unauthenticated request
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticated request, no permissions
+        SeedPermission.objects.all().delete()
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, wrong org permissions
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:write', org2.pk)
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, correct org permissions
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:write', org1.pk)
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Authenticated request, org:admin permissions
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin')
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Admin user request
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.put(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_add_user_to_organization(self):
         '''Adding a user to an organization should create a relationship
