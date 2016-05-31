@@ -341,6 +341,47 @@ class OrganizationTests(AuthAPITestCase):
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_permission_delete_organization(self):
+        '''Only admin users, users with org:admin permissions, and users with
+        org:write permissions for the organization should be able to delete
+        organizations.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        url = reverse('seedorganization-detail', args=(org1.pk,))
+
+        # Unauthenticated request
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticated request, no permissions
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, wrong org permissions
+        self.add_permission(user, 'org:write', org2.pk)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authenticated request, correct org permissions
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:write', org1.pk)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Authenticated request, org:admin permissions
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin')
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Admin user request
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_add_user_to_organization(self):
         '''Adding a user to an organization should create a relationship
         between the two.'''

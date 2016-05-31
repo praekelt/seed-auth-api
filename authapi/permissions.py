@@ -48,6 +48,15 @@ class AllowUpdate(BasePermissionComponent):
         return request.method in ('PUT', 'PATCH')
 
 
+class AllowDelete(BasePermissionComponent):
+    '''Only allows DELETE requests.'''
+    def has_permission(self, permission, request, view):
+        return request.method == 'DELETE'
+
+
+AllowModify = Or(AllowUpdate, AllowDelete)
+
+
 class AllowAdmin(BasePermissionComponent):
     '''
     This component will always allow admin users, and deny all other users.
@@ -74,6 +83,6 @@ class OrganizationPermission(BaseComposedPermision):
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
-            And(Or(AllowCreate, AllowUpdate), AllowPermission('org:admin')),
-            And(AllowUpdate, AllowObjectPermission('org:write'))
+            And(Or(AllowCreate, AllowModify), AllowPermission('org:admin')),
+            And(AllowModify, AllowObjectPermission('org:write'))
         )
