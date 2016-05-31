@@ -439,6 +439,81 @@ class OrganizationUserTests(AuthAPITestCase):
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 0)
 
+    def run_permission_checks(self, org, func):
+        '''Runs the func, and ensures the result is as expected for each of
+        the kinds of users.'''
+        # Unauthorized
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authorized no permissions
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:write, wrong org
+        org2 = SeedOrganization.objects.create()
+        self.add_permission(user, 'org:write', org2.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:write, correct org
+        self.add_permission(user, 'org:write', org.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Authorized org:admin, wrong org
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin', org2.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:admin, correct org
+        self.add_permission(user, 'org:admin', org.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Admin user request
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_permission_add_user_to_organization(self):
+        '''Only admins, org:admins, and org:write can add users to an
+        organization.'''
+        org = SeedOrganization.objects.create()
+        url = reverse('seedorganization-users-list', args=(org.pk,))
+
+        def add_user():
+            user = User.objects.create_user('testuser@example.org')
+            resp = self.client.post(url, data={'user_id': user.pk})
+            user.delete()
+            return resp
+
+        self.run_permission_checks(org, add_user)
+
+    def test_permission_remove_user_from_organization(self):
+        '''Only admins, org:admins, and org:write can remove users from an
+        organization.'''
+        org = SeedOrganization.objects.create()
+
+        def remove_user():
+            user = User.objects.create_user('testuser@example.org')
+            url = reverse(
+                'seedorganization-users-detail', args=(org.pk, user.pk))
+            resp = self.client.delete(url, data={'user_id': user.pk})
+            try:
+                user.delete()
+            except User.DoesNotExist:
+                pass
+            return resp
+
+        self.run_permission_checks(org, remove_user)
+
+
+class OrganizationTeamTests(AuthAPITestCase):
     def test_create_team_for_organization(self):
         '''Should create a team and the relation between the team and
         organization.'''
