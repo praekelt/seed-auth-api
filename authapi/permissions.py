@@ -34,7 +34,6 @@ class AllowObjectPermission(AllowPermission):
             permissions, self.permission_type, str(obj.pk))
         if permissions.count() >= 1:
             return True
-        return False
 
 
 class AllowCreate(BasePermissionComponent):
@@ -53,9 +52,6 @@ class AllowAdmin(BasePermissionComponent):
     '''
     This component will always allow admin users, and deny all other users.
     '''
-    def has_object_permission(self, permission, request, view, obj):
-        return request.user.is_superuser
-
     def has_permission(self, permission, request, view):
         return request.user.is_superuser
 
