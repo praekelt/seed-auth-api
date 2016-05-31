@@ -13,6 +13,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from authapi.models import SeedOrganization, SeedTeam, SeedPermission
+from authapi import permissions
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer, NewUserSerializer,
     ExistingUserSerializer, PermissionSerializer, CreateTokenSerializer,
@@ -35,6 +36,7 @@ def get_true_false_both(query_params, field_name, default):
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = SeedOrganization.objects.all()
     serializer_class = OrganizationSerializer
+    permission_classes = (permissions.OrganizationPermission,)
 
     def get_queryset(self):
         '''We want to still be able to modify archived organizations, but they
