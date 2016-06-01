@@ -69,15 +69,14 @@ class AllowAdmin(BasePermissionComponent):
 
 class ObjAttrTrue(BasePermissionComponent):
     '''
-    This component will pass when an object attributes is True.
+    This component will pass when the function 'attribute' returns true.
+    The function is given (request, obj) as parameters.
     '''
     def __init__(self, attribute):
         self.attribute = attribute
 
     def has_object_permission(self, permission, request, view, obj):
-        safe_locals = {"obj": obj, "request": request}
-        attribute = eval(self.attribute, {}, safe_locals)
-        return attribute
+        return self.attribute(request, obj)
 
 
 class OrganizationPermission(BaseComposedPermision):
@@ -156,10 +155,10 @@ class TeamPermission(BaseComposedPermision):
                 Or(
                     AllowObjectPermission('team:read'),
                     ObjAttrTrue(
-                        'obj.users.filter(pk=request.user.pk).count() >= 1'),
+                        lambda r, t: t.users.filter(pk=r.user.pk).exists()),
                     ObjAttrTrue(
-                        'obj.organization.users.filter(pk=request.user.pk)'
-                        '.count() >= 1')
+                        lambda r, t: t.organization.users.filter(
+                            pk=r.user.pk).exists())
                 )
             )
         )
