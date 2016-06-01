@@ -154,6 +154,114 @@ class TeamTests(AuthAPITestCase):
         response = self.client.get(reverse('seedteam-list'))
         self.assertEqual(len(response.data[0]['users']), 0)
 
+    def test_permissions_team_list_unauthorized(self):
+        '''Unauthorized users shouldn't be able to see team list.'''
+        url = reverse('seedteam-list')
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_permissions_team_list_member_of_team(self):
+        '''Teams that a user is a member of should be displayed on the list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        SeedTeam.objects.create(organization=org)
+        team1.users.add(user)
+        response = self.client.get(url)
+        [team] = response.data
+        self.assertEqual(team['id'], team1.pk)
+
+    def test_permissions_team_list_read_permission(self):
+        '''Teams that a user has 'team:read' permission for should be
+        displayed on the list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        self.add_permission(user, 'team:read', team1.pk)
+        response = self.client.get(url)
+        self.assertTrue(team2.pk not in [t['id'] for t in response.data])
+
+    def test_permissions_team_list_admin_permission(self):
+        '''Teams that a user has 'team:admin' permission for should be
+        displayed on the list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        self.add_permission(user, 'team:admin', team1.pk)
+        response = self.client.get(url)
+        self.assertTrue(team2.pk not in [t['id'] for t in response.data])
+
+    def test_permissions_team_list_org_member(self):
+        '''Teams that are a part of an organization that the user is part of
+        should be displayed in the team list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        org.users.add(user)
+        team = SeedTeam.objects.create(organization=org)
+        response = self.client.get(url)
+        [resp_team] = response.data
+        self.assertEqual(team.pk, resp_team['id'])
+
+    def test_permissions_team_list_org_admin(self):
+        '''Teams that are a part of an organization that a user has org:admin
+        permission for should be displayed on the list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        self.add_permission(user, 'org:admin', org.pk)
+        response = self.client.get(url)
+        self.assertTrue(team.pk in [t['id'] for t in response.data])
+
+    def test_permissions_team_list_org_write(self):
+        '''Teams that are a part of an organization that a user has org:write
+        permission for should be displayed on the list.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        self.add_permission(user, 'org:write', org.pk)
+        response = self.client.get(url)
+        self.assertTrue(team.pk in [t['id'] for t in response.data])
+
+    def test_permissions_team_list_admin(self):
+        '''Admin users should be able to see all teams.'''
+        url = reverse('seedteam-list')
+
+        user, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        response = self.client.get(url)
+        [resp_team] = response.data
+        self.assertTrue(team.pk, resp_team['id'])
+
     def test_create_team(self):
         '''Creating teams on this endpoint should not be allowed.'''
         _, token = self.create_admin_user()
