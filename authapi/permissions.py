@@ -134,8 +134,11 @@ class TeamPermission(BaseComposedPermision):
 
     def object_permission_set(self):
         '''
-        admins can add users to any organization. org:admin and org:write can
-        add users to the organization that they are admin for.
+        admins, users with team:admin for the team, and users with org:admin,
+        or org:write permission for the team's organization have full access
+        to teams. Users with team:read permission for the team, or are a member
+        of the team, or are a member of the team's organization, have read
+        access to the team.
         '''
         return Or(
             AllowAdmin,
