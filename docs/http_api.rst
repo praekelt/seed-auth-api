@@ -712,7 +712,6 @@ Teams
     for a team's organization can update teams. Users with team:admin can modify
     the team that they are admin for.
 
-
     :<json str title: The title of the team.
 
     :>json int id: the id of the updated team.
@@ -763,6 +762,10 @@ Teams
 
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <teams-update>` a team.
+
+    Admin users can delete teams. Users with org:admin and org:write permissions
+    for a team's organization can delete teams. Users with team:admin can delete
+    the team that they are admin for.
 
     :status 204: Team successfully archived.
 

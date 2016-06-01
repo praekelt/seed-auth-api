@@ -284,6 +284,82 @@ class TeamTests(AuthAPITestCase):
         team.refresh_from_db()
         self.assertEqual(team.archived, True)
 
+    def test_permission_delete_team_unauthorized(self):
+        '''Unauthorized users shouldn't be able to delete teams.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        url = reverse('seedteam-detail', args=(team.pk,))
+
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_permission_delete_team_admin_permission(self):
+        '''Users with team:admin permission for that team should be able to
+        delete that team.'''
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        user, token = self.create_user()
+        self.add_permission(user, 'team:admin', team1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_delete_team_org_admin_permission(self):
+        '''Users with org:admin permission for a team's organization should
+        be able to delete the team.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        user, token = self.create_user()
+        self.add_permission(user, 'org:admin', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_delete_team_org_write_permission(self):
+        '''Users with org:write permission for a team's organization should
+        be able to delete the team.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        user, token = self.create_user()
+        self.add_permission(user, 'org:write', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_delete_team_admin_user(self):
+        '''Admin users should be able to delete any team.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        user, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_update_team(self):
         '''A PUT request to a team's endpoint should update an existing
         team.'''
