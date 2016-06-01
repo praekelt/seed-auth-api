@@ -92,6 +92,7 @@ class BaseTeamViewSet(
         DestroyModelMixin, ListModelMixin, GenericViewSet):
     queryset = SeedTeam.objects.all()
     serializer_class = TeamSerializer
+    permission_classes = (permissions.TeamPermission,)
 
     def get_queryset(self):
         '''We want to still be able to modify archived organizations, but they
@@ -122,6 +123,11 @@ class BaseTeamViewSet(
             if object_id is not None:
                 queryset = queryset.filter(permissions__object_id=object_id)
 
+            permission = permissions.TeamPermission()
+            queryset = [
+                team for team in queryset if
+                permission.has_object_permission(self.request, self, team)]
+
         return queryset
 
     def perform_destroy(self, instance):
@@ -135,8 +141,15 @@ class TeamViewSet(BaseTeamViewSet):
 
 class OrganizationTeamViewSet(BaseTeamViewSet, CreateModelMixin):
     def create(self, request, parent_lookup_organization=None):
-        if parent_lookup_organization is not None:
-            request.data['organization'] = parent_lookup_organization
+        org = get_object_or_404(
+            SeedOrganization, pk=parent_lookup_organization)
+        permission = permissions.OrganizationCreateTeamPermission()
+        if not permission.has_object_permission(request, self, org):
+            self.permission_denied(
+                request, message=getattr(permission, 'message', None)
+            )
+        request.data['organization'] = org.pk
+
         return super(OrganizationTeamViewSet, self).create(request)
 
 
