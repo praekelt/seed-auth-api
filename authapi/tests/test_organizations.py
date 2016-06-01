@@ -570,9 +570,12 @@ class OrganizationTeamTests(OrganizationTestBase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         user, token = self.create_user()
-        org.users.add(user)
         team = SeedTeam.objects.create(organization=org)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.get(url)
+        self.assertEqual(response.data, [])
+
+        org.users.add(user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         [resp_team] = response.data
