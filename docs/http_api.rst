@@ -588,6 +588,12 @@ Teams
 
     Allows filtering of teams to retreive a subset.
 
+    Admin users have read access to all teams. Users with org:admin or
+    org:write permissions for an organization have read access to that
+    organization's teams. Users with team:read or team:admin permissions for
+    a team have read access to that team. Users that are part of the team, or
+    part of the team's organization, have read access to that team.
+
     :query string type_contains:
         The type field on one of the resulting team's permissions must contain
         this string.
@@ -657,6 +663,12 @@ Teams
 
     Get the details of a team.
 
+    Admin users have read access to all teams. Users with org:admin or
+    org:write permissions for an organization have read access to that
+    organization's teams. Users with team:read or team:admin permissions for
+    a team have read access to that team. Users that are part of the team, or
+    part of the team's organization, have read access to that team.
+
     :>json int id: the ID of the team.
     :>json str url: the URL of the team.
     :>json str title: the title of the team.
@@ -695,6 +707,11 @@ Teams
 .. http:put:: /teams/(int:team_id)
 
     Update the details of a team.
+
+    Admin users can update teams. Users with org:admin and org:write permissions
+    for a team's organization can update teams. Users with team:admin can modify
+    the team that they are admin for.
+
 
     :<json str title: The title of the team.
 

@@ -140,6 +140,8 @@ class TeamPermission(BaseComposedPermision):
         return Or(
             AllowAdmin,
             AllowObjectPermission('team:admin'),
+            AllowObjectPermission('org:admin', 'obj.organization.pk'),
+            AllowObjectPermission('org:write', 'obj.organization.pk'),
             And(
                 AllowOnlySafeHttpMethod,
                 Or(
@@ -148,9 +150,7 @@ class TeamPermission(BaseComposedPermision):
                         'obj.users.filter(pk=request.user.pk).count() >= 1'),
                     ObjAttrTrue(
                         'obj.organization.users.filter(pk=request.user.pk)'
-                        '.count() >= 1'),
-                    AllowObjectPermission('org:admin', 'obj.organization.pk'),
-                    AllowObjectPermission('org:write', 'obj.organization.pk')
+                        '.count() >= 1')
                 )
             )
         )

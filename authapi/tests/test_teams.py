@@ -302,6 +302,87 @@ class TeamTests(AuthAPITestCase):
         team.refresh_from_db()
         self.assertEqual(team.title, data['title'])
 
+    def test_permission_update_team_unauthorized(self):
+        '''Unauthorized users shouldn't be able to update teams.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        url = reverse('seedteam-detail', args=(team.pk,))
+        data = {'title': 'test team'}
+
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_permission_update_team_admin_permission(self):
+        '''Users with team:admin permission for that team should be able to
+        modify that team.'''
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        data = {'title': 'test team'}
+        user, token = self.create_user()
+        self.add_permission(user, 'team:admin', team1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_update_team_org_admin_permission(self):
+        '''Users with org:admin permission for a team's organization should
+        be able to update the team.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        data = {'title': 'test team'}
+        user, token = self.create_user()
+        self.add_permission(user, 'org:admin', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_update_team_org_write_permission(self):
+        '''Users with org:write permission for a team's organization should
+        be able to update the team.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        data = {'title': 'test team'}
+        user, token = self.create_user()
+        self.add_permission(user, 'org:write', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_update_team_admin_user(self):
+        '''Admin users should be able to update any team.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        data = {'title': 'test team'}
+        user, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.put(url, data=data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
     def test_update_team_organization(self):
         '''You shouldn't be able to change a team's organization.'''
         _, token = self.create_admin_user()
