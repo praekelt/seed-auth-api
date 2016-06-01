@@ -763,8 +763,8 @@ Teams
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <teams-update>` a team.
 
-    Admin users can delete teams. Users with org:admin and org:write permissions
-    for a team's organization can delete teams. Users with team:admin can delete
+    Admin users can archive teams. Users with org:admin and org:write permissions
+    for a team's organization can archive teams. Users with team:admin can archive
     the team that they are admin for.
 
     :status 204: Team successfully archived.
