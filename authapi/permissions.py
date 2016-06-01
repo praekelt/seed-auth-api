@@ -23,16 +23,22 @@ class AllowPermission(BasePermissionComponent):
 class AllowObjectPermission(AllowPermission):
     '''This component checks whether a user has a specific permission type,
     and that the object id matches the permission object id. A custom
-    location to look for the object id can be specified through location.'''
-    def __init__(self, permission_type, location='obj.pk'):
+    location to look for the object id can be specified by supplying a function
+    to location, that takes in the object as a variable.'''
+    def __init__(self, permission_type, location=None):
         self.permission_type = permission_type
-        self.location = location
+        if location is None:
+            self.location = self.get_pk
+        else:
+            self.location = location
+
+    def get_pk(self, obj):
+        return obj.pk
 
     def has_object_permission(self, permission, request, view, obj):
         user = request.user
         permissions = get_user_permissions(user)
-        safe_locals = {"obj": obj, "request": request}
-        obj_id = eval(self.location, {}, safe_locals)
+        obj_id = self.location(obj)
         permissions = find_permission(
             permissions, self.permission_type, obj_id)
         return permissions.count() >= 1
@@ -143,8 +149,8 @@ class TeamPermission(BaseComposedPermision):
         return Or(
             AllowAdmin,
             AllowObjectPermission('team:admin'),
-            AllowObjectPermission('org:admin', 'obj.organization.pk'),
-            AllowObjectPermission('org:write', 'obj.organization.pk'),
+            AllowObjectPermission('org:admin', lambda t: t.organization_id),
+            AllowObjectPermission('org:write', lambda t: t.organization_id),
             And(
                 AllowOnlySafeHttpMethod,
                 Or(
