@@ -123,7 +123,7 @@ class OrganizationUsersPermission(BaseComposedPermision):
         )
 
 
-OrganizationCreateTeamPermission = OrganizationUsersPermission
+TeamCreatePermission = OrganizationUsersPermission
 
 
 class TeamPermission(BaseComposedPermision):

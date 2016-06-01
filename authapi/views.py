@@ -143,7 +143,7 @@ class OrganizationTeamViewSet(BaseTeamViewSet, CreateModelMixin):
     def create(self, request, parent_lookup_organization=None):
         org = get_object_or_404(
             SeedOrganization, pk=parent_lookup_organization)
-        permission = permissions.OrganizationCreateTeamPermission()
+        permission = permissions.TeamCreatePermission()
         if not permission.has_object_permission(request, self, org):
             self.permission_denied(
                 request, message=getattr(permission, 'message', None)
