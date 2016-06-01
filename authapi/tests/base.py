@@ -48,4 +48,6 @@ class AuthAPITestCase(APITestCase):
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         team.users.add(user)
-        team.permissions.create(type=permission_type, object_id=object_id)
+        permission = team.permissions.create(
+            type=permission_type, object_id=object_id)
+        return team, permission
