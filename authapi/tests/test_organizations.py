@@ -507,10 +507,7 @@ class OrganizationUserTests(OrganizationTestBase):
             url = reverse(
                 'seedorganization-users-detail', args=(org.pk, user.pk))
             resp = self.client.delete(url, data={'user_id': user.pk})
-            try:
-                user.delete()
-            except User.DoesNotExist:
-                pass
+            user.delete()
             return resp
 
         self.run_permission_checks(org, remove_user)
