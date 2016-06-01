@@ -467,6 +467,9 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Create a new team.
 
+    Only admin users, and users with org:admin or org:write permissions for
+    the organization may create teams.
+
     :<json str title: The title of the team.
 
     :>json int id: The ID of the created team.
@@ -548,6 +551,12 @@ Teams
 .. http:get:: /teams/
 
     Get a list of all the teams you have read access to.
+
+    Admin users have read access to all teams. Users with org:admin or
+    org:write permissions for an organization have read access to that
+    organization's teams. Users with team:read or team:admin permissions for
+    a team have read access to that team. Users that are part of the team, or
+    part of the team's organization, have read access to that team.
 
     **Example request**:
 
