@@ -389,7 +389,51 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-class OrganizationUserTests(AuthAPITestCase):
+class OrganizationTestBase(AuthAPITestCase):
+    def run_permission_checks(
+            self, org, func, success_status=status.HTTP_204_NO_CONTENT):
+        '''Runs the func, and ensures the result is as expected for each of
+        the kinds of users.'''
+        # Unauthorized
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Authorized no permissions
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:write, wrong org
+        org2 = SeedOrganization.objects.create()
+        self.add_permission(user, 'org:write', org2.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:write, correct org
+        self.add_permission(user, 'org:write', org.pk)
+        res = func()
+        self.assertEqual(res.status_code, success_status)
+
+        # Authorized org:admin, wrong org
+        SeedPermission.objects.all().delete()
+        self.add_permission(user, 'org:admin', org2.pk)
+        res = func()
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Authorized org:admin, correct org
+        self.add_permission(user, 'org:admin', org.pk)
+        res = func()
+        self.assertEqual(res.status_code, success_status)
+
+        # Admin user request
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        res = func()
+        self.assertEqual(res.status_code, success_status)
+
+
+class OrganizationUserTests(OrganizationTestBase):
     def test_add_user_to_organization(self):
         '''Adding a user to an organization should create a relationship
         between the two.'''
@@ -439,47 +483,6 @@ class OrganizationUserTests(AuthAPITestCase):
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 0)
 
-    def run_permission_checks(self, org, func):
-        '''Runs the func, and ensures the result is as expected for each of
-        the kinds of users.'''
-        # Unauthorized
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Authorized no permissions
-        user, token = self.create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authorized org:write, wrong org
-        org2 = SeedOrganization.objects.create()
-        self.add_permission(user, 'org:write', org2.pk)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authorized org:write, correct org
-        self.add_permission(user, 'org:write', org.pk)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-
-        # Authorized org:admin, wrong org
-        SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:admin', org2.pk)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authorized org:admin, correct org
-        self.add_permission(user, 'org:admin', org.pk)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-
-        # Admin user request
-        _, token = self.create_admin_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        res = func()
-        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-
     def test_permission_add_user_to_organization(self):
         '''Only admins, org:admins, and org:write can add users to an
         organization.'''
@@ -513,10 +516,12 @@ class OrganizationUserTests(AuthAPITestCase):
         self.run_permission_checks(org, remove_user)
 
 
-class OrganizationTeamTests(AuthAPITestCase):
+class OrganizationTeamTests(OrganizationTestBase):
     def test_create_team_for_organization(self):
         '''Should create a team and the relation between the team and
         organization.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         data = {
             'title': 'test team',
@@ -530,9 +535,23 @@ class OrganizationTeamTests(AuthAPITestCase):
         self.assertEqual(team.organization, org)
         self.assertEqual(team.title, data['title'])
 
+    def test_permission_create_team_for_organization(self):
+        '''admin users, org:admin, and org:write permissions for the
+        organization should be able to create teams.'''
+        org = SeedOrganization.objects.create()
+        url = reverse('seedorganization-teams-list', args=(org.pk,))
+        data = {'title': 'test team'}
+
+        def create_team():
+            return self.client.post(url, data=data)
+
+        self.run_permission_checks(org, create_team, status.HTTP_201_CREATED)
+
     def test_get_teams_for_organization(self):
         '''Getting a list of teams for an organization should only return that
         organization's teams.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create(title='test org')
         org2 = SeedOrganization.objects.create(title='test org')
         team1 = SeedTeam.objects.create(title='test team', organization=org1)
@@ -543,6 +562,25 @@ class OrganizationTeamTests(AuthAPITestCase):
         [team] = response.data
 
         self.assertEqual(team['id'], team1.id)
+
+    def test_permission_teams_for_organization(self):
+        '''Any member of the organization should be able to see that
+        organization's teams.'''
+        org = SeedOrganization.objects.create()
+        url = reverse('seedorganization-teams-list', args=(org.pk,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        user, token = self.create_user()
+        org = SeedOrganization.objects.create()
+        org.users.add(user)
+        team = SeedTeam.objects.create(organization=org)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        [resp_team] = response.data
+        self.assertEqual(resp_team['id'], team.pk)
 
     def test_create_permission_for_organizations_team(self):
         '''Should be able to create a permission for an organization's team.'''
