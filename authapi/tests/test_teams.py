@@ -336,6 +336,125 @@ class TeamTests(AuthAPITestCase):
         expected = TeamSerializer(instance=team, context=context)
         self.assertEqual(response.data, expected.data)
 
+    def test_permission_get_team_unauthorized(self):
+        '''Only authorized users should be able to access team details.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_permission_get_team_member_of_team(self):
+        '''Users that are a member of a team should be able to access that
+        team's details.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        user, token = self.create_user()
+        team.users.add(user)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_read_permission(self):
+        '''Users that have a team:read permissions for the team should be able
+        to see the team details.'''
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        user, token = self.create_user()
+        self.add_permission(user, 'team:read', team1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_admin_permission(self):
+        '''Users that have a team:admin permissions for the team should be able
+        to see the team details.'''
+        org = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org)
+        team2 = SeedTeam.objects.create(organization=org)
+        user, token = self.create_user()
+        self.add_permission(user, 'team:admin', team1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_org_member(self):
+        '''Users that are members of a team's organization should be able to
+        see the team's details.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        user, token = self.create_user()
+        org.users.add(user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_org_admin(self):
+        '''Users that have an org:admin permission for a team's organization
+        should be able to see the team details.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        user, token = self.create_user()
+        self.add_permission(user, 'org:admin', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_org_write(self):
+        '''Users that have an org:write permission for a team's organization
+        should be able to see the team details.'''
+        org1 = SeedOrganization.objects.create()
+        org2 = SeedOrganization.objects.create()
+        team1 = SeedTeam.objects.create(organization=org1)
+        team2 = SeedTeam.objects.create(organization=org2)
+        user, token = self.create_user()
+        self.add_permission(user, 'org:write', org1.pk)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team2.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        url = reverse('seedteam-detail', args=(team1.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_permission_get_team_admin(self):
+        '''Admin users should have read access to all teams.'''
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        url = reverse('seedteam-detail', args=(team.pk,))
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
     def test_serializer(self):
         '''The TeamSerializer should return the correct information.'''
         organization = SeedOrganization.objects.create()
