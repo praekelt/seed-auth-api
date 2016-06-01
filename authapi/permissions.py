@@ -79,3 +79,24 @@ class OrganizationPermission(BaseComposedPermision):
                 )
             )
         )
+
+
+class OrganizationUsersPermission(BaseComposedPermision):
+    '''Permissions for the OrganizationUsersViewSet.'''
+    def global_permission_set(self):
+        '''All users must be authenticated.'''
+        return And(
+            AllowOnlyAuthenticated,
+            self.object_permission_set()
+        )
+
+    def object_permission_set(self):
+        '''
+        admins can add users to any organization. org:admin and org:write can
+        add users to the organization that they are admin for.
+        '''
+        return Or(
+            AllowAdmin,
+            AllowObjectPermission('org:write'),
+            AllowObjectPermission('org:admin')
+        )

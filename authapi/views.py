@@ -64,6 +64,8 @@ class OrganizationViewSet(viewsets.ModelViewSet):
 class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
     '''Nested viewset that allows users to add or remove users from
     organizations.'''
+    permission_classes = (permissions.OrganizationUsersPermission,)
+
     def create(self, request, parent_lookup_organization=None):
         '''Add a user to an organization.'''
         serializer = ExistingUserSerializer(data=request.data)
@@ -71,6 +73,7 @@ class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
         user = serializer.validated_data.get('user_id')
         org = get_object_or_404(
             SeedOrganization, pk=parent_lookup_organization)
+        self.check_object_permissions(request, org)
         org.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -79,6 +82,7 @@ class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
         user = get_object_or_404(User, pk=pk)
         org = get_object_or_404(
             SeedOrganization, pk=parent_lookup_organization)
+        self.check_object_permissions(request, org)
         org.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
