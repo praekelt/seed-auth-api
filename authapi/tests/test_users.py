@@ -11,6 +11,9 @@ from authapi.tests.base import AuthAPITestCase
 
 
 class UserTests(AuthAPITestCase):
+    def setUp(self):
+        self.patch_client_data_json()
+
     def test_get_account_list_multiple(self):
         '''If there are multiple users, it should return them all in a list.'''
         user1, token = self.create_user()

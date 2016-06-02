@@ -3,9 +3,28 @@ from django.core.urlresolvers import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.request import Request
 from rest_framework.reverse import reverse as drt_reverse
-from rest_framework.test import APITestCase, APIRequestFactory
+from rest_framework.test import APITestCase, APIRequestFactory, APIClient
 
 from authapi.models import SeedOrganization, SeedTeam
+
+
+class JsonApiClient(APIClient):
+    def ensure_json(self, **kwargs):
+        '''Ensure that all data is sent as json.'''
+        kwargs['format'] = 'json'
+        return kwargs
+
+    def get(self, *args, **kwargs):
+        kwargs = self.ensure_json(**kwargs)
+        return super(JsonApiClient, self).get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        kwargs = self.ensure_json(**kwargs)
+        return super(JsonApiClient, self).post(*args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        kwargs = self.ensure_json(**kwargs)
+        return super(JsonApiClient, self).put(*args, **kwargs)
 
 
 class AuthAPITestCase(APITestCase):
@@ -51,3 +70,7 @@ class AuthAPITestCase(APITestCase):
         permission = team.permissions.create(
             type=permission_type, object_id=object_id)
         return team, permission
+
+    def patch_client_data_json(self):
+        '''Patches the client to change data to json instead of form data.'''
+        self.client = JsonApiClient()
