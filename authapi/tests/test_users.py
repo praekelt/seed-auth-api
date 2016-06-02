@@ -379,7 +379,6 @@ class UserTests(AuthAPITestCase):
         admin.'''
         user1, token1 = self.create_user('user1@example.org')
         user2, token2 = self.create_user('user2@example.org')
-        self.add_permission(user2, 'org:admin')
         data = {
             'email': 'new@email.org',
             'first_name': 'new',
@@ -388,6 +387,13 @@ class UserTests(AuthAPITestCase):
         }
 
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token2.key)
+        self.add_permission(user2, 'org:admin')
+        response = self.client.put(
+            reverse('user-detail', args=[user1.id]), data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token2.key)
+        self.add_permission(user2, 'user:create')
         response = self.client.put(
             reverse('user-detail', args=[user1.id]), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
