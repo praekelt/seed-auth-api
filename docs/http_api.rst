@@ -980,6 +980,8 @@ Users
 
     Get a list of all users.
 
+    Requires any authenticated user.
+
     **Example request**:
 
     .. sourcecode:: http
@@ -1020,6 +1022,10 @@ Users
 .. http:post:: /users/
 
     Create a new user.
+
+    Only admin users, and users with org:admin or user:create permissions
+    can create new users. Only admin users are allowed to create other admin
+    users.
 
     :<json str first_name: The (optional) first name of the user.
     :<json str last_name: The (optional) last name of the user.
@@ -1083,6 +1089,8 @@ Users
 
     Get details on a specific user.
 
+    Requires an authenticated user.
+
     :>json int id: The ID for the user.
     :>json str url: The URL for the user.
     :>json str first_name: The (optional) first name of the user.
@@ -1131,8 +1139,11 @@ Users
 
 .. http:put:: /users/(int:user_id)
 
-    Update the information of an existing user. Cannot update the password this
-    way, see the "Password resets" section on how to update the user password.
+    Update the information of an existing user.
+
+    Only the user themself, or a user with org:admin, or an admin user can
+    update the user information. Only admin users can change a user to be an
+    admin user.
 
     :<json str first_name: The (optional) first name of the user.
     :<json str last_name: The (optional) last name of the user.
@@ -1192,6 +1203,9 @@ Users
 
     Remove an existing user. Sets the user to inactive instead of deleting
     the user.
+
+    Only the user themself, or a user with org:admin, or an admin user can
+    deactivate a user.
 
     :status 204: Successfully deleted the user.
 
