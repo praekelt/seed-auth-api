@@ -183,7 +183,7 @@ class UserPermission(BaseComposedPermision):
             AllowAdmin,
             And(
                 ObjAttrTrue(
-                    lambda r, _: r.data.get('admin') != True),
+                    lambda r, _: r.data.get('admin') is not True),
                 Or(
                     AllowPermission('user:create'),
                     AllowPermission('org:admin')
@@ -211,13 +211,13 @@ class UserPermission(BaseComposedPermision):
                 AllowPermission('org:admin'),
                 ObjAttrTrue(lambda _, u: not u.is_superuser),
                 ObjAttrTrue(
-                    lambda r, _: r.data.get('admin') != True)
+                    lambda r, _: r.data.get('admin') is not True)
             ),
             And(
                 AllowModify,
                 ObjAttrTrue(
                     lambda req, user: user == req.user),
                 ObjAttrTrue(
-                    lambda r, _: r.data.get('admin') != True)
+                    lambda r, _: r.data.get('admin') is not True)
             ),
         )
