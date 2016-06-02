@@ -76,8 +76,8 @@ class AllowAdmin(BasePermissionComponent):
 class ObjAttrTrue(BasePermissionComponent):
     '''
     This component will pass when the function 'attribute' returns true.
-    The function is given (request, obj) as parameters. It will also pass
-    all global permissions.
+    The function is given (request, obj) as parameters. obj may be None for
+    global permission views.
     '''
     def __init__(self, attribute):
         self.attribute = attribute
