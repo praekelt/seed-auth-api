@@ -182,7 +182,8 @@ class UserPermission(BaseComposedPermision):
         only_admins_create_admins = Or(
             AllowAdmin,
             And(
-                ObjAttrTrue(lambda r, _: r.data.get('admin').lower() != 'true'),
+                ObjAttrTrue(
+                    lambda r, _: r.data.get('admin').lower() != 'true'),
                 Or(
                     AllowPermission('user:create'),
                     AllowPermission('org:admin')
