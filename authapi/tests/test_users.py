@@ -10,12 +10,6 @@ from authapi.models import SeedTeam, SeedOrganization
 from authapi.tests.base import AuthAPITestCase
 
 
-'''All users have view permissions. Admin users, and users with
-org:admin can create, update, and delete any user. Any user can update
-or delete themselves. Users with user:create permission can create
-new users.'''
-
-
 class UserTests(AuthAPITestCase):
     def test_get_account_list_multiple(self):
         '''If there are multiple users, it should return them all in a list.'''
