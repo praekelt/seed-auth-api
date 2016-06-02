@@ -60,7 +60,7 @@ AllowModify = Or(AllowUpdate, AllowDelete)
 
 
 class AllowCreate(BasePermissionComponent):
-    '''Only allows POST requests with no object.'''
+    '''Only allows POST requests.'''
     def has_permission(self, permission, request, view):
         return request.method == 'POST'
 
