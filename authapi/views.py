@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.mixins import (
     DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
     ListModelMixin)
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_extensions.mixins import NestedViewSetMixin
@@ -193,6 +193,7 @@ class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
+    permission_classes = (permissions.UserPermission,)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -224,6 +225,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class TokenView(APIView):
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         '''Create a token, given an email and password. Removes all other
         tokens for that user.'''
@@ -246,7 +249,7 @@ class TokenView(APIView):
 
 
 class UserPermissionsView(APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         '''Get user information, with a list of permissions for that user.'''
