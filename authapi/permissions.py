@@ -1,5 +1,5 @@
 from restfw_composed_permissions.base import (
-    BaseComposedPermision, BasePermissionComponent, And, Or)
+    BaseComposedPermision, BasePermissionComponent, And, Or, Not)
 from restfw_composed_permissions.generic.components import (
     AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
 
@@ -17,7 +17,7 @@ class AllowPermission(BasePermissionComponent):
         user = request.user
         permissions = get_user_permissions(user)
         permissions = find_permission(permissions, self.permission_type)
-        return permissions.count() >= 1
+        return permissions.exists()
 
 
 class AllowObjectPermission(AllowPermission):
@@ -41,7 +41,7 @@ class AllowObjectPermission(AllowPermission):
         obj_id = self.location(obj)
         permissions = find_permission(
             permissions, self.permission_type, obj_id)
-        return permissions.count() >= 1
+        return permissions.exists()
 
 
 class AllowUpdate(BasePermissionComponent):
@@ -59,6 +59,12 @@ class AllowDelete(BasePermissionComponent):
 AllowModify = Or(AllowUpdate, AllowDelete)
 
 
+class AllowCreate(BasePermissionComponent):
+    '''Only allows POST requests.'''
+    def has_permission(self, permission, request, view):
+        return request.method == 'POST'
+
+
 class AllowAdmin(BasePermissionComponent):
     '''
     This component will always allow admin users, and deny all other users.
@@ -70,10 +76,14 @@ class AllowAdmin(BasePermissionComponent):
 class ObjAttrTrue(BasePermissionComponent):
     '''
     This component will pass when the function 'attribute' returns true.
-    The function is given (request, obj) as parameters.
+    The function is given (request, obj) as parameters. obj may be None for
+    global permission views.
     '''
     def __init__(self, attribute):
         self.attribute = attribute
+
+    def has_permission(self, permission, request, view):
+        return self.attribute(request, None)
 
     def has_object_permission(self, permission, request, view, obj):
         return self.attribute(request, obj)
@@ -161,4 +171,53 @@ class TeamPermission(BaseComposedPermision):
                             pk=r.user.pk).exists())
                 )
             )
+        )
+
+
+class UserPermission(BaseComposedPermision):
+    '''Permissions for the UserViewSet.'''
+    def global_permission_set(self):
+        '''All users must be authenticated. Only admins can create other admin
+        users.'''
+        only_admins_create_admins = Or(
+            AllowAdmin,
+            And(
+                ObjAttrTrue(
+                    lambda r, _: r.data.get('admin') is not True),
+                Or(
+                    AllowPermission('user:create'),
+                    AllowPermission('org:admin')
+                )
+            )
+        )
+
+        return And(
+            AllowOnlyAuthenticated,
+            Or(
+                Not(AllowCreate),
+                only_admins_create_admins
+            )
+        )
+
+    def object_permission_set(self):
+        '''All users have view permissions. Admin users, and users with
+        org:admin can create, update, and delete any user. Any user can update
+        or delete themselves. Users with user:create permission can create
+        new users. Only admins can create or modify other admin users.'''
+        return Or(
+            AllowOnlySafeHttpMethod,
+            AllowAdmin,
+            And(
+                AllowPermission('org:admin'),
+                ObjAttrTrue(lambda _, u: not u.is_superuser),
+                ObjAttrTrue(
+                    lambda r, _: r.data.get('admin') is not True)
+            ),
+            And(
+                AllowModify,
+                ObjAttrTrue(
+                    lambda req, user: user == req.user),
+                ObjAttrTrue(
+                    lambda r, _: r.data.get('admin') is not True)
+            ),
         )
