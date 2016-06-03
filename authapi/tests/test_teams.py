@@ -656,6 +656,8 @@ class TeamTests(AuthAPITestCase):
     def test_add_permission_to_team(self):
         '''When adding a permission to a team, it should create a permission
         and link it to that team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         self.assertEqual(len(team.permissions.all()), 0)
@@ -681,6 +683,8 @@ class TeamTests(AuthAPITestCase):
         '''When removing a permission from a team, it should remove the
         relation between the team and permission, and delete that
         permission.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         permission = team.permissions.create(

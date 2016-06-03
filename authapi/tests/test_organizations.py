@@ -748,6 +748,8 @@ class OrganizationTeamTests(AuthAPITestCase):
 
     def test_create_permission_for_organizations_team(self):
         '''Should be able to create a permission for an organization's team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         data = {
@@ -769,6 +771,8 @@ class OrganizationTeamTests(AuthAPITestCase):
 
     def test_remove_permission_for_organizations_team(self):
         '''Should be able to remove a permission for an organization's team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         permission = team.permissions.create(
@@ -787,6 +791,8 @@ class OrganizationTeamTests(AuthAPITestCase):
     def test_remove_permission_for_other_organization_team(self):
         '''Should not be able to remove a permission for another
         organization's team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create(title='test org')
         org2 = SeedOrganization.objects.create(title='test org')
         team1 = SeedTeam.objects.create(title='test team', organization=org1)
