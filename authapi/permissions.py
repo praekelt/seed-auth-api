@@ -100,8 +100,8 @@ class OrganizationPermission(BaseComposedPermision):
 
     def object_permission_set(self):
         '''
-        All users can read. admins, org:admins, and users with org:write
-        permission for the specific organization can update. admins can create.
+        All users can read. admins and org:admins with permission for the
+        specific organization can update. admins can create.
         '''
         return Or(
             AllowOnlySafeHttpMethod,
@@ -109,7 +109,6 @@ class OrganizationPermission(BaseComposedPermision):
             And(
                 AllowModify,
                 Or(
-                    AllowObjectPermission('org:write'),
                     AllowObjectPermission('org:admin'),
                 )
             )
@@ -127,13 +126,12 @@ class OrganizationUsersPermission(BaseComposedPermision):
 
     def object_permission_set(self):
         '''
-        admins can add users to any organization. org:admin and org:write can
-        add users to the organization that they are admin for.
+        admins can add users to any organization. org:admin can add users to
+        the organization that they are admin for.
         '''
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
-            AllowObjectPermission('org:write'),
             AllowObjectPermission('org:admin')
         )
 
@@ -150,8 +148,7 @@ class TeamPermission(BaseComposedPermision):
     def object_permission_set(self):
         '''
         admins, users with team:admin for the team, and users with org:admin,
-        or org:write permission for the team's organization have full access
-        to teams. Users with team:read permission for the team, or are a member
+        team's organization have full access to teams. Users who are a member
         of the team, or are a member of the team's organization, have read
         access to the team.
         '''
@@ -159,11 +156,9 @@ class TeamPermission(BaseComposedPermision):
             AllowAdmin,
             AllowObjectPermission('team:admin'),
             AllowObjectPermission('org:admin', lambda t: t.organization_id),
-            AllowObjectPermission('org:write', lambda t: t.organization_id),
             And(
                 AllowOnlySafeHttpMethod,
                 Or(
-                    AllowObjectPermission('team:read'),
                     ObjAttrTrue(
                         lambda r, t: t.users.filter(pk=r.user.pk).exists()),
                     ObjAttrTrue(
@@ -185,7 +180,6 @@ class UserPermission(BaseComposedPermision):
                 ObjAttrTrue(
                     lambda r, _: r.data.get('admin') is not True),
                 Or(
-                    AllowPermission('user:create'),
                     AllowPermission('org:admin')
                 )
             )
@@ -202,8 +196,8 @@ class UserPermission(BaseComposedPermision):
     def object_permission_set(self):
         '''All users have view permissions. Admin users, and users with
         org:admin can create, update, and delete any user. Any user can update
-        or delete themselves. Users with user:create permission can create
-        new users. Only admins can create or modify other admin users.'''
+        or delete themselves. Only admins can create or modify other admin
+        users.'''
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
