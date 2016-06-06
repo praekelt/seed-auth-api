@@ -263,7 +263,7 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # Authenticated request, wrong permission
-        self.add_permission(user, 'org:write')
+        self.add_permission(user, 'team:admin')
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -290,9 +290,8 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_permission_update_organization(self):
-        '''Only admin users, users with org:admin permissions, and users with
-        org:write permissions for the organization should be able to update
-        organizations.'''
+        '''Only admin users, users with org:admin permissions should be able to
+        update organizations.'''
         data = {
             'title': 'test org',
         }
@@ -310,18 +309,6 @@ class OrganizationTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authenticated request, wrong org permissions
-        SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:write', org2.pk)
-        response = self.client.put(url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authenticated request, correct org permissions
-        SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:write', org1.pk)
-        response = self.client.put(url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Authenticated request, org:admin permissions, wrong org
         SeedPermission.objects.all().delete()
@@ -342,9 +329,8 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_permission_delete_organization(self):
-        '''Only admin users, users with org:admin permissions, and users with
-        org:write permissions for the organization should be able to delete
-        organizations.'''
+        '''Only admin users, users with org:admin permissions for the
+        organization should be able to delete organizations.'''
         org1 = SeedOrganization.objects.create()
         org2 = SeedOrganization.objects.create()
         url = reverse('seedorganization-detail', args=(org1.pk,))
@@ -358,17 +344,6 @@ class OrganizationTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authenticated request, wrong org permissions
-        self.add_permission(user, 'org:write', org2.pk)
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        # Authenticated request, correct org permissions
-        SeedPermission.objects.all().delete()
-        self.add_permission(user, 'org:write', org1.pk)
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Authenticated request, org:admin permissions, wrong org
         SeedPermission.objects.all().delete()
@@ -460,31 +435,6 @@ class OrganizationUserTests(AuthAPITestCase):
         resp = self.client.post(url, data={'user_id': user.pk})
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_permission_add_user_to_organization_org_write_wrong_org(self):
-        '''If the user has org:write permissions for a different org, they
-        should not be able to add users to this org.'''
-        org1 = SeedOrganization.objects.create()
-        org2 = SeedOrganization.objects.create()
-        user, token = self.create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org2.pk)
-
-        url = reverse('seedorganization-users-list', args=(org1.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_add_user_to_organization_org_write_correct_org(self):
-        '''If the user has org:write permissions for the org, they should
-        be able to add users to this org.'''
-        org = SeedOrganization.objects.create()
-        user, token = self.create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org.pk)
-
-        url = reverse('seedorganization-users-list', args=(org.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-
     def test_permission_add_user_to_organization_org_admin_wrong_org(self):
         '''If the user has org:admin permissions for a different org, they
         should not be able to add users to this org.'''
@@ -543,33 +493,6 @@ class OrganizationUserTests(AuthAPITestCase):
         url = reverse('seedorganization-users-detail', args=(org.pk, user.pk))
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_remove_user_from_org_org_write_wrong_org(self):
-        '''If the user has org:write permissions for a different org, they
-        should not be able to remove users from this org.'''
-        org1 = SeedOrganization.objects.create()
-        org2 = SeedOrganization.objects.create()
-        user, token = self.create_user()
-        org1.users.add(user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org2.pk)
-
-        url = reverse('seedorganization-users-detail', args=(org1.pk, user.pk))
-        resp = self.client.delete(url)
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_remove_user_from_org_org_write_correct_org(self):
-        '''If the user has org:write permissions for the org, they should
-        be able to remove users from this org.'''
-        org = SeedOrganization.objects.create()
-        user, token = self.create_user()
-        org.users.add(user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org.pk)
-
-        url = reverse('seedorganization-users-detail', args=(org.pk, user.pk))
-        resp = self.client.delete(url)
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_permission_remove_user_from_org_org_admin_wrong_org(self):
         '''If the user has org:admin permissions for a different org, they
@@ -648,31 +571,6 @@ class OrganizationTeamTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         resp = self.client.post(url, data={'title': 'test team'})
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_create_team_org_write_wrong_org(self):
-        '''If a user has org:write permissions, but for another org, they
-        should not be allowed to create teams for this org.'''
-        org = SeedOrganization.objects.create()
-        org2 = SeedOrganization.objects.create()
-        url = reverse('seedorganization-teams-list', args=(org.pk,))
-
-        user, token = self.create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org2.pk)
-        resp = self.client.post(url, data={'title': 'test team'})
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_create_team_org_write_correct_org(self):
-        '''If a user has org:write permissions they should be allowed to create
-        teams for this org.'''
-        org = SeedOrganization.objects.create()
-        url = reverse('seedorganization-teams-list', args=(org.pk,))
-
-        user, token = self.create_user()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.add_permission(user, 'org:write', org.pk)
-        resp = self.client.post(url, data={'title': 'test team'})
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
     def test_permission_create_team_org_admin_wrong_org(self):
         '''If a user has org:admin permissions, but for another org, they
