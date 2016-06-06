@@ -44,6 +44,19 @@ class AllowObjectPermission(AllowPermission):
         return permissions.exists()
 
 
+class AllowPermissionAttrEqual(BasePermissionComponent):
+    '''Takes in a function, that takes in (request, permission), and returns
+    true or false whether it should be allowed.'''
+    def __init__(self, permission_type, allow):
+        self.permission_type = permission_type
+        self.allow = allow
+
+    def has_permission(self, permission, request, view):
+        permissions = get_user_permissions(request.user)
+        permissions = find_permission(permissions, self.permission_type)
+        return any((self.allow(request, p) for p in permissions))
+
+
 class AllowUpdate(BasePermissionComponent):
     '''Only allows PUT and PATCH requests.'''
     def has_permission(self, permission, request, view):
@@ -214,4 +227,50 @@ class UserPermission(BaseComposedPermision):
                 ObjAttrTrue(
                     lambda r, _: r.data.get('admin') is not True)
             ),
+        )
+
+
+class TeamPermissionPermission(BaseComposedPermision):
+    '''Permissions for adding or removing permissions from teams.'''
+    def PermissionEqual(self, permission):
+        return ObjAttrTrue(lambda r, _: r.data.get('type') == permission)
+
+    def global_permission_set(self):
+        '''All users must be authenticated. Admins and org:admin users can
+        add any permission for their org's teams. team:admin users can give
+        other teams team:admim. Anyone who can create a permission can also
+        remove that permission.'''
+        return And(
+            AllowOnlyAuthenticated,
+            Or(
+                self.object_permission_set()
+            )
+        )
+
+    def object_permission_set(self):
+        return Or(
+            AllowAdmin,
+            And(
+                AllowPermission('org:admin'),
+                Or(
+                    Not(self.PermissionEqual('org:admin')),
+                    AllowPermissionAttrEqual(
+                        'org:admin',
+                        lambda r, p: r.data.get('object_id') == p.object_id)
+                )
+            ),
+            And(
+                Not(self.PermissionEqual('org:admin')),
+                AllowPermission('team:admin'),
+                Or(
+                    And(
+                        self.PermissionEqual('team:admin'),
+                        AllowPermissionAttrEqual(
+                            'team:admin',
+                            lambda r, p:
+                                r.data.get('object_id') == p.object_id)
+                    ),
+                    Not(self.PermissionEqual('team:admin'))
+                )
+            )
         )
