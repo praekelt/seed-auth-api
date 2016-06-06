@@ -51,16 +51,9 @@ org:admin
     Can create/read/write/delete users, and teams that are part of the
     organization, and can add users to the organization that they are an admin
     for. Can read/write the organization that they are admin for.
-org:write
-    Can modify an organization's details, including adding existing users and
-    teams to the organization.
 team:admin
     Can modify the team they have permission for, and add and remove existing
     users to that team.
-team:read
-    Can view the team they have permission for.
-user:create
-    Can create new users.
 
 .. http:get:: /user
 
