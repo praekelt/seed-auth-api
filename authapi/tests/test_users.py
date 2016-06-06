@@ -140,10 +140,6 @@ class UserTests(AuthAPITestCase):
         resp = self.client.post(reverse('user-list'), data=data)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
-        self.add_permission(user, 'user:create')
-        resp = self.client.post(reverse('user-list'), data=data)
-        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
         user, token = self.create_admin_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         resp = self.client.post(reverse('user-list'), data=data)
@@ -225,22 +221,6 @@ class UserTests(AuthAPITestCase):
         }
         resp = self.client.post(reverse('user-list'), data=data)
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_permission_create_user_user_create_permission(self):
-        '''Users with user:create permissions should be able to create users.
-        '''
-        user, token = self.create_user()
-        self.add_permission(user, 'user:create')
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        data = {
-            'email': 'user1@example.org',
-            'password': 'testpassword',
-            'first_name': 'user1',
-            'last_name': 'example',
-            'admin': False,
-        }
-        resp = self.client.post(reverse('user-list'), data=data)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
     def test_permission_create_user_org_admin_permission(self):
         '''Users with org:admin permissions of any organization should be able
@@ -391,12 +371,6 @@ class UserTests(AuthAPITestCase):
 
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token2.key)
         self.add_permission(user2, 'org:admin')
-        response = self.client.put(
-            reverse('user-detail', args=[user1.id]), data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token2.key)
-        self.add_permission(user2, 'user:create')
         response = self.client.put(
             reverse('user-detail', args=[user1.id]), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
