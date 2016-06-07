@@ -10,6 +10,9 @@ from authapi.tests.base import AuthAPITestCase
 
 
 class TeamTests(AuthAPITestCase):
+    def setUp(self):
+        self.patch_client_data_json()
+
     def test_get_team_list(self):
         '''A GET request on the teams endpoint should return a list of
         teams.'''

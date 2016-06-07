@@ -10,6 +10,9 @@ from authapi.tests.base import AuthAPITestCase
 
 
 class OrganizationTests(AuthAPITestCase):
+    def setUp(self):
+        self.patch_client_data_json()
+
     def test_get_organization_list(self):
         '''A GET request to the organizations endpoint should return a list
         of organizations.'''
@@ -365,6 +368,9 @@ class OrganizationTests(AuthAPITestCase):
 
 
 class OrganizationUserTests(AuthAPITestCase):
+    def setUp(self):
+        self.patch_client_data_json()
+
     def test_add_user_to_organization(self):
         '''Adding a user to an organization should create a relationship
         between the two.'''
@@ -535,6 +541,9 @@ class OrganizationUserTests(AuthAPITestCase):
 
 
 class OrganizationTeamTests(AuthAPITestCase):
+    def setUp(self):
+        self.patch_client_data_json()
+
     def test_create_team_for_organization(self):
         '''Should create a team and the relation between the team and
         organization.'''
