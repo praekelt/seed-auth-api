@@ -821,6 +821,7 @@ class OrganizationTeamTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
+        team2 = SeedTeam.objects.create(title='test team', organization=org)
         self.add_permission(user, 'team:admin', team.pk)
 
         # team:admin
@@ -835,6 +836,19 @@ class OrganizationTeamTests(AuthAPITestCase):
                 'namespace': 'foo'
             })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # team:admin wrong team
+        resp = self.client.post(
+            reverse(
+                'seedorganization-teams-permissions-list',
+                args=[org.pk, team.pk]
+            ),
+            data={
+                'type': 'team:admin',
+                'object_id': team2.pk,
+                'namespace': 'foo'
+            })
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
         # org:admin
         resp = self.client.post(
