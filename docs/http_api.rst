@@ -779,9 +779,8 @@ Teams
 
     Add a permission to a team.
 
-    Only users with team:admin permission for this team, or org:admin
-    permission for this team's organization can add permissions.
-    
+    Any user that can see the team, can add permissions to that team.
+
     If the permission to be added is of type team:admin, then the user must
     have team:admin for the team specified by object_id, or org:admin for the
     team's organization, with the team specified by the object_id.
@@ -854,8 +853,7 @@ Teams
 
     Remove a permission from a team.
 
-    Only users with team:admin permission for this team, or org:admin
-    permission for this team's organization can remove permissions.
+    Any user that can see the team, can remove permissions from that team.
     
     If the permission to be removed is of type team:admin, then the user must
     have team:admin for the team specified by object_id, or org:admin for the

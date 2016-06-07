@@ -162,7 +162,7 @@ class TeamPermissionViewSet(
 
     def check_team_permissions(self, request, teamid, orgid=None):
         old_method = request.method
-        request.method = 'PUT'
+        request.method = 'GET'
         if orgid is not None:
             get_object_or_404(SeedOrganization, pk=orgid)
 
