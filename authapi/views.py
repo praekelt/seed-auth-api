@@ -161,24 +161,22 @@ class TeamPermissionViewSet(
     permission_classes = (permissions.TeamPermissionPermission,)
 
     def check_team_permissions(self, request, teamid, orgid=None):
+        old_method = request.method
+        request.method = 'PUT'
         if orgid is not None:
             get_object_or_404(SeedOrganization, pk=orgid)
 
             team = get_object_or_404(
                 SeedTeam, pk=teamid, organization_id=orgid)
-            permission = permissions.TeamPermission()
-            request.method = 'PUT'
-            if not permission.has_object_permission(request, self, team):
-                self.permission_denied(
-                    request, message=getattr(permission, 'message', None)
-                )
         else:
             team = get_object_or_404(SeedTeam, pk=teamid)
-            permission = permissions.TeamPermission()
-            if not permission.has_object_permission(request, self, team):
-                self.permission_denied(
-                    request, message=getattr(permission, 'message', None)
-                )
+
+        permission = permissions.TeamPermission()
+        if not permission.has_object_permission(request, self, team):
+            self.permission_denied(
+                request, message=getattr(permission, 'message', None)
+            )
+        request.method = old_method
         return team
 
     def create(
@@ -202,9 +200,8 @@ class TeamPermissionViewSet(
         self.check_team_permissions(
             request, parent_lookup_seedteam,
             parent_lookup_seedteam__organization)
-
         return super(TeamPermissionViewSet, self).destroy(
-            request, parent_lookup_seedteam,
+            request, pk, parent_lookup_seedteam,
             parent_lookup_seedteam__organization)
 
 
