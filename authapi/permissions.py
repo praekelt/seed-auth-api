@@ -1,9 +1,12 @@
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from restfw_composed_permissions.base import (
     BaseComposedPermision, BasePermissionComponent, And, Or, Not)
 from restfw_composed_permissions.generic.components import (
     AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
 
 from authapi.utils import get_user_permissions, find_permission
+from authapi.models import SeedTeam
 
 
 class AllowPermission(BasePermissionComponent):
@@ -42,19 +45,6 @@ class AllowObjectPermission(AllowPermission):
         permissions = find_permission(
             permissions, self.permission_type, obj_id)
         return permissions.exists()
-
-
-class AllowPermissionAttrEqual(BasePermissionComponent):
-    '''Takes in a function, that takes in (request, permission), and returns
-    true or false whether it should be allowed.'''
-    def __init__(self, permission_type, allow):
-        self.permission_type = permission_type
-        self.allow = allow
-
-    def has_permission(self, permission, request, view):
-        permissions = get_user_permissions(request.user)
-        permissions = find_permission(permissions, self.permission_type)
-        return any((self.allow(request, p) for p in permissions))
 
 
 class AllowUpdate(BasePermissionComponent):
@@ -230,47 +220,45 @@ class UserPermission(BaseComposedPermision):
         )
 
 
-class TeamPermissionPermission(BaseComposedPermision):
+class TeamPermissionPermission(BasePermission):
     '''Permissions for adding or removing permissions from teams.'''
-    def PermissionEqual(self, permission):
-        return ObjAttrTrue(lambda r, _: r.data.get('type') == permission)
+    def has_permission(self, request, view):
+        if request.user.is_anonymous():
+            return False
+        if request.method == 'POST':
+            return self.handle_create(request)
+        if request.method == 'DELETE':
+            # We don't need to do any checks at the view level, only at the
+            # object level.
+            return True
 
-    def global_permission_set(self):
-        '''All users must be authenticated. Admins and org:admin users can
-        add any permission for their org's teams. team:admin users can give
-        other teams team:admim. Anyone who can create a permission can also
-        remove that permission.'''
-        return And(
-            AllowOnlyAuthenticated,
-            Or(
-                self.object_permission_set()
-            )
-        )
+    def has_object_permission(self, request, view, obj):
+        return self.handle_delete(request, obj)
 
-    def object_permission_set(self):
-        return Or(
-            AllowAdmin,
-            And(
-                AllowPermission('org:admin'),
-                Or(
-                    Not(self.PermissionEqual('org:admin')),
-                    AllowPermissionAttrEqual(
-                        'org:admin',
-                        lambda r, p: r.data.get('object_id') == p.object_id)
-                )
-            ),
-            And(
-                Not(self.PermissionEqual('org:admin')),
-                AllowPermission('team:admin'),
-                Or(
-                    And(
-                        self.PermissionEqual('team:admin'),
-                        AllowPermissionAttrEqual(
-                            'team:admin',
-                            lambda r, p:
-                                r.data.get('object_id') == p.object_id)
-                    ),
-                    Not(self.PermissionEqual('team:admin'))
-                )
-            )
-        )
+    def user_has_permission(self, user, permission_type, object_id=None):
+        permissions = get_user_permissions(user)
+        permissions = find_permission(permissions, permission_type, object_id)
+        return permissions.exists()
+
+    def check_permissions(self, user, ptype, object_id):
+        if ptype == 'org:admin':
+            return self.user_has_permission(user, ptype, object_id)
+        elif ptype == 'team:admin':
+            if self.user_has_permission(user, 'team:admin', object_id):
+                return True
+            org_id = get_object_or_404(SeedTeam, pk=object_id).organization_id
+            return self.user_has_permission(user, 'org:admin', org_id)
+        else:
+            return True
+
+    def handle_create(self, request):
+        user = request.user
+        ptype = request.data.get('type')
+        object_id = request.data.get('object_id')
+        return self.check_permissions(user, ptype, object_id)
+
+    def handle_delete(self, request, obj):
+        user = request.user
+        ptype = obj.type
+        object_id = obj.object_id
+        return self.check_permissions(user, ptype, object_id)
