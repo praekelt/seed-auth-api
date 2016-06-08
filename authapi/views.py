@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework import viewsets, status, serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import get_object_or_404
+from rest_framework.request import clone_request
 from rest_framework.response import Response
 from rest_framework.mixins import (
     DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
@@ -161,22 +162,18 @@ class TeamPermissionViewSet(
     permission_classes = (permissions.TeamPermissionPermission,)
 
     def check_team_permissions(self, request, teamid, orgid=None):
-        old_method = request.method
-        request.method = 'GET'
         if orgid is not None:
-            get_object_or_404(SeedOrganization, pk=orgid)
-
             team = get_object_or_404(
                 SeedTeam, pk=teamid, organization_id=orgid)
         else:
             team = get_object_or_404(SeedTeam, pk=teamid)
 
         permission = permissions.TeamPermission()
-        if not permission.has_object_permission(request, self, team):
+        fake_request = clone_request(request, 'GET')
+        if not permission.has_object_permission(fake_request, self, team):
             self.permission_denied(
                 request, message=getattr(permission, 'message', None)
             )
-        request.method = old_method
         return team
 
     def create(
