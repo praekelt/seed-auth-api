@@ -712,16 +712,16 @@ class OrganizationTeamTests(AuthAPITestCase):
             })
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_permission_create_permission_org_admin(self):
-        '''A user with org:admin should be able to create any permission for
-        that organization's teams.'''
+    def test_permission_create_permission_team_permission(self):
+        '''The user must have read access to a team to be able to add
+        permissions to that team.'''
         user, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create(title='test org')
         org2 = SeedOrganization.objects.create(title='test org')
         team1 = SeedTeam.objects.create(title='test team', organization=org1)
         team2 = SeedTeam.objects.create(title='test team', organization=org2)
-        self.add_permission(user, 'org:admin', org1.pk)
+        team1.users.add(user)
 
         # Wrong org
         resp = self.client.post(
@@ -730,9 +730,9 @@ class OrganizationTeamTests(AuthAPITestCase):
                 args=[org2.pk, team1.pk]
             ),
             data={
-                'type': 'org:admin',
-                'object_id': org1.pk,
-                'namespace': 'foo'
+                'type': 'foo:bar',
+                'object_id': '7',
+                'namespace': 'baz'
             })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -743,9 +743,9 @@ class OrganizationTeamTests(AuthAPITestCase):
                 args=[org1.pk, team2.pk]
             ),
             data={
-                'type': 'org:admin',
-                'object_id': org1.pk,
-                'namespace': 'foo'
+                'type': 'foo:bar',
+                'object_id': '7',
+                'namespace': 'baz'
             })
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -756,11 +756,89 @@ class OrganizationTeamTests(AuthAPITestCase):
                 args=[org2.pk, team2.pk]
             ),
             data={
-                'type': 'org:admin',
-                'object_id': org1.pk,
-                'namespace': 'foo'
+                'type': 'foo:bar',
+                'object_id': '7',
+                'namespace': 'baz'
             })
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Correct
+        resp = self.client.post(
+            reverse(
+                'seedorganization-teams-permissions-list',
+                args=[org1.pk, team1.pk]
+            ),
+            data={
+                'type': 'foo:bar',
+                'object_id': '7',
+                'namespace': 'baz'
+            })
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    def test_permission_delete_permission_team_permission(self):
+        '''The user must have read access to a team to be able to remove
+        permissions from that team.'''
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        team2 = SeedTeam.objects.create(title='test team', organization=org2)
+        team1.users.add(user)
+
+        # Wrong org
+        perm = team1.permissions.create(
+            type='foo:bar', object_id='7', namespace='baz')
+        resp = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org2.pk, team1.pk, perm.pk]
+            )
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Wrong team
+        perm = team1.permissions.create(
+            type='foo:bar', object_id='7', namespace='baz')
+        resp = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org1.pk, team2.pk, perm.pk]
+            ),
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+        # Wrong org and team
+        perm = team1.permissions.create(
+            type='foo:bar', object_id='7', namespace='baz')
+        resp = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org2.pk, team2.pk, perm.pk]
+            ),
+        )
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Correct
+        perm = team1.permissions.create(
+            type='foo:bar', object_id='7', namespace='baz')
+        resp = self.client.delete(
+            reverse(
+                'seedorganization-teams-permissions-detail',
+                args=[org1.pk, team1.pk, perm.pk]
+            ),
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_permission_create_permission_org_admin(self):
+        '''A user with org:admin should be able to create any permission for
+        that organization's teams.'''
+        user, token = self.create_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org1 = SeedOrganization.objects.create(title='test org')
+        org2 = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='test team', organization=org1)
+        self.add_permission(user, 'org:admin', org1.pk)
 
         # Wrong object id
         resp = self.client.post(
