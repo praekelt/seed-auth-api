@@ -813,6 +813,16 @@ class TeamTests(AuthAPITestCase):
                     args=[team.id, permission.id]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        # Wrong team
+        wrong_team = SeedTeam.objects.create(
+            title='test team 2', organization=org)
+        permission = wrong_team.permissions.create(
+            type='team:admin', object_id=wrong_team.pk, namespace='foo')
+        response = self.client.delete(
+            reverse('seedteam-permissions-detail',
+                    args=[wrong_team.id, permission.id]))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         # other
         permission = SeedPermission.objects.create(
             type='foo:bar', object_id='7', namespace='foo')
