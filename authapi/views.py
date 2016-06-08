@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from rest_framework import viewsets, status, serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import get_object_or_404
+from rest_framework.request import clone_request
 from rest_framework.response import Response
 from rest_framework.mixins import (
     DestroyModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin,
@@ -158,15 +159,47 @@ class TeamPermissionViewSet(
     '''Nested viewset to add and remove permissions from teams.'''
     queryset = SeedPermission.objects.all()
     serializer_class = PermissionSerializer
+    permission_classes = (permissions.TeamPermissionPermission,)
 
-    def create(self, request, parent_lookup_seedteam=None, **kwargs):
+    def check_team_permissions(self, request, teamid, orgid=None):
+        if orgid is not None:
+            team = get_object_or_404(
+                SeedTeam, pk=teamid, organization_id=orgid)
+        else:
+            team = get_object_or_404(SeedTeam, pk=teamid)
+
+        permission = permissions.TeamPermission()
+        fake_request = clone_request(request, 'GET')
+        if not permission.has_object_permission(fake_request, self, team):
+            self.permission_denied(
+                request, message=getattr(permission, 'message', None)
+            )
+        return team
+
+    def create(
+            self, request, parent_lookup_seedteam=None,
+            parent_lookup_seedteam__organization=None):
         '''Add a permission to a team.'''
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
+        team = self.check_team_permissions(
+            request, parent_lookup_seedteam,
+            parent_lookup_seedteam__organization)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         permission = team.permissions.create(**serializer.validated_data)
         serializer = self.get_serializer(instance=permission)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(
+            self, request, pk=None, parent_lookup_seedteam=None,
+            parent_lookup_seedteam__organization=None):
+        '''Remove a permission from a team.'''
+        self.check_team_permissions(
+            request, parent_lookup_seedteam,
+            parent_lookup_seedteam__organization)
+        return super(TeamPermissionViewSet, self).destroy(
+            request, pk, parent_lookup_seedteam,
+            parent_lookup_seedteam__organization)
 
 
 class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):

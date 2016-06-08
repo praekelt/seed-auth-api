@@ -51,16 +51,9 @@ org:admin
     Can create/read/write/delete users, and teams that are part of the
     organization, and can add users to the organization that they are an admin
     for. Can read/write the organization that they are admin for.
-org:write
-    Can modify an organization's details, including adding existing users and
-    teams to the organization.
 team:admin
     Can modify the team they have permission for, and add and remove existing
     users to that team.
-team:read
-    Can view the team they have permission for.
-user:create
-    Can create new users.
 
 .. http:get:: /user
 
@@ -786,6 +779,15 @@ Teams
 
     Add a permission to a team.
 
+    Any user that can see the team, can add permissions to that team.
+
+    If the permission to be added is of type team:admin, then the user must
+    have team:admin for the team specified by object_id, or org:admin for the
+    team's organization, with the team specified by the object_id.
+
+    If the permission to be added is of type org:admin, then the user must
+    have org:admin for the organization specified by object_id.
+
     :<json str type: The string representing the permission.
     :<json str object_id:
         The id of the object that the permission acts on. "null" if it doesn't
@@ -850,6 +852,15 @@ Teams
 .. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)
 
     Remove a permission from a team.
+
+    Any user that can see the team, can remove permissions from that team.
+    
+    If the permission to be removed is of type team:admin, then the user must
+    have team:admin for the team specified by object_id, or org:admin for the
+    team's organization, with the team specified by the object_id.
+
+    If the permission to be removed is of type org:admin, then the user must
+    have org:admin for the organization specified by object_id.
 
     :>json int id: the id of the team.
     :>json str url: The URL of the team.

@@ -1,9 +1,12 @@
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import BasePermission
 from restfw_composed_permissions.base import (
     BaseComposedPermision, BasePermissionComponent, And, Or, Not)
 from restfw_composed_permissions.generic.components import (
     AllowOnlyAuthenticated, AllowOnlySafeHttpMethod)
 
 from authapi.utils import get_user_permissions, find_permission
+from authapi.models import SeedTeam
 
 
 class AllowPermission(BasePermissionComponent):
@@ -100,8 +103,8 @@ class OrganizationPermission(BaseComposedPermision):
 
     def object_permission_set(self):
         '''
-        All users can read. admins, org:admins, and users with org:write
-        permission for the specific organization can update. admins can create.
+        All users can read. admins and org:admins with permission for the
+        specific organization can update. admins can create.
         '''
         return Or(
             AllowOnlySafeHttpMethod,
@@ -109,7 +112,6 @@ class OrganizationPermission(BaseComposedPermision):
             And(
                 AllowModify,
                 Or(
-                    AllowObjectPermission('org:write'),
                     AllowObjectPermission('org:admin'),
                 )
             )
@@ -127,13 +129,12 @@ class OrganizationUsersPermission(BaseComposedPermision):
 
     def object_permission_set(self):
         '''
-        admins can add users to any organization. org:admin and org:write can
-        add users to the organization that they are admin for.
+        admins can add users to any organization. org:admin can add users to
+        the organization that they are admin for.
         '''
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
-            AllowObjectPermission('org:write'),
             AllowObjectPermission('org:admin')
         )
 
@@ -150,8 +151,7 @@ class TeamPermission(BaseComposedPermision):
     def object_permission_set(self):
         '''
         admins, users with team:admin for the team, and users with org:admin,
-        or org:write permission for the team's organization have full access
-        to teams. Users with team:read permission for the team, or are a member
+        team's organization have full access to teams. Users who are a member
         of the team, or are a member of the team's organization, have read
         access to the team.
         '''
@@ -159,11 +159,9 @@ class TeamPermission(BaseComposedPermision):
             AllowAdmin,
             AllowObjectPermission('team:admin'),
             AllowObjectPermission('org:admin', lambda t: t.organization_id),
-            AllowObjectPermission('org:write', lambda t: t.organization_id),
             And(
                 AllowOnlySafeHttpMethod,
                 Or(
-                    AllowObjectPermission('team:read'),
                     ObjAttrTrue(
                         lambda r, t: t.users.filter(pk=r.user.pk).exists()),
                     ObjAttrTrue(
@@ -185,7 +183,6 @@ class UserPermission(BaseComposedPermision):
                 ObjAttrTrue(
                     lambda r, _: r.data.get('admin') is not True),
                 Or(
-                    AllowPermission('user:create'),
                     AllowPermission('org:admin')
                 )
             )
@@ -202,8 +199,8 @@ class UserPermission(BaseComposedPermision):
     def object_permission_set(self):
         '''All users have view permissions. Admin users, and users with
         org:admin can create, update, and delete any user. Any user can update
-        or delete themselves. Users with user:create permission can create
-        new users. Only admins can create or modify other admin users.'''
+        or delete themselves. Only admins can create or modify other admin
+        users.'''
         return Or(
             AllowOnlySafeHttpMethod,
             AllowAdmin,
@@ -221,3 +218,47 @@ class UserPermission(BaseComposedPermision):
                     lambda r, _: r.data.get('admin') is not True)
             ),
         )
+
+
+class TeamPermissionPermission(BasePermission):
+    '''Permissions for adding or removing permissions from teams.'''
+    def has_permission(self, request, view):
+        if request.user.is_anonymous():
+            return False
+        if request.method == 'POST':
+            return self.handle_create(request)
+        if request.method == 'DELETE':
+            # We don't need to do any checks at the view level, only at the
+            # object level.
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        return self.handle_delete(request, obj)
+
+    def user_has_permission(self, user, permission_type, object_id=None):
+        permissions = get_user_permissions(user)
+        permissions = find_permission(permissions, permission_type, object_id)
+        return permissions.exists()
+
+    def check_permissions(self, user, ptype, object_id):
+        if ptype == 'org:admin':
+            return self.user_has_permission(user, ptype, object_id)
+        elif ptype == 'team:admin':
+            if self.user_has_permission(user, 'team:admin', object_id):
+                return True
+            org_id = get_object_or_404(SeedTeam, pk=object_id).organization_id
+            return self.user_has_permission(user, 'org:admin', org_id)
+        else:
+            return True
+
+    def handle_create(self, request):
+        user = request.user
+        ptype = request.data.get('type')
+        object_id = request.data.get('object_id')
+        return self.check_permissions(user, ptype, object_id)
+
+    def handle_delete(self, request, obj):
+        user = request.user
+        ptype = obj.type
+        object_id = obj.object_id
+        return self.check_permissions(user, ptype, object_id)
