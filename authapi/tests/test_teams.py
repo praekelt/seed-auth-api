@@ -641,7 +641,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'team:admin',
                 'object_id': team.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -650,7 +650,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'team:admin',
                 'object_id': team2.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -659,7 +659,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'org:admin',
                 'object_id': org.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -668,7 +668,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'foo:bar',
                 'object_id': '7',
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -688,7 +688,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'team:admin',
                 'object_id': team2.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -697,7 +697,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'org:admin',
                 'object_id': org.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -706,7 +706,7 @@ class TeamTests(AuthAPITestCase):
             reverse('seedteam-permissions-list', args=[team.id]), data={
                 'type': 'org:admin',
                 'object_id': org2.pk,
-                'namespace': 'foo',
+                'namespace': '__auth__',
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -806,7 +806,7 @@ class TeamTests(AuthAPITestCase):
 
         # org:admin
         permission = SeedPermission.objects.create(
-            type='org:admin', object_id=org.pk, namespace='foo')
+            type='org:admin', object_id=org.pk, namespace='__auth__')
         team.permissions.add(permission)
         response = self.client.delete(
             reverse('seedteam-permissions-detail',
@@ -817,7 +817,7 @@ class TeamTests(AuthAPITestCase):
         wrong_team = SeedTeam.objects.create(
             title='test team 2', organization=org)
         permission = wrong_team.permissions.create(
-            type='team:admin', object_id=wrong_team.pk, namespace='foo')
+            type='team:admin', object_id=wrong_team.pk, namespace='__auth__')
         response = self.client.delete(
             reverse('seedteam-permissions-detail',
                     args=[wrong_team.id, permission.id]))
@@ -845,7 +845,7 @@ class TeamTests(AuthAPITestCase):
 
         # incorrect team object_id
         permission = SeedPermission.objects.create(
-            type='team:admin', object_id=team2.pk, namespace='foo')
+            type='team:admin', object_id=team2.pk, namespace='__auth__')
         team2.permissions.add(permission)
         response = self.client.delete(
             reverse('seedteam-permissions-detail',
@@ -854,7 +854,7 @@ class TeamTests(AuthAPITestCase):
 
         # org:admin
         permission = SeedPermission.objects.create(
-            type='org:admin', object_id=org.pk, namespace='foo')
+            type='org:admin', object_id=org.pk, namespace='__auth__')
         team.permissions.add(permission)
         response = self.client.delete(
             reverse('seedteam-permissions-detail',
@@ -863,7 +863,7 @@ class TeamTests(AuthAPITestCase):
 
         # org:admin incorrect org
         permission = SeedPermission.objects.create(
-            type='org:admin', object_id=org2.pk, namespace='foo')
+            type='org:admin', object_id=org2.pk, namespace='__auth__')
         team2.permissions.add(permission)
         response = self.client.delete(
             reverse('seedteam-permissions-detail',
