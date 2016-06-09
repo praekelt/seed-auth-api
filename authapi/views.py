@@ -206,20 +206,44 @@ class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):
     '''Nested viewset that allows users to add or remove users from teams.'''
     queryset = User.objects.all()
     serializer_class = ExistingUserSerializer
+    permission_classes = (IsAuthenticated,)
 
-    def create(self, request, parent_lookup_seedteam=None, **kwargs):
+    def check_team_permissions(self, request, teamid, orgid=None):
+        if orgid is not None:
+            team = get_object_or_404(
+                SeedTeam, pk=teamid, organization_id=orgid)
+        else:
+            team = get_object_or_404(SeedTeam, pk=teamid)
+
+        permission = permissions.TeamPermission()
+        fake_request = clone_request(request, 'PUT')
+        if not permission.has_object_permission(fake_request, self, team):
+            self.permission_denied(
+                request, message=getattr(permission, 'message', None)
+            )
+        return team
+
+    def create(
+            self, request, parent_lookup_seedteam=None,
+            parent_lookup_seedteam__organization=None):
         '''Add a user to a team.'''
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = get_object_or_404(User, pk=serializer.data['user_id'])
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
+        team = self.check_team_permissions(
+            request, parent_lookup_seedteam,
+            parent_lookup_seedteam__organization)
         team.users.add(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, pk=None, parent_lookup_seedteam=None, **kwargs):
+    def destroy(
+            self, request, pk=None, parent_lookup_seedteam=None,
+            parent_lookup_seedteam__organization=None):
         '''Remove a user from an organization.'''
         user = self.get_object()
-        team = get_object_or_404(SeedTeam, pk=parent_lookup_seedteam)
+        team = self.check_team_permissions(
+            request, parent_lookup_seedteam,
+            parent_lookup_seedteam__organization)
         team.users.remove(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
