@@ -589,16 +589,19 @@ Teams
 
     :query string type_contains:
         The type field on one of the resulting team's permissions must contain
-        this string.
+        this string. (optional)
     :query string object_id:
         All the object_id fields on one of the resulting team's permissions
-        must equal this string.
+        must equal this string. (optional)
+    :quert string namespace:
+        All the namespace fields on one of the resulting team's permissions
+        must equal this string. (optional)
 
     **Example request**:
 
     .. sourcecode:: http
 
-        GET /teams/?permission_contains=org&object_id=3 HTTP/1.1
+        GET /teams/?permission_contains=org&object_id=3&namespace=seed_auth HTTP/1.1
 
     **Example response**:
 
