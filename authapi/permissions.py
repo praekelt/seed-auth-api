@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import BasePermission
 from restfw_composed_permissions.base import (
@@ -19,7 +20,9 @@ class AllowPermission(BasePermissionComponent):
     def has_permission(self, permission, request, view):
         user = request.user
         permissions = get_user_permissions(user)
-        permissions = find_permission(permissions, self.permission_type)
+        permissions = find_permission(
+            permissions, self.permission_type,
+            namespace=settings.PERMISSION_NAMESPACE)
         return permissions.exists()
 
 
@@ -43,7 +46,8 @@ class AllowObjectPermission(AllowPermission):
         permissions = get_user_permissions(user)
         obj_id = self.location(obj)
         permissions = find_permission(
-            permissions, self.permission_type, obj_id)
+            permissions, self.permission_type, obj_id,
+            settings.PERMISSION_NAMESPACE)
         return permissions.exists()
 
 
@@ -237,10 +241,14 @@ class TeamPermissionPermission(BasePermission):
 
     def user_has_permission(self, user, permission_type, object_id=None):
         permissions = get_user_permissions(user)
-        permissions = find_permission(permissions, permission_type, object_id)
+        permissions = find_permission(
+            permissions, permission_type, object_id,
+            settings.PERMISSION_NAMESPACE)
         return permissions.exists()
 
-    def check_permissions(self, user, ptype, object_id):
+    def check_permissions(self, user, ptype, object_id, namespace):
+        if namespace != settings.PERMISSION_NAMESPACE:
+            return True
         if ptype == 'org:admin':
             return self.user_has_permission(user, ptype, object_id)
         elif ptype == 'team:admin':
@@ -255,10 +263,12 @@ class TeamPermissionPermission(BasePermission):
         user = request.user
         ptype = request.data.get('type')
         object_id = request.data.get('object_id')
-        return self.check_permissions(user, ptype, object_id)
+        namespace = request.data.get('namespace')
+        return self.check_permissions(user, ptype, object_id, namespace)
 
     def handle_delete(self, request, obj):
         user = request.user
         ptype = obj.type
         object_id = obj.object_id
-        return self.check_permissions(user, ptype, object_id)
+        namespace = obj.namespace
+        return self.check_permissions(user, ptype, object_id, namespace)

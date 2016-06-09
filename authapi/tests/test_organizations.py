@@ -662,7 +662,7 @@ class OrganizationTeamTests(AuthAPITestCase):
         data = {
             'type': 'foo:bar',
             'object_id': '2',
-            'namespace': 'foo',
+            'namespace': '__auth__',
         }
 
         self.assertEqual(len(team.permissions.all()), 0)
@@ -689,7 +689,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'organization:admin',
                 'object_id': org.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -849,7 +849,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'org:admin',
                 'object_id': org2.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -862,7 +862,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'org:admin',
                 'object_id': org1.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -875,7 +875,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'team:admin',
                 'object_id': team1.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -911,7 +911,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'team:admin',
                 'object_id': team.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
@@ -924,7 +924,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'team:admin',
                 'object_id': team2.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -937,7 +937,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'org:admin',
                 'object_id': org.pk,
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -950,7 +950,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             data={
                 'type': 'foo:bar',
                 'object_id': '7',
-                'namespace': 'foo'
+                'namespace': '__auth__'
             })
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 

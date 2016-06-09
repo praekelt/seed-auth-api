@@ -61,14 +61,15 @@ class AuthAPITestCase(APITestCase):
         token = Token.objects.create(user=user)
         return (user, token)
 
-    def add_permission(self, user, permission_type, object_id=''):
+    def add_permission(
+            self, user, permission_type, object_id='', namespace='__auth__'):
         '''Creates an organization, create a team for that org, adds the user
         to that team, and creates the permission on that team.'''
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         team.users.add(user)
         permission = team.permissions.create(
-            type=permission_type, object_id=object_id)
+            type=permission_type, object_id=object_id, namespace=namespace)
         return team, permission
 
     def patch_client_data_json(self):
