@@ -111,3 +111,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
 }
+
+# Set the namespace to use for internal permissions.
+PERMISSION_NAMESPACE = '__auth__'
