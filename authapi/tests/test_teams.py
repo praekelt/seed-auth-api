@@ -960,12 +960,12 @@ class TeamTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'org:admin', org1.pk)
 
-        # Correct team
+        # Correct org
         response = self.client.post(reverse(
             'seedteam-users-list', args=[team1.pk]), data=data)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Incorrect team
+        # Incorrect org
         response = self.client.post(reverse(
             'seedteam-users-list', args=[team2.pk]), data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -1053,12 +1053,12 @@ class TeamTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'org:admin', org1.pk)
 
-        # Correct team
+        # Correct org
         response = self.client.delete(reverse(
             'seedteam-users-detail', args=[team1.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Incorrect team
+        # Incorrect org
         response = self.client.delete(reverse(
             'seedteam-users-detail', args=[team2.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
