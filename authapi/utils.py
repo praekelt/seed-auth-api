@@ -14,9 +14,11 @@ def get_user_permissions(user):
     return permissions
 
 
-def find_permission(permissions, permission_type, object_id=None):
+def find_permission(
+        permissions, permission_type, object_id=None, namespace=None):
     '''Given a queryset of permissions, filters depending on the permission
-    type, and optionally an object id.'''
+    type, and optionally an object id and namespace.'''
     if object_id is not None:
-        return permissions.filter(type=permission_type, object_id=object_id)
+        return permissions.filter(
+            type=permission_type, object_id=object_id, namespace=namespace)
     return permissions.filter(type=permission_type)
