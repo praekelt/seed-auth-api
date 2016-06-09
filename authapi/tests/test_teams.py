@@ -171,6 +171,42 @@ class TeamTests(AuthAPITestCase):
             '%s?object_id=2' % reverse('seedteam-list'))
         self.assertEqual(len(response.data), 1)
 
+    def test_get_team_list_filter_namespace(self):
+        '''If the querystring argument namespace is present, we should only
+        display teams that have that namespace in one of their permissions.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create(title='test org')
+        team1 = SeedTeam.objects.create(title='team 1', organization=org)
+        perm = team1.permissions.create(
+            type='bar:foo:bar', object_id='2', namespace='bar')
+        team2 = SeedTeam.objects.create(title='team 2', organization=org)
+        team2.permissions.create(
+            type='bar:bar:bar', object_id='3', namespace='foo')
+
+        response = self.client.get(
+            '%s?namespace=bar' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(
+            response.data[0]['permissions'][0]['namespace'],
+            perm.namespace)
+
+    def test_get_team_list_filter_namespace_multiple(self):
+        '''If a team has multiple permissions with the same namespace, the team
+        should only be listed once.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        team.permissions.create(
+            type='bar:foo:bar', object_id='2', namespace='bar')
+        team.permissions.create(
+            type='bar:bar:bar', object_id='2', namespace='bar')
+
+        response = self.client.get(
+            '%s?namespace=bar' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+
     def test_get_team_list_archived_users(self):
         '''When getting the list of teams, inactive users should not appear
         on the list of users.'''
