@@ -125,6 +125,11 @@ class BaseTeamViewSet(
                 queryset = queryset.filter(
                     permissions__object_id=object_id).distinct()
 
+            namespace = self.request.query_params.get('namespace', None)
+            if namespace is not None:
+                queryset = queryset.filter(
+                    permissions__namespace=namespace).distinct()
+
             permission = permissions.TeamPermission()
             queryset = [
                 team for team in queryset if
