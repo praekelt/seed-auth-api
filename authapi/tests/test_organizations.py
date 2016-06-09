@@ -994,6 +994,8 @@ class OrganizationTeamTests(AuthAPITestCase):
 
     def test_add_user_to_organizations_team(self):
         '''Should be able to add an existing user to an organization's team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         user = User.objects.create_user('test user')
@@ -1014,6 +1016,8 @@ class OrganizationTeamTests(AuthAPITestCase):
     def test_remove_user_from_organizations_team(self):
         '''Should be able to remove an existing user from an organization's
         team.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         user = User.objects.create_user('test user')
@@ -1032,6 +1036,8 @@ class OrganizationTeamTests(AuthAPITestCase):
     def test_remove_user_from_other_organizations_team(self):
         '''Should not be able to remove user's from a team belonging to
         another organization.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org1 = SeedOrganization.objects.create(title='test org')
         org2 = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org1)

@@ -882,6 +882,8 @@ class TeamTests(AuthAPITestCase):
     def test_add_user_to_team(self):
         '''Adding a user to a team should create a relationship between the
         two.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         user = User.objects.create_user(username='test@example.org')
@@ -898,6 +900,8 @@ class TeamTests(AuthAPITestCase):
     def test_remove_user_from_team(self):
         '''Removing a user from a team should remove the relationship between
         the two.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         user = User.objects.create_user(username='test@example.org')
