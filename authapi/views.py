@@ -118,11 +118,12 @@ class BaseTeamViewSet(
                 'permission_contains', None)
             if permission is not None:
                 queryset = queryset.filter(
-                    permissions__type__contains=permission)
+                    permissions__type__contains=permission).distinct()
 
             object_id = self.request.query_params.get('object_id', None)
             if object_id is not None:
-                queryset = queryset.filter(permissions__object_id=object_id)
+                queryset = queryset.filter(
+                    permissions__object_id=object_id).distinct()
 
             permission = permissions.TeamPermission()
             queryset = [
