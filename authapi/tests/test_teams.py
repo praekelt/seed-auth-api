@@ -119,6 +119,22 @@ class TeamTests(AuthAPITestCase):
             response.data[0]['permissions'][0]['type'],
             perm.type)
 
+    def test_get_team_list_filter_permission_type_multiple(self):
+        '''If a team has multiple permissions that match, the team should only
+        be listed once.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        team.permissions.create(
+            type='bar:foo:bar', object_id='2', namespace='bar')
+        team.permissions.create(
+            type='bar:foo:bar', object_id='3', namespace='bar')
+
+        response = self.client.get(
+            '%s?permission_contains=foo' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
+
     def test_get_team_list_filter_object_id(self):
         '''If the querystring argument object_id is present, we should only
         display teams that have that object id in one of their permissions.'''
@@ -138,6 +154,22 @@ class TeamTests(AuthAPITestCase):
         self.assertEqual(
             response.data[0]['permissions'][0]['object_id'],
             perm.object_id)
+
+    def test_get_team_list_filter_object_id_multiple(self):
+        '''If a team has multiple permissions that match, the team should only
+        be listed once.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create()
+        team = SeedTeam.objects.create(organization=org)
+        team.permissions.create(
+            type='bar:foo:bar', object_id='2', namespace='bar')
+        team.permissions.create(
+            type='bar:bar:bar', object_id='2', namespace='bar')
+
+        response = self.client.get(
+            '%s?object_id=2' % reverse('seedteam-list'))
+        self.assertEqual(len(response.data), 1)
 
     def test_get_team_list_archived_users(self):
         '''When getting the list of teams, inactive users should not appear
