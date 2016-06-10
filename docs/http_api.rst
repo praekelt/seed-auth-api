@@ -92,7 +92,7 @@ team:admin
                 "id": 2,
                 "type": "org:admins",
                 "object_id": "3",
-                "namespace": "seed_auth"
+                "namespace": "__auth__"
             },
             {
                 "id": 5,
@@ -113,10 +113,7 @@ type
     The string representing the type of permission.
 object_id
     A string that uniquely identifies the object that this permission acts
-    upon. "null" if this permission does not act on a specific object.
-metadata
-    A flat object that can be used to add any additional information that
-    might be needed for the permission.
+    upon. Empty string if this permission does not act on a specific object.
 namespace
     A string used to namespace a set of permissions for a specific app, to
     avoid "type" collisions.
@@ -173,7 +170,7 @@ For the token endpoints, no authentication is required.
       Content-Type: application/json
 
       {
-        "email": "testuser",
+        "email": "testuser@example.org",
         "password": "testpassword"
       }
 
@@ -193,6 +190,9 @@ For the token endpoints, no authentication is required.
 
 Password resets
 ^^^^^^^^^^^^^^^
+
+.. ATTENTION::
+    This endpoint has not yet been implemented.
 
 For the password reset endpoints, no authentication is required.
 
@@ -269,12 +269,15 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Requires admin user.
 
+    :<json str title: The title of the organization.
     :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
+    :>json str url: The URL for this organization.
+    :>json bool archived: True if the organization has been archived.
     :status 201: When the organization is successfully generated.
-    :status 422: When there is invalid information to create the organization.
+    :status 400: When there is invalid information to create the organization.
 
     **Example request**:
 
@@ -283,7 +286,9 @@ to belong to exactly one organization, but an organization can have many teams.
        POST /organizations/ HTTP/1.1
        Content-Type: application/json
 
-       {"title":"Nights Watch"}
+       {
+        "title": "Nights Watch"
+       }
 
 
     **Example response**:
@@ -293,7 +298,14 @@ to belong to exactly one organization, but an organization can have many teams.
         HTTP/1.1 201 Created
         Content-Type: application/json
 
-        {"title":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+        {
+            "title": "Nights Watch",
+            "id": 4,
+            "teams": [],
+            "url": "https://example.org/organizations/4",
+            "users": [],
+            "archived": false
+        }
 
 .. _organizations-list:
 .. http:get:: /organizations/
@@ -320,7 +332,24 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       [{"title":"Nights Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}]
+       [
+        {
+            "title":"Nights Watch",
+            "id":4,
+            "teams":[],
+            "url":"https://example.org/organizations/4",
+            "users":[],
+            "archived": false
+        },
+        {
+            "title":"Brotherhood Without Banners",
+            "id":5,
+            "teams":[],
+            "url":"https://example.org/organizations/5",
+            "users":[],
+            "archived": false
+        }
+       ]
 
 .. http:get:: /organizations/(int:organization_id)
 
@@ -331,6 +360,9 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json str title: The title of the created organization.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
+    :>json list users: The list of users that are a part of the organization.
+    :>json str url: The URL for this organization.
+    :>json bool archived: True if the organization has been archived.
 
     **Example request**:
 
@@ -345,22 +377,33 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       {"title":"Night's Watch","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+       {
+        "title":"Night's Watch",
+        "id":4,
+        "teams":[],
+        "url":"https://example.org/organizations/4",
+        "users":[],
+        "archived": false
+       }
 
 .. _organizations-update:
 .. http:put:: /organizations/(int:organization_id)
 
     Update an existing organization.
 
-    Requires admin user, or any user that has 'org:admin' or 'org:write'
-    permissions, with object_id equal to organization_id.
+    Requires admin user, or any user that has 'org:admin' permission for the
+    specific organization.
 
     :<json str title: The title of the organization.
+    :<json str archived: True if the organization is to be archived.
     :>json int id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
+    :>json str url: The URL for this organization.
+    :>json bool archived: True if the organization has been archived.
+
     :status 200: When the organization is successfully generated.
-    :status 422: When there is invalid information to update the organization.
+    :status 400: When there is invalid information to update the organization.
 
     **Example request**:
 
@@ -369,7 +412,10 @@ to belong to exactly one organization, but an organization can have many teams.
        PUT /organizations/4 HTTP/1.1
        Content-Type: application/json
 
-       {"title": "Brotherhood Without Banners"}
+       {
+        "title": "Brotherhood Without Banners",
+        "archived": false
+       }
 
     **Example response**:
 
@@ -378,7 +424,14 @@ to belong to exactly one organization, but an organization can have many teams.
        HTTP/1.1 200 OK
        Content-Type: application/json
 
-       {"title":"Brotherhood Without Banners","id":4,"teams":[],"url":"https://example.org/organizations/4","users":[]}
+       {
+        "title":"Brotherhood Without Banners",
+        "id":4,
+        "teams":[],
+        "url":"https://example.org/organizations/4",
+        "users":[],
+        "archived": false
+       }
 
 .. http:delete:: /organizations/(int:organization_id)
 
@@ -392,8 +445,8 @@ to belong to exactly one organization, but an organization can have many teams.
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <organizations-update>` an organization.
 
-    Requires admin user, or any user that has 'org:admin' or 'org:write'
-    permissions, with object_id equal to organization_id.
+    Requires admin user, or any user that has 'org:admin' for this
+    organization.
 
     :status 204: Organization successfully archived
 
@@ -413,8 +466,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Add a user to an existing organization.
 
-    Requires admin user, or any user that has 'org:admin' or 'org:write'
-    permissions, with object_id equal to organization_id.
+    Requires admin user, or any user that has 'org:admin' permissions for that
+    organization.
 
     :<json int user_id: The ID of the user to add.
 
@@ -439,8 +492,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     Remove a user from an organization.
 
-    Requires admin user, or any user that has 'org:admin' or 'org:write'
-    permissions, with object_id equal to organization_id.
+    Requires admin user, or any user that has 'org:admin' permission for that
+    organization.
 
     :status 204: User was successfully removed from an organization
 
@@ -458,12 +511,13 @@ to belong to exactly one organization, but an organization can have many teams.
 
 .. http:post:: /organizations/(int:organization_id)/teams/
 
-    Create a new team.
+    Create a new team for an organization
 
-    Only admin users, and users with org:admin or org:write permissions for
-    the organization may create teams.
+    Only admin users, and users with org:admin permissions for the org may
+    create teams.
 
     :<json str title: The title of the team.
+    :<json bool archived: True if the team is archived.
 
     :>json int id: The ID of the created team.
     :>json str url: The URL of the created team.
@@ -471,8 +525,9 @@ to belong to exactly one organization, but an organization can have many teams.
     :>json list users: The list of users that belong to this team.
     :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
+    :>json bool archived: True if the team is archived.
     :status 201: Successfully created team.
-    :status 422: Missing required information to create team.
+    :status 400: Missing required information to create team.
 
     **Example request**:
 
@@ -483,6 +538,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
         {
             "title": "Lord Commanders",
+            "archived": false
         }
 
     **Example response**:
@@ -501,7 +557,8 @@ to belong to exactly one organization, but an organization can have many teams.
             "organization": {
                 "url": "https://example.com/organizations/7/",
                 "id": 7
-            }
+            },
+            "archived": false
         }
 
 .. http:get:: /organizations/(int:organization_id)/teams/
@@ -545,11 +602,11 @@ Teams
 
     Get a list of all the teams you have read access to.
 
-    Admin users have read access to all teams. Users with org:admin or
-    org:write permissions for an organization have read access to that
-    organization's teams. Users with team:read or team:admin permissions for
-    a team have read access to that team. Users that are part of the team, or
-    part of the team's organization, have read access to that team.
+    admin users have read access to all teams. users with org:admin for an
+    organization have read access to that organization's teams. users with
+    team:admin permissions for a team have read access to that team. users
+    that are part of the team, or part of the team's organization, have read
+    access to that team.
 
     **Example request**:
 
@@ -573,19 +630,14 @@ Teams
                 "organization": {
                     "url": "https://example.org/organizations/7/",
                     "id": 7
-                }
+                },
+                "archived": false
             }
         ]
 
 .. http:get:: /teams/
 
     Allows filtering of teams to retreive a subset.
-
-    Admin users have read access to all teams. Users with org:admin or
-    org:write permissions for an organization have read access to that
-    organization's teams. Users with team:read or team:admin permissions for
-    a team have read access to that team. Users that are part of the team, or
-    part of the team's organization, have read access to that team.
 
     :query string type_contains:
         The type field on one of the resulting team's permissions must contain
@@ -601,7 +653,7 @@ Teams
 
     .. sourcecode:: http
 
-        GET /teams/?permission_contains=org&object_id=3&namespace=seed_auth HTTP/1.1
+        GET /teams/?permission_contains=org&object_id=3&namespace=__auth__ HTTP/1.1
 
     **Example response**:
 
@@ -619,37 +671,43 @@ Teams
                     [
                         {
                             "id": 2,
-                            "type": "org:admins",
+                            "type": "org:admin",
                             "object_id": "3",
-                            "metadata": {},
-                            "namespace": "seed_auth"
+                            "namespace": "__auth__"
                         }
                     ],
                 "url": "https://example.org/teams/4",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
                     "id": 3
-                }
+                },
+                "archived": false
             },
             {
                 "id": 7,
-                "title": "organization editors",
+                "title": "other organization admins",
                 "users": [],
                 "permissions":
                     [
                         {
                             "id": 3,
-                            "type": "org:write",
+                            "type": "org:admin",
                             "object_id": "3",
-                            "metadata": {},
-                            "namespace": "seed_auth"
+                            "namespace": "__auth__"
+                        },
+                        {
+                            "id": 4,
+                            "type": "foo:bar",
+                            "object_id": "",
+                            "namespace": "foo_app"
                         }
                     ],
                 "url": "https://exmple.org/teams/6",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
                     "id": 3
-                }
+                },
+                "archived": false
             }
         ]
 
@@ -659,11 +717,11 @@ Teams
 
     Get the details of a team.
 
-    Admin users have read access to all teams. Users with org:admin or
-    org:write permissions for an organization have read access to that
-    organization's teams. Users with team:read or team:admin permissions for
-    a team have read access to that team. Users that are part of the team, or
-    part of the team's organization, have read access to that team.
+    admin users have read access to all teams. users with org:admin for an
+    organization have read access to that organization's teams. users with
+    team:admin permissions for a team have read access to that team. users
+    that are part of the team, or part of the team's organization, have read
+    access to that team.
 
     :>json int id: the ID of the team.
     :>json str url: the URL of the team.
@@ -671,6 +729,7 @@ Teams
     :>json list users: The list of users that belong to this team.
     :>json obj organization: An object representing the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
+    :>json bool archived: True if team is archived.
     :status 200: Successfully retrieved team.
 
     **Example request**:
@@ -695,7 +754,8 @@ Teams
             "organization": {
                 "url": "https://example.org/organizations/7/",
                 "id": 7
-            }
+            },
+            "archived": false
         }
 
 .. _Update team details:
@@ -704,11 +764,12 @@ Teams
 
     Update the details of a team.
 
-    Admin users can update teams. Users with org:admin and org:write permissions
-    for a team's organization can update teams. Users with team:admin can modify
+    Admin users can update teams. Users with org:admin permissions for a
+    team's organization can update teams. Users with team:admin can modify
     the team that they are admin for.
 
     :<json str title: The title of the team.
+    :<json bool archived: True if the team is archived.
 
     :>json int id: the id of the updated team.
     :>json str url: The URL of the updated team.
@@ -716,6 +777,7 @@ Teams
     :>json list users: The list of users that belong to this team.
     :>json obj organization: The summary of the organization that the team belongs to.
     :>json list permissions: The permission list for the team.
+    :>json bool archived: True if the team is archived.
     :status 200: successfully updated team.
 
     **Example request**:
@@ -727,6 +789,7 @@ Teams
 
         {
             "title": "Brotherhood without banners",
+            "archived": false
         }
 
     **Example reponse**:
@@ -745,7 +808,8 @@ Teams
             "organization": {
                 "url": "https://example.org/organizations/7/",
                 "id": 7
-            }
+            },
+            "archived": false
         }
 
 .. _Archive team:
@@ -759,8 +823,8 @@ Teams
     Archiving can be reversed by setting ``archived`` to ``true`` when
     :ref:`updating <teams-update>` a team.
 
-    Admin users can archive teams. Users with org:admin and org:write permissions
-    for a team's organization can archive teams. Users with team:admin can archive
+    Admin users can archive teams. Users with org:admin permissions for a
+    team's organization can archive teams. Users with team:admin can archive
     the team that they are admin for.
 
     :status 204: Team successfully archived.
@@ -791,23 +855,19 @@ Teams
     If the permission to be added is of type org:admin, then the user must
     have org:admin for the organization specified by object_id.
 
+    admin users can add any permissions.
+
     :<json str type: The string representing the permission.
     :<json str object_id:
-        The id of the object that the permission acts on. "null" if it doesn't
-        act on any object.
-    :<json obj metadata:
-        A single layer object that can contain any amount of keys. Used to add
-        additional information that might be useful to external applications.
+        The id of the object that the permission acts on. Empty string if it
+        doesn't act on any object.
     :<json str namespace:
         The namespace for the permission, to avoid "type" collisions between
         apps.
 
-    :>json int id: the id of the team.
-    :>json str url: the URL of the team.
-    :>json str name: the name of the team.
-    :>json list users: The list of users that belong to this team.
-    :>json obj organization: The summary of the organization that the team belongs to.
-    :>json list permissions: The permission list for the team.
+    :>json int id: the id of the permission.
+    :>json str type: the type of the permission.
+    :>json str object_id: the object id that the permission acts on.
     :status 200: successfully added permission to the team.
 
     **Example request**:
@@ -820,8 +880,7 @@ Teams
         {
             "type": "org:admin",
             "object_id": "2",
-            "metadata": {},
-            "namespace": "seed_auth"
+            "namespace": "__auth__"
         }
 
     **Example response**:
@@ -832,23 +891,10 @@ Teams
         Content-Type: application/json
 
         {
-            "id": 2,
-            "name": "Lord Commanders",
-            "users": [],
-            "permissions": [
-                {
-                    "id": 17,
-                    "type": "org:admin",
-                    "object_id": "2",
-                    "metadata": {},
-                    "namespace": "seed_auth"
-                }
-            ],
-            "url": "https://example.org/teams/2",
-            "organization": {
-                "url": "https://example.org/organizations/7/",
-                "id": 7
-            }
+            "id": 17,
+            "type": "org:admin",
+            "object_id": "2",
+            "namespace": "__auth__"
         }
 
 .. _Remove permission from team:
@@ -865,13 +911,9 @@ Teams
     If the permission to be removed is of type org:admin, then the user must
     have org:admin for the organization specified by object_id.
 
-    :>json int id: the id of the team.
-    :>json str url: The URL of the team.
-    :>json str name: the name of the team.
-    :>json list users: The list of users that belong to this team.
-    :>json obj organization: The summary of the organization that the team belongs to.
-    :>json list permissions: The permission list for the team.
-    :status 200: successfully removed permission from the team.
+    admin users can remove any permission.
+
+    :status 204: successfully removed permission from the team.
 
     **Example request**:
 
@@ -883,20 +925,7 @@ Teams
 
     .. sourcecode:: http
 
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-        {
-            "id": 2,
-            "name": "Lord Commanders",
-            "permissions": [],
-            "users": [],
-            "url": "https://example.org/teams/2",
-            "organization": {
-                "url": "https://example.org/organizations/7/",
-                "id": 7
-            }
-        }
+        HTTP/1.1 204 No Content
 
 .. _Add user to team:
 .. http:post:: /teams/(int:team_id)/users/
@@ -905,13 +934,7 @@ Teams
 
     :<json int user_id: The ID of the user to add to the team.
 
-    :>json int id: the id of the team.
-    :>json str url: The URL of the team.
-    :>json str name: the name of the team.
-    :>json list users: The list of users that belong to this team.
-    :>json obj organization: The summary of the organization that the team belongs to.
-    :>json list permissions: The permission list for the team.
-    :status 200: successfully added the user to the team.
+    :status 204: successfully added the user to the team.
 
     **Example request**:
 
@@ -928,39 +951,14 @@ Teams
 
     .. sourcecode:: http
 
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-        {
-            "id": 2,
-            "name": "Lord Commanders",
-            "permissions": [],
-            "users": 
-                [
-                    {
-                        "id": 1,
-                        "url": "https://example.org/users/1"
-                    }
-                ],
-            "url": "https://example.org/teams/2",
-            "organization": {
-                "url": "https://example.org/organizations/7/",
-                "id": 7
-            }
-        }
+        HTTP/1.1 204 No Content
 
 .. _Remove user from team:
 .. http:delete:: /teams/(int:team_id)/users/1
 
     Remove a user from a team.
 
-    :>json int id: the id of the team.
-    :>json str url: The URL of the team.
-    :>json str name: the name of the team.
-    :>json list users: The list of users that belong to this team.
-    :>json obj organization: The summary of the organization that the team belongs to.
-    :>json list permissions: The permission list for the team.
-    :status 200: successfully removed the user from the team.
+    :status 204: successfully removed the user from the team.
 
     **Example request**:
 
@@ -972,20 +970,7 @@ Teams
 
     .. sourcecode:: http
 
-        HTTP/1.1 200 OK
-        Content-Type: application/json
-
-        {
-            "id": 2,
-            "name": "Lord Commanders",
-            "permissions": [],
-            "users": [],
-            "url": "https://example.org/teams/2",
-            "organization": {
-                "url": "https://example.org/organizations/7/",
-                "id": 7
-            }
-        }
+        HTTP/1.1 204 OK
 
 Users
 ^^^^^
@@ -1037,9 +1022,8 @@ Users
 
     Create a new user.
 
-    Only admin users, and users with org:admin or user:create permissions
-    can create new users. Only admin users are allowed to create other admin
-    users.
+    Only admin users, and users with org:admin permissions can create new
+    users. Only admin users are allowed to create other admin users.
 
     :<json str first_name: The (optional) first name of the user.
     :<json str last_name: The (optional) last name of the user.
@@ -1151,7 +1135,7 @@ Users
             ]
         }
 
-.. http:put:: /users/(int:user_id)
+.. http:put:: /users/(int:user_id)/
 
     Update the information of an existing user.
 
@@ -1183,7 +1167,7 @@ Users
 
     .. sourcecode:: http
 
-        PUT /users/1 HTTP/1.1
+        PUT /users/1/ HTTP/1.1
         Content-Type: application/json
 
         {
@@ -1220,6 +1204,9 @@ Users
 
     Only the user themself, or a user with org:admin, or an admin user can
     deactivate a user.
+
+    User can be reactivated by setting active to true in
+    :ref:`updating users <users-update>`.
 
     :status 204: Successfully deleted the user.
 
