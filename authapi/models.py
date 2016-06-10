@@ -18,7 +18,7 @@ class SeedOrganization(models.Model):
 
 class SeedPermission(models.Model):
     type = models.TextField()
-    object_id = models.TextField()
+    object_id = models.TextField(blank=True)
     namespace = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
