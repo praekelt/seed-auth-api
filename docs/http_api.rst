@@ -113,7 +113,7 @@ type
     The string representing the type of permission.
 object_id
     A string that uniquely identifies the object that this permission acts
-    upon. Empty string if this permission does not act on a specific object.
+    upon. null if this permission does not act on a specific object.
 namespace
     A string used to namespace a set of permissions for a specific app, to
     avoid "type" collisions.
@@ -859,7 +859,7 @@ Teams
 
     :<json str type: The string representing the permission.
     :<json str object_id:
-        The id of the object that the permission acts on. Empty string if it
+        The id of the object that the permission acts on. null if it
         doesn't act on any object.
     :<json str namespace:
         The namespace for the permission, to avoid "type" collisions between
