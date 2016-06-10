@@ -55,7 +55,7 @@ team:admin
     Can modify the team they have permission for, and add and remove existing
     users to that team.
 
-.. http:get:: /user
+.. http:get:: /user/
 
    Get the user details, and list of permissions that a user currently has
    access to, for the user authorized by the given token.
@@ -68,7 +68,7 @@ team:admin
 
    .. sourcecode:: http
 
-      GET /user HTTP/1.1
+      GET /user/ HTTP/1.1
       Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b
 
 
@@ -81,7 +81,7 @@ team:admin
 
     {
         "id": 1,
-        "url": "https://example.org/users/1",
+        "url": "https://example.org/users/1/",
         "first_name": "Jon",
         "last_name": "Snow",
         "email": "jonsnow@castleblack.net",
@@ -302,7 +302,7 @@ to belong to exactly one organization, but an organization can have many teams.
             "title": "Nights Watch",
             "id": 4,
             "teams": [],
-            "url": "https://example.org/organizations/4",
+            "url": "https://example.org/organizations/4/",
             "users": [],
             "archived": false
         }
@@ -337,7 +337,7 @@ to belong to exactly one organization, but an organization can have many teams.
             "title":"Nights Watch",
             "id":4,
             "teams":[],
-            "url":"https://example.org/organizations/4",
+            "url":"https://example.org/organizations/4/",
             "users":[],
             "archived": false
         },
@@ -345,13 +345,13 @@ to belong to exactly one organization, but an organization can have many teams.
             "title":"Brotherhood Without Banners",
             "id":5,
             "teams":[],
-            "url":"https://example.org/organizations/5",
+            "url":"https://example.org/organizations/5/",
             "users":[],
             "archived": false
         }
        ]
 
-.. http:get:: /organizations/(int:organization_id)
+.. http:get:: /organizations/(int:organization_id)/
 
     Get the details of an organization.
 
@@ -368,7 +368,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-       GET /organizations/4 HTTP/1.1
+       GET /organizations/4/ HTTP/1.1
 
     **Example response**:
 
@@ -381,13 +381,13 @@ to belong to exactly one organization, but an organization can have many teams.
         "title":"Night's Watch",
         "id":4,
         "teams":[],
-        "url":"https://example.org/organizations/4",
+        "url":"https://example.org/organizations/4/",
         "users":[],
         "archived": false
        }
 
 .. _organizations-update:
-.. http:put:: /organizations/(int:organization_id)
+.. http:put:: /organizations/(int:organization_id)/
 
     Update an existing organization.
 
@@ -409,7 +409,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-       PUT /organizations/4 HTTP/1.1
+       PUT /organizations/4/ HTTP/1.1
        Content-Type: application/json
 
        {
@@ -428,12 +428,12 @@ to belong to exactly one organization, but an organization can have many teams.
         "title":"Brotherhood Without Banners",
         "id":4,
         "teams":[],
-        "url":"https://example.org/organizations/4",
+        "url":"https://example.org/organizations/4/",
         "users":[],
         "archived": false
        }
 
-.. http:delete:: /organizations/(int:organization_id)
+.. http:delete:: /organizations/(int:organization_id)/
 
     Archive an organization. The organization will by default no longer be
     shown when :ref:`listing organizations <organizations-list>`, the
@@ -454,7 +454,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
    .. sourcecode:: http
 
-      DELETE /organizations/4 HTTP/1.1
+      DELETE /organizations/4/ HTTP/1.1
 
    **Example response**:
 
@@ -488,7 +488,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
         HTTP/1.1 204 No Content
 
-.. http:delete:: /organizations/(int:organization_id)/users/(int:user_id)
+.. http:delete:: /organizations/(int:organization_id)/users/(int:user_id)/
 
     Remove a user from an organization.
 
@@ -501,7 +501,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-        DELETE /organizations/4/users/2 HTTP/1.1
+        DELETE /organizations/4/users/2/ HTTP/1.1
 
     **Example response**:
 
@@ -553,7 +553,7 @@ to belong to exactly one organization, but an organization can have many teams.
             "title": "Lord Commanders",
             "users": [],
             "permissions": [],
-            "url": "https://example.org/teams/2",
+            "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.com/organizations/7/",
                 "id": 7
@@ -626,7 +626,7 @@ Teams
                 "title": "admins",
                 "permissions": [],
                 "users": [],
-                "url": "https://example.org/teams/4",
+                "url": "https://example.org/teams/4/",
                 "organization": {
                     "url": "https://example.org/organizations/7/",
                     "id": 7
@@ -676,7 +676,7 @@ Teams
                             "namespace": "__auth__"
                         }
                     ],
-                "url": "https://example.org/teams/4",
+                "url": "https://example.org/teams/4/",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
                     "id": 3
@@ -702,7 +702,7 @@ Teams
                             "namespace": "foo_app"
                         }
                     ],
-                "url": "https://exmple.org/teams/6",
+                "url": "https://exmple.org/teams/6/",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
                     "id": 3
@@ -713,7 +713,7 @@ Teams
 
 
 .. _Get team details:
-.. http:get:: /teams/(int:team_id)
+.. http:get:: /teams/(int:team_id)/
 
     Get the details of a team.
 
@@ -736,7 +736,7 @@ Teams
 
     .. sourcecode:: http
 
-        GET /teams/2 HTTP/1.1
+        GET /teams/2/ HTTP/1.1
 
     **Example response**:
 
@@ -750,7 +750,7 @@ Teams
             "title": "Lord Commanders",
             "permissions": [],
             "users": [],
-            "url": "https://example.org/teams/2",
+            "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.org/organizations/7/",
                 "id": 7
@@ -760,7 +760,7 @@ Teams
 
 .. _Update team details:
 .. _teams-update:
-.. http:put:: /teams/(int:team_id)
+.. http:put:: /teams/(int:team_id)/
 
     Update the details of a team.
 
@@ -784,7 +784,7 @@ Teams
 
     .. sourcecode:: http
 
-        PUT /teams/2 HTTP/1.1
+        PUT /teams/2/ HTTP/1.1
         Content-Type: application/json
 
         {
@@ -804,7 +804,7 @@ Teams
             "title": "Brotherhood without banners",
             "permissions": [],
             "users": [],
-            "url": "https://example.org/teams/2",
+            "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.org/organizations/7/",
                 "id": 7
@@ -813,7 +813,7 @@ Teams
         }
 
 .. _Archive team:
-.. http:delete:: /teams/(int:team_id)
+.. http:delete:: /teams/(int:team_id)/
 
     Archive a team. The team will by default no longer be shown when
     :ref:`listing teams <teams-list>`, and any permissions associated with the
@@ -833,7 +833,7 @@ Teams
 
     .. sourcecode:: http
 
-        DELETE /teams/2 HTTP/1.1
+        DELETE /teams/2/ HTTP/1.1
 
     **Example response**:
 
@@ -898,7 +898,7 @@ Teams
         }
 
 .. _Remove permission from team:
-.. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)
+.. http:delete:: /teams/(int:team_id)/permissions/(int:permission_id)/
 
     Remove a permission from a team.
 
@@ -919,7 +919,7 @@ Teams
 
     .. sourcecode:: http
 
-        DELETE /teams/2/permissions/17 HTTP/1.1
+        DELETE /teams/2/permissions/17/ HTTP/1.1
 
     **Example response**:
 
@@ -954,7 +954,7 @@ Teams
         HTTP/1.1 204 No Content
 
 .. _Remove user from team:
-.. http:delete:: /teams/(int:team_id)/users/1
+.. http:delete:: /teams/(int:team_id)/users/1/
 
     Remove a user from a team.
 
@@ -964,7 +964,7 @@ Teams
 
     .. sourcecode:: http
 
-        DELETE /teams/2/users/1 HTTP/1.1
+        DELETE /teams/2/users/1/ HTTP/1.1
 
     **Example response**:
 
@@ -997,7 +997,7 @@ Users
         [
             {
                 "id": 1,
-                "url": "https://example.org/users/1",
+                "url": "https://example.org/users/1/",
                 "first_name": "Jon",
                 "last_name": "Snow",
                 "email": "jonsnow@castleblack.net",
@@ -1006,13 +1006,13 @@ Users
                 "teams": [
                     {
                         "id": 2,
-                        "url": "https://example.org/teams/2"
+                        "url": "https://example.org/teams/2/"
                     }
                 ],
                 "organizations": [
                     {
                         "id": 4,
-                        "url": "https://example.org/organizations/4"
+                        "url": "https://example.org/organizations/4/"
                     }
                 ]
             }
@@ -1073,7 +1073,7 @@ Users
 
         {
             "id": 1,
-            "url": "https://example.org/users/1",
+            "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
             "email": "jonsnow@castleblack.net",
@@ -1083,7 +1083,7 @@ Users
             "organizations": []
         }
 
-.. http:get:: /users/(int:user_id)
+.. http:get:: /users/(int:user_id)/
 
     Get details on a specific user.
 
@@ -1104,7 +1104,7 @@ Users
 
     .. sourcecode:: http
 
-        GET /users/1 HTTP/1.1
+        GET /users/1/ HTTP/1.1
 
     **Example response**:
 
@@ -1115,7 +1115,7 @@ Users
 
         {
             "id": 1,
-            "url": "https://example.org/users/1",
+            "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
             "email": "jonsnow@castleblack.net",
@@ -1124,13 +1124,13 @@ Users
             "teams": [
                 {
                     "id": 2,
-                    "url": "https://example.org/teams/2"
+                    "url": "https://example.org/teams/2/"
                 }
             ],
             "organizations": [
                 {
                     "id": 4,
-                    "url": "https://example.org/organizations/4"
+                    "url": "https://example.org/organizations/4/"
                 }
             ]
         }
@@ -1187,7 +1187,7 @@ Users
 
         {
             "id": 1,
-            "url": "https://example.org/users/1",
+            "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
             "email": "jonsnow@castleblack.org",
@@ -1197,7 +1197,7 @@ Users
             "organizations": []
         }
 
-.. http:delete:: /users/(int:user_id)
+.. http:delete:: /users/(int:user_id)/
 
     Remove an existing user. Sets the user to inactive instead of deleting
     the user.
@@ -1214,7 +1214,7 @@ Users
 
     .. sourcecode:: http
 
-        DELETE /users/1 HTTP/1.1
+        DELETE /users/1/ HTTP/1.1
 
     **Example response**:
 
