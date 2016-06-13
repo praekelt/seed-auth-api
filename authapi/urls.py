@@ -40,7 +40,7 @@ team_router.register(
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(
-        r'^user$', views.UserPermissionsView.as_view(),
+        r'^user/$', views.UserPermissionsView.as_view(),
         name='get-user-permissions'),
     url(r'^user/tokens/$', views.TokenView.as_view(), name='create-token'),
 ]

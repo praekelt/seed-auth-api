@@ -249,6 +249,8 @@ class TeamPermissionPermission(BasePermission):
     def check_permissions(self, user, ptype, object_id, namespace):
         if namespace != settings.PERMISSION_NAMESPACE:
             return True
+        if user.is_superuser:
+            return True
         if ptype == 'org:admin':
             return self.user_has_permission(user, ptype, object_id)
         elif ptype == 'team:admin':
