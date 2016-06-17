@@ -462,14 +462,12 @@ to belong to exactly one organization, but an organization can have many teams.
 
       HTTP/1.1 204 No Content
 
-.. http:post:: /organizations/(int:organization_id)/users/
+.. http:put:: /organizations/(int:organization_id)/users/(int:user_id)/
 
     Add a user to an existing organization.
 
     Requires admin user, or any user that has 'org:admin' permissions for that
     organization.
-
-    :<json int user_id: The ID of the user to add.
 
     :status 204: User was successfully added.
 
@@ -477,10 +475,8 @@ to belong to exactly one organization, but an organization can have many teams.
 
     .. sourcecode:: http
 
-        POST /organizations/4/users/ HTTP/1.1
+        PUT /organizations/4/users/2/ HTTP/1.1
         Content-Type: application/json
-
-        {"user_id": 2}
 
     **Example response**:
 
@@ -585,7 +581,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     See `Remove permission from team`_. Limited to teams that belong to the organization.
 
-.. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/users/
+.. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/users/(int:user_id)/
 
     See `Add user to team`_. Limited to teams that belong to the organization.
 
@@ -928,11 +924,9 @@ Teams
         HTTP/1.1 204 No Content
 
 .. _Add user to team:
-.. http:post:: /teams/(int:team_id)/users/
+.. http:put:: /teams/(int:team_id)/users/(int:user_id)/
 
     Add an existing user to an existing team.
-
-    :<json int user_id: The ID of the user to add to the team.
 
     :status 204: successfully added the user to the team.
 
@@ -940,12 +934,8 @@ Teams
 
     .. sourcecode:: http
 
-        POST /teams/2/users/ HTTP/1.1
+        PUT /teams/2/users/1/ HTTP/1.1
         Content-Type: application/json
-
-        {
-            "user_id": 1
-        }
 
     **Example response**:
 
