@@ -44,12 +44,6 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = ('id', 'type', 'object_id', 'namespace')
 
 
-class ExistingUserSerializer(serializers.Serializer):
-    '''Serializer for adding/removing an existing user.'''
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
-
-
 class OrganizationSerializer(serializers.ModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='get_active_teams', read_only=True)
