@@ -211,7 +211,6 @@ class TeamPermissionViewSet(
 class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):
     '''Nested viewset that allows users to add or remove users from teams.'''
     queryset = User.objects.all()
-    serializer_class = ExistingUserSerializer
     permission_classes = (IsAuthenticated,)
 
     def check_team_permissions(self, request, teamid, orgid=None):
@@ -229,13 +228,11 @@ class TeamUsersViewSet(NestedViewSetMixin, GenericViewSet):
             )
         return team
 
-    def create(
-            self, request, parent_lookup_seedteam=None,
+    def update(
+            self, request, pk=None, parent_lookup_seedteam=None,
             parent_lookup_seedteam__organization=None):
         '''Add a user to a team.'''
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, pk=serializer.data['user_id'])
+        user = get_object_or_404(User, pk=pk)
         team = self.check_team_permissions(
             request, parent_lookup_seedteam,
             parent_lookup_seedteam__organization)
