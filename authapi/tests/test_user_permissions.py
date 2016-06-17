@@ -20,7 +20,7 @@ class UserPermissionsTests(AuthAPITestCase):
         response = self.client.get(reverse('get-user-permissions'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['id'], user.id)
+        self.assertEqual(response.data['id'], str(user.id))
         self.assertEqual(response.data['email'], 'foo@bar.org')
         self.assertEqual(response.data['permissions'], [])
 
