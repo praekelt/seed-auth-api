@@ -413,9 +413,10 @@ class OrganizationUserTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
-        response = self.client.put(
-            reverse('seedorganization-users-detail',
+        response = self.client.put(reverse(
+            'seedorganization-users-detail',
             args=[org.id, 'missing-user']))
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remove_user_from_organization(self):
