@@ -17,8 +17,7 @@ from authapi.models import SeedOrganization, SeedTeam, SeedPermission
 from authapi import permissions
 from authapi.serializers import (
     OrganizationSerializer, TeamSerializer, UserSerializer, NewUserSerializer,
-    ExistingUserSerializer, PermissionSerializer, CreateTokenSerializer,
-    PermissionsUserSerializer)
+    PermissionSerializer, CreateTokenSerializer, PermissionsUserSerializer)
 
 
 def get_true_false_both(query_params, field_name, default):
@@ -67,11 +66,9 @@ class OrganizationUsersViewSet(NestedViewSetMixin, viewsets.ViewSet):
     organizations.'''
     permission_classes = (permissions.OrganizationUsersPermission,)
 
-    def create(self, request, parent_lookup_organization=None):
+    def update(self, request, pk=None, parent_lookup_organization=None):
         '''Add a user to an organization.'''
-        serializer = ExistingUserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data.get('user_id')
+        user = get_object_or_404(User, pk=pk)
         org = get_object_or_404(
             SeedOrganization, pk=parent_lookup_organization)
         self.check_object_permissions(request, org)
