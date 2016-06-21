@@ -525,7 +525,7 @@ class UserTests(AuthAPITestCase):
             'admin': user.is_superuser,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'id': user.id,
+            'id': str(user.id),
             'teams': [TeamSummarySerializer(
                 instance=team, context=context).data],
             'organizations': [OrganizationSummarySerializer(
@@ -556,7 +556,7 @@ class UserTests(AuthAPITestCase):
             'admin': user.is_superuser,
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'id': user.id,
+            'id': str(user.id),
             'teams': [TeamSummarySerializer(
                 instance=team, context=context).data],
             'organizations': [OrganizationSummarySerializer(
@@ -577,5 +577,5 @@ class UserTests(AuthAPITestCase):
         data = UserSummarySerializer(instance=user, context=context).data
         self.assertEqual(data, {
             'url': url,
-            'id': user.id,
+            'id': str(user.id),
         })

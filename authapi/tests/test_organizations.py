@@ -168,7 +168,7 @@ class OrganizationTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         [org] = SeedOrganization.objects.all()
-        self.assertEqual(org.id, response.data['id'])
+        self.assertEqual(str(org.id), response.data['id'])
         self.assertEqual(org.title, data['title'])
 
     def test_get_organization(self):
@@ -214,7 +214,7 @@ class OrganizationTests(AuthAPITestCase):
             instance=organization, context=context).data
         self.assertEqual(data, {
             'url': url,
-            'id': organization.id,
+            'id': str(organization.id),
             'users': [
                 UserSummarySerializer(instance=user, context=context).data],
             'teams': [
@@ -235,7 +235,7 @@ class OrganizationTests(AuthAPITestCase):
             instance=organization, context=context).data
         self.assertEqual(data, {
             'url': url,
-            'id': organization.id,
+            'id': str(organization.id),
         })
 
     def test_permission_list_organization(self):
@@ -645,7 +645,7 @@ class OrganizationTeamTests(AuthAPITestCase):
             reverse('seedorganization-teams-list', args=[org1.pk]))
         [team] = response.data
 
-        self.assertEqual(team['id'], team1.id)
+        self.assertEqual(team['id'], str(team1.id))
 
     def test_permission_teams_for_organization(self):
         '''Any member of the organization should be able to see that
@@ -666,7 +666,7 @@ class OrganizationTeamTests(AuthAPITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         [resp_team] = response.data
-        self.assertEqual(resp_team['id'], team.pk)
+        self.assertEqual(resp_team['id'], str(team.pk))
 
     def test_create_permission_for_organizations_team(self):
         '''Should be able to create a permission for an organization's team.'''
