@@ -20,14 +20,11 @@ class SerializerPkField(serializers.PrimaryKeyRelatedField):
         return self.serializer(instance=value, context=self.context).data
 
 
-class IntStrReprField(serializers.Field):
+class IntStrReprField(serializers.IntegerField):
     '''Field that parses to int and serializes to string.'''
 
     def to_representation(self, value):
         return str(value)
-
-    def to_internal_value(self, data):
-        return int(data)
 
 
 class BaseModelSerializer(serializers.ModelSerializer):
