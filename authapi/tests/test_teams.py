@@ -245,7 +245,7 @@ class TeamTests(AuthAPITestCase):
         team1.users.add(user)
         response = self.client.get(url)
         [team] = response.data
-        self.assertEqual(team['id'], team1.pk)
+        self.assertEqual(team['id'], str(team1.pk))
 
     def test_permissions_team_list_admin_permission(self):
         '''Teams that a user has 'team:admin' permission for should be
@@ -275,7 +275,7 @@ class TeamTests(AuthAPITestCase):
         team = SeedTeam.objects.create(organization=org)
         response = self.client.get(url)
         [resp_team] = response.data
-        self.assertEqual(team.pk, resp_team['id'])
+        self.assertEqual(str(team.pk), resp_team['id'])
 
     def test_permissions_team_list_org_admin(self):
         '''Teams that are a part of an organization that a user has org:admin
@@ -289,7 +289,7 @@ class TeamTests(AuthAPITestCase):
         team = SeedTeam.objects.create(organization=org)
         self.add_permission(user, 'org:admin', org.pk)
         response = self.client.get(url)
-        self.assertTrue(team.pk in [t['id'] for t in response.data])
+        self.assertTrue(str(team.pk) in [t['id'] for t in response.data])
 
     def test_permissions_team_list_admin(self):
         '''Admin users should be able to see all teams.'''
@@ -302,7 +302,7 @@ class TeamTests(AuthAPITestCase):
         team = SeedTeam.objects.create(organization=org)
         response = self.client.get(url)
         [resp_team] = response.data
-        self.assertTrue(team.pk, resp_team['id'])
+        self.assertTrue(str(team.pk), resp_team['id'])
 
     def test_create_team(self):
         '''Creating teams on this endpoint should not be allowed.'''
@@ -599,7 +599,7 @@ class TeamTests(AuthAPITestCase):
             'permissions': [
                 PermissionSerializer(instance=permission, context=context).data
             ],
-            'id': team.id,
+            'id': str(team.id),
             'users': [
                 UserSummarySerializer(instance=user, context=context).data],
             'archived': team.archived,
@@ -616,7 +616,7 @@ class TeamTests(AuthAPITestCase):
         data = TeamSummarySerializer(instance=team, context=context).data
         self.assertEqual(data, {
             'url': url,
-            'id': team.id
+            'id': str(team.id)
         })
 
     def test_add_permission_to_team(self):
@@ -641,7 +641,7 @@ class TeamTests(AuthAPITestCase):
             'type': data['type'],
             'object_id': data['object_id'],
             'namespace': data['namespace'],
-            'id': permission.id
+            'id': str(permission.id)
         })
         self.assertEqual(len(team.permissions.all()), 1)
 

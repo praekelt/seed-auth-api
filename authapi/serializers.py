@@ -20,25 +20,36 @@ class SerializerPkField(serializers.PrimaryKeyRelatedField):
         return self.serializer(instance=value, context=self.context).data
 
 
-class OrganizationSummarySerializer(serializers.ModelSerializer):
+class IntStrReprField(serializers.IntegerField):
+    '''Field that parses to int and serializes to string.'''
+
+    def to_representation(self, value):
+        return str(value)
+
+
+class BaseModelSerializer(serializers.ModelSerializer):
+    id = IntStrReprField(read_only=True)
+
+
+class OrganizationSummarySerializer(BaseModelSerializer):
     class Meta:
         model = SeedOrganization
         fields = ('id', 'url')
 
 
-class UserSummarySerializer(serializers.ModelSerializer):
+class UserSummarySerializer(BaseModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'url')
 
 
-class TeamSummarySerializer(serializers.ModelSerializer):
+class TeamSummarySerializer(BaseModelSerializer):
     class Meta:
         model = SeedTeam
         fields = ('id', 'url')
 
 
-class PermissionSerializer(serializers.ModelSerializer):
+class PermissionSerializer(BaseModelSerializer):
     class Meta:
         model = SeedPermission
         fields = ('id', 'type', 'object_id', 'namespace')
@@ -50,7 +61,7 @@ class ExistingUserSerializer(serializers.Serializer):
         queryset=User.objects.all())
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(BaseModelSerializer):
     teams = TeamSummarySerializer(
         many=True, source='get_active_teams', read_only=True)
     users = UserSummarySerializer(
@@ -61,7 +72,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = ('title', 'id', 'url', 'teams', 'users', 'archived')
 
 
-class TeamSerializer(serializers.ModelSerializer):
+class TeamSerializer(BaseModelSerializer):
     users = UserSummarySerializer(
         many=True, read_only=True, source='get_active_users')
     permissions = PermissionSerializer(many=True, read_only=True)
@@ -79,7 +90,7 @@ class TeamSerializer(serializers.ModelSerializer):
             'archived')
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
+class BaseUserSerializer(BaseModelSerializer):
     email = serializers.EmailField()
     admin = serializers.BooleanField(source='is_superuser', required=False)
     active = serializers.BooleanField(default=True, source='is_active')
