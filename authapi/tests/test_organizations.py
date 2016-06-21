@@ -380,11 +380,29 @@ class OrganizationUserTests(AuthAPITestCase):
         user = User.objects.create_user(username='test@example.org')
         self.assertEqual(len(org.users.all()), 0)
 
-        response = self.client.post(
-            reverse('seedorganization-users-list', args=[org.id]), {
-                'user_id': user.id
-            })
+        response = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.id, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        org.refresh_from_db()
+        self.assertEqual(len(org.users.all()), 1)
+
+    def test_add_user_to_organization_idempotent(self):
+        '''Adding a user to an organization be idempotent'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create(title='test org')
+        user = User.objects.create_user(username='test@example.org')
+        self.assertEqual(len(org.users.all()), 0)
+
+        response = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.id, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.id, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
         org.refresh_from_db()
         self.assertEqual(len(org.users.all()), 1)
 
@@ -395,14 +413,11 @@ class OrganizationUserTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         org = SeedOrganization.objects.create(title='test org')
 
-        response = self.client.post(
-            reverse('seedorganization-users-list', args=[org.id]), {
-                'user_id': 7,
-            })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data, {
-            'user_id': ['Invalid pk "7" - object does not exist.']
-        })
+        response = self.client.put(reverse(
+            'seedorganization-users-detail',
+            args=[org.id, 'missing-user']))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_remove_user_from_organization(self):
         '''Removing a user from an organization should remove the relationship
@@ -426,8 +441,8 @@ class OrganizationUserTests(AuthAPITestCase):
         org = SeedOrganization.objects.create()
         user = User.objects.create_user('testuser@example.org')
 
-        url = reverse('seedorganization-users-list', args=(org.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
+        resp = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.pk, user.pk]))
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_permission_add_user_to_organization_authorized(self):
@@ -437,8 +452,8 @@ class OrganizationUserTests(AuthAPITestCase):
         user, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-        url = reverse('seedorganization-users-list', args=(org.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
+        resp = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.pk, user.pk]))
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_organization_org_admin_wrong_org(self):
@@ -450,8 +465,8 @@ class OrganizationUserTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(user, 'org:admin', org2.pk)
 
-        url = reverse('seedorganization-users-list', args=(org1.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
+        resp = self.client.put(
+            reverse('seedorganization-users-detail', args=[org1.pk, user.pk]))
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_organization_org_admin_correct_org(self):
@@ -462,19 +477,19 @@ class OrganizationUserTests(AuthAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(user, 'org:admin', org.pk)
 
-        url = reverse('seedorganization-users-list', args=(org.pk,))
-        resp = self.client.post(url, data={'user_id': user.pk})
+        resp = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.pk, user.pk]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_permission_add_user_to_organization_admin(self):
         '''Admins should be able to add users to an organization.'''
         org = SeedOrganization.objects.create()
-        url = reverse('seedorganization-users-list', args=(org.pk,))
-
+        user = User.objects.create_user('testuser@example.org')
         _, token = self.create_admin_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        user = User.objects.create_user('testuser@example.org')
-        resp = self.client.post(url, data={'user_id': user.pk})
+
+        resp = self.client.put(
+            reverse('seedorganization-users-detail', args=[org.pk, user.pk]))
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_permission_remove_user_to_organization_unauthorized(self):
@@ -999,17 +1014,34 @@ class OrganizationTeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create(title='test org')
         team = SeedTeam.objects.create(title='test team', organization=org)
         user = User.objects.create_user('test user')
-        data = {
-            'user_id': user.pk,
-        }
 
-        response = self.client.post(
-            reverse(
-                'seedorganization-teams-users-list',
-                args=[org.pk, team.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team.pk, user.id]))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        [teamuser] = team.users.all()
+        self.assertEqual(teamuser, user)
+
+    def test_add_user_to_organizations_team_idempotent(self):
+        '''Adding an existing user to an organization's team should be
+        idempotent'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user('test user')
+
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team.pk, user.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team.pk, user.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
         [teamuser] = team.users.all()
         self.assertEqual(teamuser, user)
 
@@ -1019,11 +1051,10 @@ class OrganizationTeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org.pk, team.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_permission_add_user_to_organizations_team_no_permission(self):
@@ -1032,13 +1063,12 @@ class OrganizationTeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         _, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org.pk, team.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_organizations_team_team_admin(self):
@@ -1048,22 +1078,22 @@ class OrganizationTeamTests(AuthAPITestCase):
         team1 = SeedTeam.objects.create(organization=org)
         team2 = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         authuser, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'team:admin', team1.pk)
 
         # Correct team
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org.pk, team1.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team1.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Incorrect team
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org.pk, team2.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org.pk, team2.pk, user.pk]))
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_organizations_team_org_admin(self):
@@ -1074,22 +1104,21 @@ class OrganizationTeamTests(AuthAPITestCase):
         team1 = SeedTeam.objects.create(organization=org1)
         team2 = SeedTeam.objects.create(organization=org2)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         authuser, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'team:admin', team1.pk)
 
         # Correct org
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org1.pk, team1.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org1.pk, team1.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Incorrect org
-        response = self.client.post(reverse(
-            'seedorganization-teams-users-list', args=[org2.pk, team2.pk]),
-            data=data)
+        response = self.client.put(reverse(
+            'seedorganization-teams-users-detail',
+            args=[org2.pk, team2.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_remove_user_from_organizations_team(self):

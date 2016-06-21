@@ -957,11 +957,30 @@ class TeamTests(AuthAPITestCase):
         user = User.objects.create_user(username='test@example.org')
         self.assertEqual(len(team.users.all()), 0)
 
-        response = self.client.post(
-            reverse('seedteam-users-list', args=[team.id]), {
-                'user_id': user.id
-            })
+        response = self.client.put(
+            reverse('seedteam-users-detail', args=[team.id, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        team.refresh_from_db()
+        self.assertEqual(len(team.users.all()), 1)
+
+    def test_add_user_to_team_idempotent(self):
+        '''Adding a user to a team should be idempotent.'''
+        _, token = self.create_admin_user()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        org = SeedOrganization.objects.create(title='test org')
+        team = SeedTeam.objects.create(title='test team', organization=org)
+        user = User.objects.create_user(username='test@example.org')
+        self.assertEqual(len(team.users.all()), 0)
+
+        response = self.client.put(
+            reverse('seedteam-users-detail', args=[team.id, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.put(
+            reverse('seedteam-users-detail', args=[team.id, user.pk]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
         team.refresh_from_db()
         self.assertEqual(len(team.users.all()), 1)
 
@@ -970,10 +989,9 @@ class TeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_permission_add_user_to_team_no_permission(self):
@@ -982,13 +1000,12 @@ class TeamTests(AuthAPITestCase):
         org = SeedOrganization.objects.create()
         team = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         _, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_team_team_admin(self):
@@ -998,20 +1015,19 @@ class TeamTests(AuthAPITestCase):
         team1 = SeedTeam.objects.create(organization=org)
         team2 = SeedTeam.objects.create(organization=org)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         authuser, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'team:admin', team1.pk)
 
         # Correct team
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team1.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team1.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Incorrect team
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team2.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team2.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_permission_add_user_to_team_org_admin(self):
@@ -1022,20 +1038,19 @@ class TeamTests(AuthAPITestCase):
         team1 = SeedTeam.objects.create(organization=org1)
         team2 = SeedTeam.objects.create(organization=org2)
         user = User.objects.create_user('test user')
-        data = {'user_id': user.pk}
 
         authuser, token = self.create_user()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.add_permission(authuser, 'org:admin', org1.pk)
 
         # Correct org
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team1.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team1.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Incorrect org
-        response = self.client.post(reverse(
-            'seedteam-users-list', args=[team2.pk]), data=data)
+        response = self.client.put(reverse(
+            'seedteam-users-detail', args=[team2.pk, user.pk]))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_remove_user_from_team(self):
