@@ -581,7 +581,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     See `Remove permission from team`_. Limited to teams that belong to the organization.
 
-.. http:post:: /organizations/(int:organization_id)/teams/(int:team:id)/users/(int:user_id)/
+.. http:put:: /organizations/(int:organization_id)/teams/(int:team:id)/users/(int:user_id)/
 
     See `Add user to team`_. Limited to teams that belong to the organization.
 
