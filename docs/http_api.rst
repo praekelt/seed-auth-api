@@ -80,7 +80,7 @@ team:admin
     Content-Type: application/json
 
     {
-        "id": 1,
+        "id": "1",
         "url": "https://example.org/users/1/",
         "first_name": "Jon",
         "last_name": "Snow",
@@ -89,13 +89,13 @@ team:admin
         "active": true,
         "permissions": [
             {
-                "id": 2,
+                "id": "2",
                 "type": "org:admins",
                 "object_id": "3",
                 "namespace": "__auth__"
             },
             {
-                "id": 5,
+                "id": "5",
                 "type": "foo:bar:baz",
                 "object_id": "7",
                 "namespace": "foo_app"
@@ -271,7 +271,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     :<json str title: The title of the organization.
     :>json str title: The title of the created organization.
-    :>json int id: The id of the created organization.
+    :>json str id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
     :>json str url: The URL for this organization.
@@ -300,7 +300,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
         {
             "title": "Nights Watch",
-            "id": 4,
+            "id": "4",
             "teams": [],
             "url": "https://example.org/organizations/4/",
             "users": [],
@@ -358,7 +358,7 @@ to belong to exactly one organization, but an organization can have many teams.
     Requires any user.
 
     :>json str title: The title of the created organization.
-    :>json int id: The id of the created organization.
+    :>json str id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are a part of the organization.
     :>json str url: The URL for this organization.
@@ -396,7 +396,7 @@ to belong to exactly one organization, but an organization can have many teams.
 
     :<json str title: The title of the organization.
     :<json str archived: True if the organization is to be archived.
-    :>json int id: The id of the created organization.
+    :>json str id: The id of the created organization.
     :>json list teams: The list of teams that the organization has.
     :>json list users: The list of users that are part of the organization.
     :>json str url: The URL for this organization.
@@ -519,7 +519,7 @@ to belong to exactly one organization, but an organization can have many teams.
     :<json str title: The title of the team.
     :<json bool archived: True if the team is archived.
 
-    :>json int id: The ID of the created team.
+    :>json str id: The ID of the created team.
     :>json str url: The URL of the created team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
@@ -549,14 +549,14 @@ to belong to exactly one organization, but an organization can have many teams.
         Content-Type: application/json
 
         {
-            "id": 2,
+            "id": "2",
             "title": "Lord Commanders",
             "users": [],
             "permissions": [],
             "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.com/organizations/7/",
-                "id": 7
+                "id": "7"
             },
             "archived": false
         }
@@ -622,14 +622,14 @@ Teams
 
         [
             {
-                "id": 4,
+                "id": "4",
                 "title": "admins",
                 "permissions": [],
                 "users": [],
                 "url": "https://example.org/teams/4/",
                 "organization": {
                     "url": "https://example.org/organizations/7/",
-                    "id": 7
+                    "id": "7"
                 },
                 "archived": false
             }
@@ -664,13 +664,13 @@ Teams
 
         [
             {
-                "id": 4,
+                "id": "4",
                 "title": "organization admins",
                 "users": [],
                 "permissions":
                     [
                         {
-                            "id": 2,
+                            "id": "2",
                             "type": "org:admin",
                             "object_id": "3",
                             "namespace": "__auth__"
@@ -679,24 +679,24 @@ Teams
                 "url": "https://example.org/teams/4/",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
-                    "id": 3
+                    "id": "3"
                 },
                 "archived": false
             },
             {
-                "id": 7,
+                "id": "7",
                 "title": "other organization admins",
                 "users": [],
                 "permissions":
                     [
                         {
-                            "id": 3,
+                            "id": "3",
                             "type": "org:admin",
                             "object_id": "3",
                             "namespace": "__auth__"
                         },
                         {
-                            "id": 4,
+                            "id": "4",
                             "type": "foo:bar",
                             "object_id": "",
                             "namespace": "foo_app"
@@ -705,7 +705,7 @@ Teams
                 "url": "https://exmple.org/teams/6/",
                 "organization": {
                     "url": "https://example.org/organizations/3/",
-                    "id": 3
+                    "id": "3"
                 },
                 "archived": false
             }
@@ -723,7 +723,7 @@ Teams
     that are part of the team, or part of the team's organization, have read
     access to that team.
 
-    :>json int id: the ID of the team.
+    :>json str id: the ID of the team.
     :>json str url: the URL of the team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
@@ -746,14 +746,14 @@ Teams
         Content-Type: application/json
 
         {
-            "id": 2,
+            "id": "2",
             "title": "Lord Commanders",
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.org/organizations/7/",
-                "id": 7
+                "id": "7"
             },
             "archived": false
         }
@@ -771,7 +771,7 @@ Teams
     :<json str title: The title of the team.
     :<json bool archived: True if the team is archived.
 
-    :>json int id: the id of the updated team.
+    :>json str id: the id of the updated team.
     :>json str url: The URL of the updated team.
     :>json str title: the title of the team.
     :>json list users: The list of users that belong to this team.
@@ -800,14 +800,14 @@ Teams
         Content-Type: application/json
 
         {
-            "id": 2,
+            "id": "2",
             "title": "Brotherhood without banners",
             "permissions": [],
             "users": [],
             "url": "https://example.org/teams/2/",
             "organization": {
                 "url": "https://example.org/organizations/7/",
-                "id": 7
+                "id": "7"
             },
             "archived": false
         }
@@ -865,7 +865,7 @@ Teams
         The namespace for the permission, to avoid "type" collisions between
         apps.
 
-    :>json int id: the id of the permission.
+    :>json str id: the id of the permission.
     :>json str type: the type of the permission.
     :>json str object_id: the object id that the permission acts on.
     :status 200: successfully added permission to the team.
@@ -891,7 +891,7 @@ Teams
         Content-Type: application/json
 
         {
-            "id": 17,
+            "id": "17",
             "type": "org:admin",
             "object_id": "2",
             "namespace": "__auth__"
@@ -996,7 +996,7 @@ Users
 
         [
             {
-                "id": 1,
+                "id": "1",
                 "url": "https://example.org/users/1/",
                 "first_name": "Jon",
                 "last_name": "Snow",
@@ -1005,13 +1005,13 @@ Users
                 "active": true,
                 "teams": [
                     {
-                        "id": 2,
+                        "id": "2",
                         "url": "https://example.org/teams/2/"
                     }
                 ],
                 "organizations": [
                     {
-                        "id": 4,
+                        "id": "4",
                         "url": "https://example.org/organizations/4/"
                     }
                 ]
@@ -1036,7 +1036,7 @@ Users
         tokens created, and permissions are also inactive. They do not show
         up in any users listing. Defaults to True.
 
-    :>json int id: The ID for the user.
+    :>json str id: The ID for the user.
     :>json str url: The URL for the user.
     :>json str first_name: The (optional) first name of the user.
     :>json str last_name: The (optional) last name of the user.
@@ -1072,7 +1072,7 @@ Users
         Content-Type: application/json
 
         {
-            "id": 1,
+            "id": "1",
             "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
@@ -1089,7 +1089,7 @@ Users
 
     Requires an authenticated user.
 
-    :>json int id: The ID for the user.
+    :>json str id: The ID for the user.
     :>json str url: The URL for the user.
     :>json str first_name: The (optional) first name of the user.
     :>json str last_name: The (optional) last name of the user.
@@ -1114,7 +1114,7 @@ Users
         Content-Type: application/json
 
         {
-            "id": 1,
+            "id": "1",
             "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
@@ -1123,13 +1123,13 @@ Users
             "active": true,
             "teams": [
                 {
-                    "id": 2,
+                    "id": "2",
                     "url": "https://example.org/teams/2/"
                 }
             ],
             "organizations": [
                 {
-                    "id": 4,
+                    "id": "4",
                     "url": "https://example.org/organizations/4/"
                 }
             ]
@@ -1150,7 +1150,7 @@ Users
     :<json bool admin: (optional) True if the user is an admin user.
     :<json bool active: (optional) True if the user is active.
 
-    :>json int id: The ID for the user.
+    :>json str id: The ID for the user.
     :>json str url: The URL for the user.
     :>json str first_name: The (optional) first name of the user.
     :>json str last_name: The (optional) last name of the user.
@@ -1186,7 +1186,7 @@ Users
         Content-Type: application/json
 
         {
-            "id": 1,
+            "id": "1",
             "url": "https://example.org/users/1/",
             "first_name": "Jon",
             "last_name": "Snow",
