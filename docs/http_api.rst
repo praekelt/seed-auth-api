@@ -6,7 +6,7 @@ Seed Auth HTTP API
 
 Overview
 ^^^^^^^^
-Seed Auth was designed to allow one or more applications to be able to delegate authentication, user and permission management to a single, internal service. For the case of multiple applications, this avoids the need for users to authenticate separately for each application.
+Seed Auth was designed to allow one or more applications to be able to delegate authentication and user and permission management to a single, internal service. For the case of multiple applications, this avoids the need for users to authenticate separately for each application.
 
 An application would use Seed Auth as follows:
 
