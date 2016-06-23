@@ -1,11 +1,8 @@
 .. _http-api:
 
 
-HTTP API
-========
-
-Seed Auth's HTTP API.
-
+Seed Auth HTTP API
+==================
 
 .. _authentication:
 
