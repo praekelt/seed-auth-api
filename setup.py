@@ -16,6 +16,7 @@ setup(
         'djangorestframework==3.4.6',
         'drf-extensions==0.2.8',
         'djangorestframework-composed-permissions==0.1',
+        'raven==5.27.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
