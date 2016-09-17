@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # external
     'rest_framework',
     'rest_framework.authtoken',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE_CLASSES = [
