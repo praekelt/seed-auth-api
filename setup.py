@@ -14,7 +14,7 @@ setup(
         'dj_database_url==0.4.1',
         'psycopg2cffi==2.7.4',
         'djangorestframework==3.4.7',
-        'drf-extensions==0.2.8',
+        'drf-extensions==0.3.1',
         'djangorestframework-composed-permissions==0.1',
         'raven==5.27.1',
     ],
