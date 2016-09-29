@@ -295,8 +295,6 @@ class TokenView(APIView):
         user = authenticate(username=email, password=password)
         if not user:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        if not user.is_active:
-            return Response(status=status.HTTP_403_FORBIDDEN)
 
         Token.objects.filter(user=user).delete()
         token = Token.objects.create(user=user)
