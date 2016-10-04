@@ -40,7 +40,7 @@ class TokenTests(AuthAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_inactive_user(self):
-        '''A user that is not active, should get a forbidden response to
+        '''A user that is not active, should get an unauthorized response to
         creating a token.'''
         data = {
             'email': 'test@example.org',
@@ -51,7 +51,7 @@ class TokenTests(AuthAPITestCase):
             password=data['password'], is_active=False)
 
         response = self.client.post(reverse('create-token'), data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_token_removes_other_tokens(self):
         '''When a new token for a user is requested, all other tokens for
