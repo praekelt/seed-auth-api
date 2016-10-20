@@ -13,7 +13,7 @@ setup(
         'Django==1.10.2',
         'dj_database_url==0.4.1',
         'psycopg2cffi==2.7.4',
-        'djangorestframework==3.4.7',
+        'djangorestframework==3.5.0',
         'drf-extensions==0.3.1',
         'djangorestframework-composed-permissions==0.1',
         'raven==5.30.0',
