@@ -33,7 +33,7 @@ RAVEN_CONFIG = {
 SECRET_KEY = os.environ.get('SECRET_KEY', 'REPLACEME')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
 
@@ -82,6 +82,20 @@ DATABASES = {
             'postgres://postgres:@localhost/seed_auth')),
 }
 
+# NOTE: Django 1.10 by default initiates with an empty template dir setting
+#       this loads the dirs from the various apps
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                "django.contrib.auth.context_processors.auth",
+            ]
+        }
+    }
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
