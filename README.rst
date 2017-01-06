@@ -3,7 +3,10 @@
 [![Requirements Status](https://requires.io/github/praekelt/seed-auth-api/requirements.svg?branch=develop)](https://requires.io/github/praekelt/seed-auth-api/requirements/?branch=develop)
 [![Documentation Status](https://readthedocs.org/projects/seed-auth-api/badge/?version=develop)](http://seed-auth-api.readthedocs.io/en/develop/?badge=develop)
 
-# seed-auth-api
+=============
+Seed Auth API
+=============
+
 Seed Auth API. User and permissions store, authentication and authorization.
 
 ## Running
