@@ -1,0 +1,24 @@
+language: python
+cache: pip
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+services:
+  - "postgresql"
+install:
+  - "pip install -e ."
+  - "pip install -r requirements-dev.txt"
+  - "pip install coveralls pytest-cov pytest-flake8"
+script:
+  - "py.test --ds=seed_auth_api.testsettings --cov=authapi --flake8 --ignore='authapi/migrations' authapi"
+after_success:
+  - "coveralls"
+deploy:
+  provider: pypi
+  user: praekelt.org
+  password:
+    secure: B8g2n9BekIAnBeoBWdvAO5VUaUBVnJE/KHvenwlpYnKmhwIu0Etv6nLMiiiFY6cBJryk6niY2KNUgR74L+Bf/G10PcoPej7CUtbtuZBJwaEadpBrE5N4bfyLCEqjzsarEqT+GcOcsGDmRoJe4lVcecw7fqQ9zSbmvz9XihHOlGTp4ZH1qonaaGt2ecZXopiTR5sYTbtyEL4wUuMeQ8Uxr2R5pMMGfV6wTo6WwTN+mvEHHHk0d8ozVC9hyy2z2H5PANq3JywqiMvnMR1e5tK5sttVKCyf5yR0UKYbpv+vV5wTWj6kkKtHZ0HLirXNv9ZwXM+xRqaS2gNXB4V26zK7EgoWc7FZ0Fkva6sp0GmOx4OtEj1eTqBeDU+RiCcUM8u3p/j6K43odmE8cSkuVboSXWi4UfW8Sip3l7VHLuTM8p26IyptfXJRgRZrZ6krY+KcihV3R+aYibeeepYn4OmFfY2MvoDmLlorEsDbTh3xxFZlo/oKpESITV3GwfZai9IxS3ecjrQYoSaVv4SK/wAW9HQLeYkJd6LDPlz67xkGxdtnaAy4SLnWxJ84BTUV4/jeD3HhNApxOmxJ85yEddW41+TzeaZkliiY7FBflyZOU9I3iblqAOjuzT8lSp5RZMciPEmonNMatNiTVVzk3LwUjt+EBHzAMow4+43YGNFvRTE=
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
