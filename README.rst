@@ -1,7 +1,14 @@
-[![Coverage Status](https://coveralls.io/repos/github/praekelt/seed-auth-api/badge.svg?branch=develop)](https://coveralls.io/github/praekelt/seed-auth-api?branch=develop)
-[![Build Status](https://travis-ci.org/praekelt/seed-auth-api.svg?branch=develop)](https://travis-ci.org/praekelt/seed-auth-api)
-[![Requirements Status](https://requires.io/github/praekelt/seed-auth-api/requirements.svg?branch=develop)](https://requires.io/github/praekelt/seed-auth-api/requirements/?branch=develop)
-[![Documentation Status](https://readthedocs.org/projects/seed-auth-api/badge/?version=develop)](http://seed-auth-api.readthedocs.io/en/develop/?badge=develop)
+.. image:: https://coveralls.io/repos/github/praekelt/seed-auth-api/badge.svg?branch=develop
+   :target: https://coveralls.io/github/praekelt/seed-auth-api?branch=develop
+
+.. image:: https://travis-ci.org/praekelt/seed-auth-api.svg?branch=develop
+   :target: https://travis-ci.org/praekelt/seed-auth-api
+
+.. image:: https://requires.io/github/praekelt/seed-auth-api/requirements.svg?branch=develop
+   :target: https://requires.io/github/praekelt/seed-auth-api/requirements/?branch=develop
+
+.. image:: https://readthedocs.org/projects/seed-auth-api/badge/?version=develop
+   :target: http://seed-auth-api.readthedocs.io/en/develop/?badge=develop
 
 =============
 Seed Auth API
