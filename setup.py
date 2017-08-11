@@ -38,7 +38,7 @@ setup(
     install_requires=[
         'Django==1.11.4',
         'dj-database-url==0.4.2',
-        'psycopg2cffi==2.7.5',
+        'psycopg2cffi==2.7.6',
         'djangorestframework==3.6.3',
         'drf-extensions==0.3.1',
         'djangorestframework-composed-permissions==0.1',
