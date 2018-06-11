@@ -41,7 +41,7 @@ setup(
         'psycopg2==2.7.4',
         'djangorestframework==3.8.2',
         'drf-extensions==0.3.1',
-        'djangorestframework-composed-permissions==0.1',
+        'djangorestframework-composed-permissions==0.2',
         'raven==6.9.0',
     ],
     classifiers=[
