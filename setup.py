@@ -40,7 +40,7 @@ setup(
         'dj-database-url==0.5.0',
         'psycopg2==2.7.5',
         'djangorestframework==3.8.2',
-        'drf-extensions==0.3.1',
+        'drf-extensions==0.4.0',
         'djangorestframework-composed-permissions==0.2',
         'raven==6.9.0',
     ],
