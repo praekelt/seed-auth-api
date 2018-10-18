@@ -39,7 +39,7 @@ setup(
         'Django==2.1.2',
         'dj-database-url==0.5.0',
         'psycopg2==2.7.5',
-        'djangorestframework==3.8.2',
+        'djangorestframework==3.9.0',
         'drf-extensions==0.4.0',
         'djangorestframework-composed-permissions==0.2',
         'raven==6.9.0',
