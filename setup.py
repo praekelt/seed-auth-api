@@ -36,7 +36,7 @@ setup(
     packages=find_packages(),
     include_all_package_data=True,
     install_requires=[
-        'Django==1.10.5',
+        'Django==1.11.22',
         'dj-database-url==0.4.2',
         'psycopg2==2.7.3.1',
         'djangorestframework==3.9.1',
