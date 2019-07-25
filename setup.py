@@ -36,13 +36,13 @@ setup(
     packages=find_packages(),
     include_all_package_data=True,
     install_requires=[
-        'Django==1.11.22',
+        'Django==2.1.10',
         'dj-database-url==0.4.2',
         'psycopg2==2.7.3.1',
         'djangorestframework==3.9.1',
         'drf-extensions==0.4.0',
-        'djangorestframework-composed-permissions==0.1',
-        'raven==5.32.0',
+        'djangorestframework-composed-permissions==0.2.1',
+        'raven==6.10.0',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',

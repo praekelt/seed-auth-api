@@ -227,7 +227,7 @@ class UserPermission(BaseComposedPermision):
 class TeamPermissionPermission(BasePermission):
     '''Permissions for adding or removing permissions from teams.'''
     def has_permission(self, request, view):
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             return False
         if request.method == 'POST':
             return self.handle_create(request)
