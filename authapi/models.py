@@ -26,7 +26,9 @@ class SeedPermission(models.Model):
 
 class SeedTeam(models.Model):
     title = models.TextField()
-    organization = models.ForeignKey(SeedOrganization)
+    organization = models.ForeignKey(
+        SeedOrganization, on_delete=models.CASCADE
+    )
     users = models.ManyToManyField(User)
     permissions = models.ManyToManyField(SeedPermission)
     created_at = models.DateTimeField(auto_now_add=True)
