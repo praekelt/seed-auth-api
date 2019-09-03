@@ -1,3 +1,7 @@
+0.9.5
+-----
+- Fix pypi deploy credentials
+
 0.9.4
 -----
 - Fix pypi deploy credentials
