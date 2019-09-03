@@ -1,3 +1,7 @@
+0.9.6
+-----
+- Fix formatting of readme
+
 0.9.5
 -----
 - Fix pypi deploy credentials
