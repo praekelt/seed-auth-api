@@ -1,3 +1,7 @@
+0.9.7
+-----
+- Upgrade Django to 2.2.8 (Security vulnerability)
+
 0.9.6
 -----
 - Fix formatting of readme
