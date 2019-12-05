@@ -1,3 +1,7 @@
+0.9.8
+-----
+- Rerelease for 0.9.7
+
 0.9.7
 -----
 - Upgrade Django to 2.2.8 (Security vulnerability)
